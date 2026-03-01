@@ -1,1 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?><?xml-stylesheet type="text/xsl" href="../lib/xsl/lexan.xsl"?><lexan><token kind="ID" lexeme="ab"><location begcolumn="1" begline="1" endcolumn="2" endline="1"/></token><token kind="INT" lexeme="int"><location begcolumn="17" begline="1" endcolumn="19" endline="1"/></token><token kind="EOF"/></lexan>
