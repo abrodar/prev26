@@ -1,0 +1,101 @@
+// keyword vs id traps
+int integer intval int_ int0
+while whilex
+if ifelse
+true trueValue
+false false_
+and andor
+or orElse
+not notice
+sizeof sizeoff
+fun function
+var variant
+typ type
+none nonetheless
+nil nil0
+
+// integer traps
+0
+1
+9
+10
+99
+100
+01
+001
+000
+0 0 0
+1234567890
+
+// operator adjacency
+a=b
+a==b
+a!=b
+a<=b
+a>=b
+a<b
+a>b
+a====b
+a<==b
+a>==b
+a!==b
+a==b==c
+a=b==c
+a==b=c
+a<=b>=c
+a<b>c
+
+// arithmetic chaos
+a+b-c*d/e%f
+a+-b
+a--b
+a**b
+a//b
+(a+b)*(c-d)
+((a)))
+(((a+b)))
+
+// char constants
+'a'
+'Z'
+'0'
+' '
+'!'
+'~'
+'\\'
+'\''
+'\x20'
+'\x41'
+'\x7E'
+
+// string constants
+""
+" "
+"abc"
+"ABCxyz0123"
+"!@#$%^&*()[]{}<>"
+"\""
+"\\"
+"\x41"
+"\x41\x42\x43"
+"mix\x20of\x20hex"
+"edge\x7Ecase"
+"\"\\\x41"
+"\x20\x21\x22"
+
+// comments mid-line
+a=b // comment after code
+c==d//no space comment
+e!=f //
+
+// braces & brackets adjacency
+{a}
+[a]
+{[a]}
+(a)[b]{c}
+
+// power & colon combos
+a^b
+a^b^c
+x:int
+fun f(a:int,b:char):bool= a==0 or b=='\x41'

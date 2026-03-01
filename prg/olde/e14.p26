@@ -1,0 +1,2 @@
+// Err: slash mora biti escapan, hkrati r ni valid hex digit
+"\x0a\x0b\x0r"
