@@ -64,7 +64,7 @@ public class LexAn extends Phase {
                 {
                     CharStream input = (CharStream) recognizer.getInputStream();
                     int col = visualColumn(input, line, charPositionInLine) + 1; // pristejemo 1, ker 1-based (stolpci)
-                    String detailed = "Lexical error at line " + line +
+                    String detailed = "Error at line " + line +
                             ", column " + col +
                             ": " + msg;
                     Location location = new Location(line, col);

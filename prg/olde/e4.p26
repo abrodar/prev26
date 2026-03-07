@@ -1,2 +1,0 @@
-123  //the next line is erronous with one hex digit missing
-'\x0'

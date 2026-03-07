@@ -7,204 +7,214 @@ import java.util.*;
 
 import prev26lang.common.report.*;
 import prev26lang.phase.lexan.*;
+import prev26lang.phase.synan.*;
 
 /**
  * The Prev26 compiler.
- * 
+ *
  * @author bostjan.slivnik@fri.uni-lj.si
  */
 public class Compiler {
 
-	/** (Default) values of command line options. */
-	private static final HashMap<String, String> cmdLineOpts = new HashMap<String, String>(Map.ofEntries( //
-			Map.entry("--src-file-name", ""), // ---: the name of the source file
-			Map.entry("--dst-file-name", ""), // ---: the name of the destination file
-			Map.entry("--target-phase", "all"), // -: the name of the last performed phase
-			Map.entry("--logged-phase", "all"), // -: the name of the logged phase (or none or all)
-			Map.entry("--xml", ""), // -------------: the name of xml files (without phase name and extension)
-			Map.entry("--xsl", "../lib/xsl/"), // --: the directory with the xsl templates for the logs
-			Map.entry("--dev-mode", "on") // -------: development mode (on or off)
-	));
+    /** (Default) values of command line options. */
+    private static final HashMap<String, String> cmdLineOpts = new HashMap<String, String>(Map.ofEntries( //
+            Map.entry("--src-file-name", ""), // ---: the name of the source file
+            Map.entry("--dst-file-name", ""), // ---: the name of the destination file
+            Map.entry("--target-phase", "all"), // -: the name of the last performed phase
+            Map.entry("--logged-phase", "all"), // -: the name of the logged phase (or none or all)
+            Map.entry("--xml", ""), // -------------: the name of xml files (without phase name and extension)
+            Map.entry("--xsl", "../lib/xsl/"), // --: the directory with the xsl templates for the logs
+            Map.entry("--dev-mode", "on") // -------: development mode (on or off)
+    ));
 
-	/** All valid phases name of the compiler. */
-	private static final Vector<String> phaseNames = new Vector<String>(Arrays.asList( //
-			"none", // ---: no phase
-			"lexan", // --: lexical analysis
-			"all" // -----: putting it all together
-	));
+    /** All valid phases name of the compiler. */
+    private static final Vector<String> phaseNames = new Vector<String>(Arrays.asList( //
+            "none", // ---: no phase
+            "lexan", // --: lexical analysis
+            "synan", // --: syntax analysis
+            "all" // -----: putting it all together
+    ));
 
-	/** Specifies whether the compiler is run in the development mode. */
-	private static boolean devMode = false;
+    /** Specifies whether the compiler is run in the development mode. */
+    private static boolean devMode = false;
 
-	/**
-	 * Returns information on whether the compiler is run in the development mode.
-	 * 
-	 * @return {@code true} if the compiler is run in the development mode,
-	 *         {@code false} otherwise.
-	 */
-	public static final boolean devMode() {
-		return devMode;
-	}
+    /**
+     * Returns information on whether the compiler is run in the development mode.
+     *
+     * @return {@code true} if the compiler is run in the development mode,
+     *         {@code false} otherwise.
+     */
+    public static final boolean devMode() {
+        return devMode;
+    }
 
-	/**
-	 * Returns the value of a command line option.
-	 *
-	 * @param cmdLineOptName Command line option name.
-	 * @return Command line option value.
-	 */
-	public static final String cmdLineOptValue(final String cmdLineOptName) {
-		String cmdLineOptValue = cmdLineOpts.get(cmdLineOptName);
-		if (cmdLineOptValue == null)
-			throw new Report.InternalError();
-		return cmdLineOpts.get(cmdLineOptName);
-	}
+    /**
+     * Returns the value of a command line option.
+     *
+     * @param cmdLineOptName Command line option name.
+     * @return Command line option value.
+     */
+    public static final String cmdLineOptValue(final String cmdLineOptName) {
+        String cmdLineOptValue = cmdLineOpts.get(cmdLineOptName);
+        if (cmdLineOptValue == null)
+            throw new Report.InternalError();
+        return cmdLineOpts.get(cmdLineOptName);
+    }
 
-	/** (Unused but included to keep javadoc happy.) */
-	private Compiler() {
-		throw new Report.InternalError();
-	}
+    /** (Unused but included to keep javadoc happy.) */
+    private Compiler() {
+        throw new Report.InternalError();
+    }
 
-	/**
-	 * The compiler's main driver running all phases one after another.
-	 * 
-	 * @param cmdLineArgs Command line arguments (see {@link prev26lang}).
-	 */
-	public static void main(final String[] cmdLineArgs) {
-		try {
-			Report.info("This is Prev26 compiler:");
+    /**
+     * The compiler's main driver running all phases one after another.
+     *
+     * @param cmdLineArgs Command line arguments (see {@link prev26lang}).
+     */
+    public static void main(final String[] cmdLineArgs) {
+        try {
+            Report.info("This is Prev26 compiler:");
 
-			// Scan the command line.
-			{
-				HashSet<String> usedCmdLineOpts = new HashSet<String>();
-				for (int argc = 0; argc < cmdLineArgs.length; argc++) {
-					if (cmdLineArgs[argc].startsWith("--")) {
-						// Command line option.
-						final String cmdLineOptName = cmdLineArgs[argc].replaceFirst("=.*", "");
-						final String cmdLineOptValue = cmdLineArgs[argc].replaceFirst("^[^=]*=", "");
-						if (!cmdLineOpts.keySet().contains(cmdLineOptName)) {
-							Report.warning("Unknown command line option '" + cmdLineOptName + "'.");
-							continue;
-						}
-						if (!usedCmdLineOpts.contains(cmdLineOptName)) {
-							// Not yet successfully specified command line option.
+            // Scan the command line.
+            {
+                HashSet<String> usedCmdLineOpts = new HashSet<String>();
+                for (int argc = 0; argc < cmdLineArgs.length; argc++) {
+                    if (cmdLineArgs[argc].startsWith("--")) {
+                        // Command line option.
+                        final String cmdLineOptName = cmdLineArgs[argc].replaceFirst("=.*", "");
+                        final String cmdLineOptValue = cmdLineArgs[argc].replaceFirst("^[^=]*=", "");
+                        if (!cmdLineOpts.keySet().contains(cmdLineOptName)) {
+                            Report.warning("Unknown command line option '" + cmdLineOptName + "'.");
+                            continue;
+                        }
+                        if (!usedCmdLineOpts.contains(cmdLineOptName)) {
+                            // Not yet successfully specified command line option.
 
-							// Check the value of the command line option.
-							if (cmdLineOptName.equals("--target-phase") && (!phaseNames.contains(cmdLineOptValue))) {
-								Report.warning("Illegal phase specification in '" + cmdLineArgs[argc] + "' ignored.");
-								continue;
-							}
-							if (cmdLineOptName.equals("--logged-phase") && (!phaseNames.contains(cmdLineOptValue))) {
-								Report.warning("Illegal phase specification in '" + cmdLineArgs[argc] + "' ignored.");
-								continue;
-							}
-							if (cmdLineOptName.equals("--dev-mode") && (!cmdLineOptValue.matches("on|off"))) {
-								Report.warning("Illegal value in '" + cmdLineArgs[argc] + "' ignored.");
-								continue;
-							}
+                            // Check the value of the command line option.
+                            if (cmdLineOptName.equals("--target-phase") && (!phaseNames.contains(cmdLineOptValue))) {
+                                Report.warning("Illegal phase specification in '" + cmdLineArgs[argc] + "' ignored.");
+                                continue;
+                            }
+                            if (cmdLineOptName.equals("--logged-phase") && (!phaseNames.contains(cmdLineOptValue))) {
+                                Report.warning("Illegal phase specification in '" + cmdLineArgs[argc] + "' ignored.");
+                                continue;
+                            }
+                            if (cmdLineOptName.equals("--dev-mode") && (!cmdLineOptValue.matches("on|off"))) {
+                                Report.warning("Illegal value in '" + cmdLineArgs[argc] + "' ignored.");
+                                continue;
+                            }
 
-							cmdLineOpts.put(cmdLineOptName, cmdLineOptValue);
-							usedCmdLineOpts.add(cmdLineOptValue);
-						} else {
-							// Repeated specification of a command line option.
-							Report.warning("Command line option '" + cmdLineArgs[argc] + "' ignored.");
-							continue;
-						}
-					} else {
-						// Source file name.
-						if (cmdLineOpts.get("--src-file-name") == "") {
-							cmdLineOpts.put("--src-file-name", cmdLineArgs[argc]);
-							usedCmdLineOpts.add("--src-file-name");
-						} else {
-							Report.warning("Source file '" + cmdLineArgs[argc] + "' ignored.");
-							continue;
-						}
-					}
-				}
-			}
-			// Check the command line option values.
-			{
-				// Source file name.
-				if (cmdLineOpts.get("--src-file-name") == "") {
-					try {
-						// Source file has not been specified, so consider using the last modified
-						// p26 file in the working directory.
-						final String currWorkDir = new File(".").getCanonicalPath();
-						FileTime latestTime = FileTime.fromMillis(0);
-						Path latestPath = null;
-						for (final Path path : java.nio.file.Files.walk(Paths.get(currWorkDir))
-								.filter(path -> path.toString().endsWith(".p26")).toArray(Path[]::new)) {
-							final FileTime time = Files.getLastModifiedTime(path);
-							if (time.compareTo(latestTime) > 0) {
-								latestTime = time;
-								latestPath = path;
-							}
-						}
-						if (latestPath != null) {
-							cmdLineOpts.put("--src-file-name", latestPath.toString());
-							Report.warning("Source file not specified, using '" + latestPath.toString() + "'.");
-						}
-					} catch (final IOException __) {
-						throw new Report.Error("Source file not specified.");
-					}
+                            cmdLineOpts.put(cmdLineOptName, cmdLineOptValue);
+                            usedCmdLineOpts.add(cmdLineOptValue);
+                        } else {
+                            // Repeated specification of a command line option.
+                            Report.warning("Command line option '" + cmdLineArgs[argc] + "' ignored.");
+                            continue;
+                        }
+                    } else {
+                        // Source file name.
+                        if (cmdLineOpts.get("--src-file-name") == "") {
+                            cmdLineOpts.put("--src-file-name", cmdLineArgs[argc]);
+                            usedCmdLineOpts.add("--src-file-name");
+                        } else {
+                            Report.warning("Source file '" + cmdLineArgs[argc] + "' ignored.");
+                            continue;
+                        }
+                    }
+                }
+            }
+            // Check the command line option values.
+            {
+                // Source file name.
+                if (cmdLineOpts.get("--src-file-name") == "") {
+                    try {
+                        // Source file has not been specified, so consider using the last modified
+                        // p26 file in the working directory.
+                        final String currWorkDir = new File(".").getCanonicalPath();
+                        FileTime latestTime = FileTime.fromMillis(0);
+                        Path latestPath = null;
+                        for (final Path path : java.nio.file.Files.walk(Paths.get(currWorkDir))
+                                .filter(path -> path.toString().endsWith(".p26")).toArray(Path[]::new)) {
+                            final FileTime time = Files.getLastModifiedTime(path);
+                            if (time.compareTo(latestTime) > 0) {
+                                latestTime = time;
+                                latestPath = path;
+                            }
+                        }
+                        if (latestPath != null) {
+                            cmdLineOpts.put("--src-file-name", latestPath.toString());
+                            Report.warning("Source file not specified, using '" + latestPath.toString() + "'.");
+                        }
+                    } catch (final IOException __) {
+                        throw new Report.Error("Source file not specified.");
+                    }
 
-					if (cmdLineOpts.get("--src-file-name") == "") {
-						throw new Report.Error("Source file not specified.");
-					}
-				}
-				// Destination file name.
-				if (cmdLineOpts.get("--dst-file-name") == "") {
-					cmdLineOpts.put("--dst-file-name",
-							cmdLineOpts.get("--src-file-name").replaceFirst("\\.[^./]*$", ".asm"));
-				}
-				if (cmdLineOpts.get("--xml") == "") {
-					cmdLineOpts.put("--xml", cmdLineOpts.get("--src-file-name").replaceFirst("\\.[^./]*$", ""));
-				}
-				// Development mode (on or off).
-				switch (cmdLineOpts.get("--dev-mode")) {
-				case "on":
-					devMode = true;
-					break;
-				case "off":
-					devMode = false;
-					break;
-				default:
-					Report.warning("Illegal value '" + cmdLineOpts.get("--devMode") + "' for --dev-mode switch.");
-					break;
-				}
-			}
+                    if (cmdLineOpts.get("--src-file-name") == "") {
+                        throw new Report.Error("Source file not specified.");
+                    }
+                }
+                // Destination file name.
+                if (cmdLineOpts.get("--dst-file-name") == "") {
+                    cmdLineOpts.put("--dst-file-name",
+                            cmdLineOpts.get("--src-file-name").replaceFirst("\\.[^./]*$", ".asm"));
+                }
+                if (cmdLineOpts.get("--xml") == "") {
+                    cmdLineOpts.put("--xml", cmdLineOpts.get("--src-file-name").replaceFirst("\\.[^./]*$", ""));
+                }
+                // Development mode (on or off).
+                switch (cmdLineOpts.get("--dev-mode")) {
+                    case "on":
+                        devMode = true;
+                        break;
+                    case "off":
+                        devMode = false;
+                        break;
+                    default:
+                        Report.warning("Illegal value '" + cmdLineOpts.get("--devMode") + "' for --dev-mode switch.");
+                        break;
+                }
+            }
 
-			// Carry out the compilation phase by phase.
-			{
-				while (true) {
+            // Carry out the compilation phase by phase.
+            {
+                while (true) {
 
-					if (cmdLineOpts.get("--target-phase").equals("none"))
-						break;
+                    if (cmdLineOpts.get("--target-phase").equals("none"))
+                        break;
 
-					// === LEXICAL ANALYSIS ===
-					if (cmdLineOpts.get("--target-phase").equals("lexan")) {
-						try (final LexAn lexan = new LexAn()) {
-							// Read all tokens one by one.
-							while (lexan.lexer.nextToken().getType() != LexAn.LocLogToken.EOF) {
-							}
-						}
-						break;
-					} else {
-						// Unless the lexical analysis is not the last phase to be performed, it is
-						// performed during the syntax analysis.
-					}
+                    // === LEXICAL ANALYSIS ===
+                    if (cmdLineOpts.get("--target-phase").equals("lexan")) {
+                        try (final LexAn lexan = new LexAn()) {
+                            // Read all tokens one by one.
+                            while (lexan.lexer.nextToken().getType() != LexAn.LocLogToken.EOF) {
+                            }
+                        }
+                        break;
+                    } else {
+                        // Unless the lexical analysis is not the last phase to be performed, it is
+                        // performed during the syntax analysis.
+                    }
 
-					break;
-				}
-			}
+                    // === SYNTAX ANALYSIS ===
+                    try (LexAn lexan = new LexAn(); SynAn synan = new SynAn(lexan)) {
+                        SynAn.tree = synan.parser.source();
+                        synan.log(SynAn.tree);
+                    }
+                    if (cmdLineOpts.get("--target-phase").equals("synan"))
+                        break;
 
-			// Beware:
-			// 1. The generated translation of the source file might be erroneous :-o
-			// 2. The source file might not be what the programmer intended it to be ;-)
-			Report.info("Done.");
+                    break;
+                }
+            }
 
-		} catch (final Report.Error error) {
-			System.err.println(error.getMessage());
-			System.exit(1);
-		}
-	}
+            // But beware:
+            // 1. The generated translation of the source file might be erroneous :-o
+            // 2. The source file might not be what the programmer intended it to be ;-)
+            Report.info("Done.");
+
+        } catch (final Report.Error error) {
+            System.err.println(error.getMessage());
+            System.exit(1);
+        }
+    }
 }

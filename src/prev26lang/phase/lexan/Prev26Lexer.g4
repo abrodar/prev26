@@ -68,7 +68,7 @@ WHILE : 'while' ;
 // Imena
 ID : [a-zA-Z_][a-zA-Z0-9_]* ;
 // Komentarji
-COMMENT : '//'[\u0000-\u0009\u000b-\u007f]*('\n' | EOF) -> skip ;
+COMMENT : '//' [\u0000-\u0009\u000b-\u007f]* '\n' -> skip ;
 // Belo besedilo
 WS : [ \t\r\n]+ -> skip ;
 // Fragmenti - leksikalna pravila uporabljena v leksikalnih pravilih, ki sama po sebi niso žetoni
