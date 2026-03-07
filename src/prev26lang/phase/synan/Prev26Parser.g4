@@ -122,10 +122,12 @@ boolExpr :  boolExpr (AND|OR) compExpr
             | compExpr; // levo-asociativen
 compExpr :  addExpr (EQU|NEQ|LT|GT|LE|GE) addExpr
             | addExpr; // ne-asociativen
-addExpr :   mulExpr (MUL|DIV|MOD) mulExpr
+addExpr :   addExpr (ADD|SUB) mulExpr
             | mulExpr // levo-asociativen
         ;
-mulExpr :   ;
+mulExpr :   mulExpr (MUL|DIV|MOD) prefixExpr
+            | prefixExprž
+            ;
 prefixExpr : ;
 postfixExpr : ;
 
