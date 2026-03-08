@@ -1,0 +1,1 @@
+fun f() : bool = not a+b*b+a-c % 10 as int

@@ -1,0 +1,1 @@
+fun funny() : void = ˘a[b].c^d as { a: {}, b: (:{a: ( g : int)}:bool)}, sizeof { a: {}, b: (:{a: ( g : int)}:bool)}
