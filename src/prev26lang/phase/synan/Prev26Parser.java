@@ -6,7 +6,7 @@
     import java.util.*;
     import prev26lang.common.report.*;
     import prev26lang.phase.lexan.*;
-    import prev26lang.phase.abstr.*;
+    //import prev26lang.phase.abstr.*;
 
 
 import org.antlr.v4.runtime.atn.*;

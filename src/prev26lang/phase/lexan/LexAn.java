@@ -64,9 +64,9 @@ public class LexAn extends Phase {
                 {
                     CharStream input = (CharStream) recognizer.getInputStream();
                     int col = visualColumn(input, line, charPositionInLine) + 1; // pristejemo 1, ker 1-based (stolpci)
-                    String detailed = "Error at line " + line +
+                    String detailed = "\n\nThere is a mistake in the code at line " + line +
                             ", column " + col +
-                            ": " + msg;
+                            ": " + msg + ".\nThe compiler did not expect this here.";
                     Location location = new Location(line, col);
                     throw new Report.Error(location, detailed);
                 }

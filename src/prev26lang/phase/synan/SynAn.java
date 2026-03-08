@@ -26,12 +26,21 @@ public class SynAn extends Phase {
 	public SynAn(final LexAn lexan) {
 		super("synan");
 		parser = new Prev26Parser(new CommonTokenStream(lexan.lexer));
-		parser.removeErrorListeners();
+		parser.removeErrorListeners(); // remove default error listeners
 		parser.addErrorListener(new BaseErrorListener() {
-			public void syntaxError(final Recognizer<?, ?> recognizer, final Object offendingSymbol, final int line,
-					final int charPositionInLine, final String msg, final RecognitionException e) {
-				throw new Report.Error(new Location(line, charPositionInLine), //
-						"Unexpected symbol '" + ((LexAn.LocLogToken) offendingSymbol).getText() + "'.");
+            @Override
+            public void syntaxError(Recognizer<?, ?> recognizer,
+                                    Object offendingSymbol,
+                                    int line, int charPositionInLine,
+                                    String msg,
+                                    RecognitionException e)
+            {
+                // dobi pravilno lokacijo že od pregledovalnika
+                String detailed = "\n\nThere is a mistake in the code at line " + line +
+                        ", column " + charPositionInLine +
+                        ", near '" + ((LexAn.LocLogToken) offendingSymbol).getText() + "'.\nThe compiler did not expect this here.";
+				Location location = new Location(line, charPositionInLine);
+                throw new Report.Error(location, detailed);
 			}
 		});
 	}
