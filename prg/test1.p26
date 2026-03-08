@@ -1,1 +1,1 @@
-type test = (a: int, b: char)
+typ test = (a: int, b: char)
