@@ -49,7 +49,6 @@ options{
 
 source :    prog EOF;
 prog :  defn+;
-defnList : defn (COMMA defn)*;
 defn :  typeDecl
         | varDecl
         | funcDecl
@@ -67,71 +66,62 @@ type:   INT
         | CHAR
         | BOOL
         | VOID
-        | ID
         | LBRACK INT_CONST RBRACK type
         | POW type // mogoče kazalec
         | LPAREN paramList RPAREN //tuple type
-        | LBRACE paramList RBRACE //field type
+        | LBRACE paramList? RBRACE //field type
         | LPAREN COLON typeList COLON type RPAREN //function type
         | LPAREN type RPAREN //recursive
+        | ID
         ;
 
 exprList :  expr (COMMA expr)*;
 
-exprDEL :  INT_CONST
-        | CHAR_CONST
-        | STRING_CONST
-        | TRUE  // bool
-        | FALSE // bool
-        | NONE  // void
-        | NIL   // ptr
-        | ID
-        | expr POW  // ptr dereference, postfiksni operator
-        | expr LPAREN exprList? RPAREN  // postfiksni operator
-        | expr LBRACK expr RBRACK   // postfiksni operator
-        | expr DOT ID // postfiksni operator
-        | NOT expr  // prefiksni operator
-        | ADD expr // prefiksni operator
-        | SUB expr    // prefiksni operator
-        | POW expr  // prefiksni operator
-        | expr MUL expr // multiplikativni operator
-        | expr DIV expr // multiplikativni operator
-        | expr MOD expr // multiplikativni operator
-        | expr ADD expr // additivni operator
-        | expr SUB expr // additivni operator
-        | // primerjalni operatorji, neasociativni
-        | expr AND expr // logični operator
-        | expr OR expr // logični operator
-        | expr AS type // pretvorba tipa
-        //| // prirejanje, neasociativni
-        | LPAREN exprList RPAREN
-        | SIZEOF type
-        | IF expr THEN exprList END
-        | IF expr THEN exprList ELSE exprList END
-        | WHILE expr DO exprList END
-        | LET defnList IN exprList END
-        ;
-
-
-//exprv2
 expr : assignExpr ;
-assignExpr : castExpr (ASSIGN castExpr)?; // ne-asociativen
-castExpr :  castExpr AS type
-            | boolExpr; // levo-asociativen
-boolExpr :  boolExpr (AND|OR) compExpr
-            | compExpr; // levo-asociativen
-compExpr :  addExpr (EQU|NEQ|LT|GT|LE|GE) addExpr
-            | addExpr; // ne-asociativen
-addExpr :   addExpr (ADD|SUB) mulExpr
-            | mulExpr // levo-asociativen
-        ;
-mulExpr :   mulExpr (MUL|DIV|MOD) prefixExpr
-            | prefixExprž
+assignExpr :    castExpr ASSIGN castExpr    // ne-asociativen
+                | castExpr
+                ;
+castExpr :      castExpr AS type    // levo-asociativen
+                | boolORExpr
+                ;
+boolORExpr :    boolORExpr OR boolANDExpr  // levo-asociativen
+                | boolANDExpr
+                ;
+boolANDExpr :   boolANDExpr AND compExpr  // levo-asociativen
+                | compExpr
+                ;
+compExpr :  addExpr (EQU|NEQ|LT|GT|LE|GE) addExpr   // ne-asociativen
+            | addExpr
             ;
-prefixExpr : ;
-postfixExpr : ;
-
-
+addExpr :   addExpr (ADD|SUB) mulExpr   // levo-asociativen
+            | mulExpr
+        ;
+mulExpr :   mulExpr (MUL|DIV|MOD) prefixExpr // levo-asociativen
+            | prefixExpr
+            ;
+prefixExpr :    (NOT|ADD|SUB|POW) prefixExpr // desno-asociativen
+                | postfixExpr;
+postfixExpr :   postfixExpr POW
+                | postfixExpr LPAREN exprList? RPAREN
+                | postfixExpr LBRACK expr RBRACK
+                | postfixExpr DOT ID
+                | basicExpr
+                ;
+basicExpr :  INT_CONST
+             | CHAR_CONST
+             | STRING_CONST
+             | TRUE  // bool
+             | FALSE // bool
+             | NONE  // void
+             | NIL   // ptr
+             | LPAREN exprList RPAREN
+             | SIZEOF type
+             | IF expr THEN exprList END
+             | IF expr THEN exprList ELSE exprList END
+             | WHILE expr DO exprList END
+             | LET prog IN exprList END
+             | ID
+          ;
 
 
 

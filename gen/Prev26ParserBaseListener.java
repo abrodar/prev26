@@ -50,18 +50,6 @@ public class Prev26ParserBaseListener implements Prev26ParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterDefnList(Prev26Parser.DefnListContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitDefnList(Prev26Parser.DefnListContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterDefn(Prev26Parser.DefnContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -170,18 +158,6 @@ public class Prev26ParserBaseListener implements Prev26ParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterExprDEL(Prev26Parser.ExprDELContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitExprDEL(Prev26Parser.ExprDELContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterExpr(Prev26Parser.ExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -218,13 +194,25 @@ public class Prev26ParserBaseListener implements Prev26ParserListener {
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterBoolExpr(Prev26Parser.BoolExprContext ctx) { }
+	@Override public void enterBoolORExpr(Prev26Parser.BoolORExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void exitBoolExpr(Prev26Parser.BoolExprContext ctx) { }
+	@Override public void exitBoolORExpr(Prev26Parser.BoolORExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterBoolANDExpr(Prev26Parser.BoolANDExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitBoolANDExpr(Prev26Parser.BoolANDExprContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -285,6 +273,18 @@ public class Prev26ParserBaseListener implements Prev26ParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitPostfixExpr(Prev26Parser.PostfixExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterBasicExpr(Prev26Parser.BasicExprContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitBasicExpr(Prev26Parser.BasicExprContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

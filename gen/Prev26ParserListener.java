@@ -37,16 +37,6 @@ public interface Prev26ParserListener extends ParseTreeListener {
 	 */
 	void exitProg(Prev26Parser.ProgContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link Prev26Parser#defnList}.
-	 * @param ctx the parse tree
-	 */
-	void enterDefnList(Prev26Parser.DefnListContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link Prev26Parser#defnList}.
-	 * @param ctx the parse tree
-	 */
-	void exitDefnList(Prev26Parser.DefnListContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link Prev26Parser#defn}.
 	 * @param ctx the parse tree
 	 */
@@ -137,16 +127,6 @@ public interface Prev26ParserListener extends ParseTreeListener {
 	 */
 	void exitExprList(Prev26Parser.ExprListContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link Prev26Parser#exprDEL}.
-	 * @param ctx the parse tree
-	 */
-	void enterExprDEL(Prev26Parser.ExprDELContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link Prev26Parser#exprDEL}.
-	 * @param ctx the parse tree
-	 */
-	void exitExprDEL(Prev26Parser.ExprDELContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link Prev26Parser#expr}.
 	 * @param ctx the parse tree
 	 */
@@ -177,15 +157,25 @@ public interface Prev26ParserListener extends ParseTreeListener {
 	 */
 	void exitCastExpr(Prev26Parser.CastExprContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link Prev26Parser#boolExpr}.
+	 * Enter a parse tree produced by {@link Prev26Parser#boolORExpr}.
 	 * @param ctx the parse tree
 	 */
-	void enterBoolExpr(Prev26Parser.BoolExprContext ctx);
+	void enterBoolORExpr(Prev26Parser.BoolORExprContext ctx);
 	/**
-	 * Exit a parse tree produced by {@link Prev26Parser#boolExpr}.
+	 * Exit a parse tree produced by {@link Prev26Parser#boolORExpr}.
 	 * @param ctx the parse tree
 	 */
-	void exitBoolExpr(Prev26Parser.BoolExprContext ctx);
+	void exitBoolORExpr(Prev26Parser.BoolORExprContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link Prev26Parser#boolANDExpr}.
+	 * @param ctx the parse tree
+	 */
+	void enterBoolANDExpr(Prev26Parser.BoolANDExprContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link Prev26Parser#boolANDExpr}.
+	 * @param ctx the parse tree
+	 */
+	void exitBoolANDExpr(Prev26Parser.BoolANDExprContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link Prev26Parser#compExpr}.
 	 * @param ctx the parse tree
@@ -236,4 +226,14 @@ public interface Prev26ParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitPostfixExpr(Prev26Parser.PostfixExprContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link Prev26Parser#basicExpr}.
+	 * @param ctx the parse tree
+	 */
+	void enterBasicExpr(Prev26Parser.BasicExprContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link Prev26Parser#basicExpr}.
+	 * @param ctx the parse tree
+	 */
+	void exitBasicExpr(Prev26Parser.BasicExprContext ctx);
 }

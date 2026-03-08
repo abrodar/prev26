@@ -32,12 +32,6 @@ public interface Prev26ParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitProg(Prev26Parser.ProgContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link Prev26Parser#defnList}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitDefnList(Prev26Parser.DefnListContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link Prev26Parser#defn}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -92,12 +86,6 @@ public interface Prev26ParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitExprList(Prev26Parser.ExprListContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link Prev26Parser#exprDEL}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitExprDEL(Prev26Parser.ExprDELContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link Prev26Parser#expr}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -116,11 +104,17 @@ public interface Prev26ParserVisitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitCastExpr(Prev26Parser.CastExprContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link Prev26Parser#boolExpr}.
+	 * Visit a parse tree produced by {@link Prev26Parser#boolORExpr}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
-	T visitBoolExpr(Prev26Parser.BoolExprContext ctx);
+	T visitBoolORExpr(Prev26Parser.BoolORExprContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link Prev26Parser#boolANDExpr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBoolANDExpr(Prev26Parser.BoolANDExprContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link Prev26Parser#compExpr}.
 	 * @param ctx the parse tree
@@ -151,4 +145,10 @@ public interface Prev26ParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitPostfixExpr(Prev26Parser.PostfixExprContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link Prev26Parser#basicExpr}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitBasicExpr(Prev26Parser.BasicExprContext ctx);
 }
