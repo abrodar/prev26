@@ -1034,6 +1034,7 @@ public class Prev26Parser extends Parser {
 				((TypeContext)_localctx).RPAREN = match(RPAREN);
 
 				        ((TypeContext)_localctx).ast =  new FunType(((TypeContext)_localctx).tl.ast, ((TypeContext)_localctx).t.ast);
+				        Abstr.locAttr.put(((TypeContext)_localctx).tl.ast, loc(((TypeContext)_localctx).LPAREN, ((TypeContext)_localctx).RPAREN));
 				        Abstr.locAttr.put(_localctx.ast, loc(((TypeContext)_localctx).LPAREN, ((TypeContext)_localctx).RPAREN));
 				        
 				}

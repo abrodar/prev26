@@ -222,6 +222,7 @@ type returns [AST.Type ast]
         | LPAREN COLON tl=typeList COLON t=type RPAREN
         {
         $ast = new FunType($tl.ast, $t.ast);
+        Abstr.locAttr.put($tl.ast, loc($LPAREN, $RPAREN));
         Abstr.locAttr.put($ast, loc($LPAREN, $RPAREN));
         }// tip funkcije
         | LPAREN t=type RPAREN
