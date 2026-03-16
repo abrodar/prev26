@@ -1,12 +1,11 @@
 // Generated from /home/aljaz/Desktop/FRI_PORTAL/SEM2/P/prev26/src/prev26lang/phase/synan/Prev26Parser.g4 by ANTLR 4.13.2
 
-
     package prev26lang.phase.synan;
-    
     import java.util.*;
     import prev26lang.common.report.*;
     import prev26lang.phase.lexan.*;
-    //import prev26lang.phase.abstr.*;
+    import prev26lang.phase.abstr.*;
+    import prev26lang.phase.abstr.AST.*;
 
 
 import org.antlr.v4.runtime.tree.ParseTreeListener;
@@ -96,6 +95,26 @@ public interface Prev26ParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitParam(Prev26Parser.ParamContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link Prev26Parser#compList}.
+	 * @param ctx the parse tree
+	 */
+	void enterCompList(Prev26Parser.CompListContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link Prev26Parser#compList}.
+	 * @param ctx the parse tree
+	 */
+	void exitCompList(Prev26Parser.CompListContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link Prev26Parser#comp}.
+	 * @param ctx the parse tree
+	 */
+	void enterComp(Prev26Parser.CompContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link Prev26Parser#comp}.
+	 * @param ctx the parse tree
+	 */
+	void exitComp(Prev26Parser.CompContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link Prev26Parser#typeList}.
 	 * @param ctx the parse tree

@@ -1,12 +1,11 @@
 // Generated from /home/aljaz/Desktop/FRI_PORTAL/SEM2/P/prev26/src/prev26lang/phase/synan/Prev26Parser.g4 by ANTLR 4.13.2
 
-
     package prev26lang.phase.synan;
-    
     import java.util.*;
     import prev26lang.common.report.*;
     import prev26lang.phase.lexan.*;
-    //import prev26lang.phase.abstr.*;
+    import prev26lang.phase.abstr.*;
+    import prev26lang.phase.abstr.AST.*;
 
 
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
@@ -77,6 +76,20 @@ public class Prev26ParserBaseVisitor<T> extends AbstractParseTreeVisitor<T> impl
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
 	@Override public T visitParam(Prev26Parser.ParamContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitCompList(Prev26Parser.CompListContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitComp(Prev26Parser.CompContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *

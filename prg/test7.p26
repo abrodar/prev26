@@ -1,3 +1,0 @@
-typ t = (((id)))
-typ t2 = (id: (int))
-typ t3 = (((({}))))

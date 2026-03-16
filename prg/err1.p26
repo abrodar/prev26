@@ -1,2 +1,0 @@
-// neasociativnost
-fun f(): void = a = b = c = d = e

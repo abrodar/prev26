@@ -8,6 +8,7 @@ import java.util.*;
 import prev26lang.common.report.*;
 import prev26lang.phase.lexan.*;
 import prev26lang.phase.synan.*;
+import prev26lang.phase.abstr.*;
 
 /**
  * The Prev26 compiler.
@@ -32,7 +33,7 @@ public class Compiler {
             "none", // ---: no phase
             "lexan", // --: lexical analysis
             "synan", // --: syntax analysis
-            "all" // -----: putting it all together
+            "abstr" // --: abstract syntax tree
     ));
 
     /** Specifies whether the compiler is run in the development mode. */
@@ -203,6 +204,16 @@ public class Compiler {
                     if (cmdLineOpts.get("--target-phase").equals("synan"))
                         break;
 
+                    // === ABSTRACT SYNTAX ===
+                    try (Abstr abstr = new Abstr()) {
+                        Abstr.tree = SynAn.tree.ast;
+                        Abstr.locAttr.lock();
+                        SynAn.tree = null;
+                        (new Abstr.Logger(abstr.xmlLogger)).visit(Abstr.tree);
+                    }
+                    if (cmdLineOpts.get("--target-phase").equals("abstr"))
+                        break;
+
                     break;
                 }
             }
@@ -211,6 +222,7 @@ public class Compiler {
             // 1. The generated translation of the source file might be erroneous :-o
             // 2. The source file might not be what the programmer intended it to be ;-)
             Report.info("Done.");
+
         } catch (final Report.Error error) {
             System.err.println(error.getMessage());
             System.exit(1);

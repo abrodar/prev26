@@ -1,3 +1,0 @@
-// neasociativnost
-
-fun f() : bool = a > b < c

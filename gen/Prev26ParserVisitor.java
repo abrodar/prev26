@@ -1,12 +1,11 @@
 // Generated from /home/aljaz/Desktop/FRI_PORTAL/SEM2/P/prev26/src/prev26lang/phase/synan/Prev26Parser.g4 by ANTLR 4.13.2
 
-
     package prev26lang.phase.synan;
-    
     import java.util.*;
     import prev26lang.common.report.*;
     import prev26lang.phase.lexan.*;
-    //import prev26lang.phase.abstr.*;
+    import prev26lang.phase.abstr.*;
+    import prev26lang.phase.abstr.AST.*;
 
 
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
@@ -67,6 +66,18 @@ public interface Prev26ParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitParam(Prev26Parser.ParamContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link Prev26Parser#compList}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitCompList(Prev26Parser.CompListContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link Prev26Parser#comp}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitComp(Prev26Parser.CompContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link Prev26Parser#typeList}.
 	 * @param ctx the parse tree

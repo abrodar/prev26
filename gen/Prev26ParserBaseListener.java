@@ -1,12 +1,11 @@
 // Generated from /home/aljaz/Desktop/FRI_PORTAL/SEM2/P/prev26/src/prev26lang/phase/synan/Prev26Parser.g4 by ANTLR 4.13.2
 
-
     package prev26lang.phase.synan;
-    
     import java.util.*;
     import prev26lang.common.report.*;
     import prev26lang.phase.lexan.*;
-    //import prev26lang.phase.abstr.*;
+    import prev26lang.phase.abstr.*;
+    import prev26lang.phase.abstr.AST.*;
 
 
 
@@ -117,6 +116,30 @@ public class Prev26ParserBaseListener implements Prev26ParserListener {
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitParam(Prev26Parser.ParamContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterCompList(Prev26Parser.CompListContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitCompList(Prev26Parser.CompListContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterComp(Prev26Parser.CompContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitComp(Prev26Parser.CompContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
