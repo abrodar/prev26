@@ -1,0 +1,3 @@
+// defnList test
+fun f() : int = let typ a = int typ b = int in a, b end
+

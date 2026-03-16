@@ -239,6 +239,7 @@ public class Prev26Parser extends Parser {
 			                list.add(dctx.ast);
 			            }
 			            ((ProgContext)_localctx).ast =  new AST.Nodes<>(list);
+			            Abstr.locAttr.put(_localctx.ast, loc(((ProgContext)_localctx).ds.get(0).ast, ((ProgContext)_localctx).ds.get(((ProgContext)_localctx).ds.size()-1).ast));
 			        
 			}
 		}
@@ -336,6 +337,7 @@ public class Prev26Parser extends Parser {
 	@SuppressWarnings("CheckReturnValue")
 	public static class TypeDeclContext extends ParserRuleContext {
 		public AST.TypDefn ast;
+		public Token TYP;
 		public Token id;
 		public TypeContext t;
 		public TerminalNode TYP() { return getToken(Prev26Parser.TYP, 0); }
@@ -370,14 +372,17 @@ public class Prev26Parser extends Parser {
 			enterOuterAlt(_localctx, 1);
 			{
 			setState(70);
-			match(TYP);
+			((TypeDeclContext)_localctx).TYP = match(TYP);
 			setState(71);
 			((TypeDeclContext)_localctx).id = match(ID);
 			setState(72);
 			match(ASSIGN);
 			setState(73);
 			((TypeDeclContext)_localctx).t = type();
-			 ((TypeDeclContext)_localctx).ast =  new TypDefn((((TypeDeclContext)_localctx).id!=null?((TypeDeclContext)_localctx).id.getText():null), ((TypeDeclContext)_localctx).t.ast); 
+
+			        ((TypeDeclContext)_localctx).ast =  new TypDefn((((TypeDeclContext)_localctx).id!=null?((TypeDeclContext)_localctx).id.getText():null), ((TypeDeclContext)_localctx).t.ast);
+			        Abstr.locAttr.put(_localctx.ast, loc(((TypeDeclContext)_localctx).TYP, ((TypeDeclContext)_localctx).t.ast));
+			        
 			}
 		}
 		catch (RecognitionException re) {
@@ -394,6 +399,7 @@ public class Prev26Parser extends Parser {
 	@SuppressWarnings("CheckReturnValue")
 	public static class VarDeclContext extends ParserRuleContext {
 		public AST.VarDefn ast;
+		public Token VAR;
 		public Token id;
 		public TypeContext t;
 		public TerminalNode VAR() { return getToken(Prev26Parser.VAR, 0); }
@@ -428,14 +434,17 @@ public class Prev26Parser extends Parser {
 			enterOuterAlt(_localctx, 1);
 			{
 			setState(76);
-			match(VAR);
+			((VarDeclContext)_localctx).VAR = match(VAR);
 			setState(77);
 			((VarDeclContext)_localctx).id = match(ID);
 			setState(78);
 			match(COLON);
 			setState(79);
 			((VarDeclContext)_localctx).t = type();
-			 ((VarDeclContext)_localctx).ast =  new VarDefn((((VarDeclContext)_localctx).id!=null?((VarDeclContext)_localctx).id.getText():null), ((VarDeclContext)_localctx).t.ast); 
+
+			        ((VarDeclContext)_localctx).ast =  new VarDefn((((VarDeclContext)_localctx).id!=null?((VarDeclContext)_localctx).id.getText():null), ((VarDeclContext)_localctx).t.ast);
+			        Abstr.locAttr.put(_localctx.ast, loc(((VarDeclContext)_localctx).VAR, ((VarDeclContext)_localctx).t.ast));
+			        
 			}
 		}
 		catch (RecognitionException re) {
@@ -452,8 +461,11 @@ public class Prev26Parser extends Parser {
 	@SuppressWarnings("CheckReturnValue")
 	public static class FuncDeclContext extends ParserRuleContext {
 		public AST.FunDefn ast;
+		public Token FUN;
 		public Token id1;
+		public Token LPAREN;
 		public ParamListContext pars1;
+		public Token RPAREN;
 		public TypeContext t1;
 		public ExprListContext es;
 		public Token id2;
@@ -505,11 +517,11 @@ public class Prev26Parser extends Parser {
 				enterOuterAlt(_localctx, 1);
 				{
 				setState(82);
-				match(FUN);
+				((FuncDeclContext)_localctx).FUN = match(FUN);
 				setState(83);
 				((FuncDeclContext)_localctx).id1 = match(ID);
 				setState(84);
-				match(LPAREN);
+				((FuncDeclContext)_localctx).LPAREN = match(LPAREN);
 				setState(86);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
@@ -521,7 +533,7 @@ public class Prev26Parser extends Parser {
 				}
 
 				setState(88);
-				match(RPAREN);
+				((FuncDeclContext)_localctx).RPAREN = match(RPAREN);
 				setState(89);
 				match(COLON);
 				setState(90);
@@ -530,18 +542,30 @@ public class Prev26Parser extends Parser {
 				match(ASSIGN);
 				setState(92);
 				((FuncDeclContext)_localctx).es = exprList();
-				 ((FuncDeclContext)_localctx).ast =  new DefFunDefn((((FuncDeclContext)_localctx).id1!=null?((FuncDeclContext)_localctx).id1.getText():null),  ((FuncDeclContext)_localctx).pars1.ast != null ? ((FuncDeclContext)_localctx).pars1.ast : new AST.Nodes<AST.ParDefn>(), ((FuncDeclContext)_localctx).t1.ast, new Exprs(((FuncDeclContext)_localctx).es.ast)); 
+
+				        AST.Nodes<AST.ParDefn> p1;
+				        try {
+				            p1 = ((FuncDeclContext)_localctx).pars1.ast;
+				        } catch (NullPointerException e) {
+				            p1 = new AST.Nodes<>();
+				            Abstr.locAttr.put(p1, loc(((FuncDeclContext)_localctx).LPAREN, ((FuncDeclContext)_localctx).RPAREN));
+				        }
+				        Exprs body = new Exprs(((FuncDeclContext)_localctx).es.ast);
+				        Abstr.locAttr.put(body, loc(((FuncDeclContext)_localctx).es.ast));
+				        ((FuncDeclContext)_localctx).ast =  new DefFunDefn((((FuncDeclContext)_localctx).id1!=null?((FuncDeclContext)_localctx).id1.getText():null),  p1, ((FuncDeclContext)_localctx).t1.ast, body);
+				        Abstr.locAttr.put(_localctx.ast, loc(((FuncDeclContext)_localctx).FUN, ((FuncDeclContext)_localctx).es.ast));
+				        
 				}
 				break;
 			case 2:
 				enterOuterAlt(_localctx, 2);
 				{
 				setState(95);
-				match(FUN);
+				((FuncDeclContext)_localctx).FUN = match(FUN);
 				setState(96);
 				((FuncDeclContext)_localctx).id2 = match(ID);
 				setState(97);
-				match(LPAREN);
+				((FuncDeclContext)_localctx).LPAREN = match(LPAREN);
 				setState(99);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
@@ -553,12 +577,22 @@ public class Prev26Parser extends Parser {
 				}
 
 				setState(101);
-				match(RPAREN);
+				((FuncDeclContext)_localctx).RPAREN = match(RPAREN);
 				setState(102);
 				match(COLON);
 				setState(103);
 				((FuncDeclContext)_localctx).t2 = type();
-				 ((FuncDeclContext)_localctx).ast =  new ExtFunDefn((((FuncDeclContext)_localctx).id2!=null?((FuncDeclContext)_localctx).id2.getText():null),  ((FuncDeclContext)_localctx).pars2.ast != null ? ((FuncDeclContext)_localctx).pars2.ast : new AST.Nodes<AST.ParDefn>(), ((FuncDeclContext)_localctx).t2.ast); 
+
+				        AST.Nodes<AST.ParDefn> p2;
+				        try {
+				            p2 = ((FuncDeclContext)_localctx).pars2.ast;
+				        } catch (NullPointerException e) {
+				            p2 = new AST.Nodes<>();
+				            Abstr.locAttr.put(p2, loc(((FuncDeclContext)_localctx).LPAREN, ((FuncDeclContext)_localctx).RPAREN));
+				        }
+				        ((FuncDeclContext)_localctx).ast =  new ExtFunDefn((((FuncDeclContext)_localctx).id2!=null?((FuncDeclContext)_localctx).id2.getText():null), p2, ((FuncDeclContext)_localctx).t2.ast);
+				        Abstr.locAttr.put(_localctx.ast, loc(((FuncDeclContext)_localctx).FUN, ((FuncDeclContext)_localctx).t2.ast));
+				        
 				}
 				break;
 			}
@@ -641,6 +675,7 @@ public class Prev26Parser extends Parser {
 			                list.add(pctx.ast);
 			            }
 			            ((ParamListContext)_localctx).ast =  new AST.Nodes<>(list);
+			            Abstr.locAttr.put(_localctx.ast, loc(((ParamListContext)_localctx).ps.get(0).ast, ((ParamListContext)_localctx).ps.get(((ParamListContext)_localctx).ps.size()-1).ast));
 			            
 			}
 		}
@@ -696,7 +731,10 @@ public class Prev26Parser extends Parser {
 			match(COLON);
 			setState(120);
 			((ParamContext)_localctx).t = type();
-			 ((ParamContext)_localctx).ast =  new ParDefn((((ParamContext)_localctx).id!=null?((ParamContext)_localctx).id.getText():null), ((ParamContext)_localctx).t.ast); 
+
+			        ((ParamContext)_localctx).ast =  new ParDefn((((ParamContext)_localctx).id!=null?((ParamContext)_localctx).id.getText():null), ((ParamContext)_localctx).t.ast);
+			        Abstr.locAttr.put(_localctx.ast, loc(((ParamContext)_localctx).id, ((ParamContext)_localctx).t.ast));
+			        
 			}
 		}
 		catch (RecognitionException re) {
@@ -777,6 +815,7 @@ public class Prev26Parser extends Parser {
 			                list.add(cctx.ast);
 			            }
 			            ((CompListContext)_localctx).ast =  new AST.Nodes<>(list);
+			            Abstr.locAttr.put(_localctx.ast, loc(((CompListContext)_localctx).cs.get(0).ast, ((CompListContext)_localctx).cs.get(((CompListContext)_localctx).cs.size()-1).ast));
 			            
 			}
 		}
@@ -832,7 +871,10 @@ public class Prev26Parser extends Parser {
 			match(COLON);
 			setState(135);
 			((CompContext)_localctx).t = type();
-			 ((CompContext)_localctx).ast =  new CompDefn((((CompContext)_localctx).id!=null?((CompContext)_localctx).id.getText():null), ((CompContext)_localctx).t.ast); 
+
+			        ((CompContext)_localctx).ast =  new CompDefn((((CompContext)_localctx).id!=null?((CompContext)_localctx).id.getText():null), ((CompContext)_localctx).t.ast);
+			        Abstr.locAttr.put(_localctx.ast, loc(((CompContext)_localctx).id, ((CompContext)_localctx).t.ast));
+			        
 			}
 		}
 		catch (RecognitionException re) {
@@ -848,7 +890,7 @@ public class Prev26Parser extends Parser {
 
 	@SuppressWarnings("CheckReturnValue")
 	public static class TypeListContext extends ParserRuleContext {
-		public AST.Nodes<Type> ast;
+		public AST.Nodes<AST.Type> ast;
 		public TypeContext type;
 		public List<TypeContext> ts = new ArrayList<TypeContext>();
 		public List<TypeContext> type() {
@@ -922,7 +964,10 @@ public class Prev26Parser extends Parser {
 			                list.add(tctx.ast);
 			            }
 			        }
-			        ((TypeListContext)_localctx).ast =  new Nodes(list);
+			        ((TypeListContext)_localctx).ast =  new AST.Nodes<>(list);
+			        if (!list.isEmpty()) {
+			            Abstr.locAttr.put(_localctx.ast, loc(((TypeListContext)_localctx).ts.get(0).ast, ((TypeListContext)_localctx).ts.get(((TypeListContext)_localctx).ts.size()-1).ast));
+			        }
 			        
 			}
 		}
@@ -940,10 +985,20 @@ public class Prev26Parser extends Parser {
 	@SuppressWarnings("CheckReturnValue")
 	public static class TypeContext extends ParserRuleContext {
 		public AST.Type ast;
+		public Token INT;
+		public Token CHAR;
+		public Token BOOL;
+		public Token VOID;
+		public Token LBRACK;
 		public Token ic;
 		public TypeContext t;
+		public Token POW;
+		public Token LPAREN;
 		public CompListContext cl1;
+		public Token RPAREN;
+		public Token LBRACE;
 		public CompListContext cl2;
+		public Token RBRACE;
 		public TypeListContext tl;
 		public Token id;
 		public TerminalNode INT() { return getToken(Prev26Parser.INT, 0); }
@@ -1003,75 +1058,96 @@ public class Prev26Parser extends Parser {
 				enterOuterAlt(_localctx, 1);
 				{
 				setState(150);
-				match(INT);
-				 ((TypeContext)_localctx).ast =  new AtomType(AST.AtomType.Type.INT); 
+				((TypeContext)_localctx).INT = match(INT);
+
+				        ((TypeContext)_localctx).ast =  new AtomType(AST.AtomType.Type.INT);
+				        Abstr.locAttr.put(_localctx.ast, loc(((TypeContext)_localctx).INT));
+				        
 				}
 				break;
 			case 2:
 				enterOuterAlt(_localctx, 2);
 				{
 				setState(152);
-				match(CHAR);
-				 ((TypeContext)_localctx).ast =  new AtomType(AST.AtomType.Type.CHAR); 
+				((TypeContext)_localctx).CHAR = match(CHAR);
+
+				        ((TypeContext)_localctx).ast =  new AtomType(AST.AtomType.Type.CHAR);
+				        Abstr.locAttr.put(_localctx.ast, loc(((TypeContext)_localctx).CHAR));
+				        
 				}
 				break;
 			case 3:
 				enterOuterAlt(_localctx, 3);
 				{
 				setState(154);
-				match(BOOL);
-				 ((TypeContext)_localctx).ast =  new AtomType(AST.AtomType.Type.BOOL); 
+				((TypeContext)_localctx).BOOL = match(BOOL);
+
+				        ((TypeContext)_localctx).ast =  new AtomType(AST.AtomType.Type.BOOL);
+				        Abstr.locAttr.put(_localctx.ast, loc(((TypeContext)_localctx).BOOL));
+				        
 				}
 				break;
 			case 4:
 				enterOuterAlt(_localctx, 4);
 				{
 				setState(156);
-				match(VOID);
-				 ((TypeContext)_localctx).ast =  new AtomType(AST.AtomType.Type.VOID); 
+				((TypeContext)_localctx).VOID = match(VOID);
+
+				        ((TypeContext)_localctx).ast =  new AtomType(AST.AtomType.Type.VOID);
+				        Abstr.locAttr.put(_localctx.ast, loc(((TypeContext)_localctx).VOID));
+				        
 				}
 				break;
 			case 5:
 				enterOuterAlt(_localctx, 5);
 				{
 				setState(158);
-				match(LBRACK);
+				((TypeContext)_localctx).LBRACK = match(LBRACK);
 				setState(159);
 				((TypeContext)_localctx).ic = match(INT_CONST);
 				setState(160);
 				match(RBRACK);
 				setState(161);
 				((TypeContext)_localctx).t = type();
-				 ((TypeContext)_localctx).ast =  new ArrType(((TypeContext)_localctx).t.ast, (((TypeContext)_localctx).ic!=null?((TypeContext)_localctx).ic.getText():null)); 
+
+				        ((TypeContext)_localctx).ast =  new ArrType(((TypeContext)_localctx).t.ast, (((TypeContext)_localctx).ic!=null?((TypeContext)_localctx).ic.getText():null));
+				        Abstr.locAttr.put(_localctx.ast, loc(((TypeContext)_localctx).LBRACK, ((TypeContext)_localctx).t.ast));
+				        
 				}
 				break;
 			case 6:
 				enterOuterAlt(_localctx, 6);
 				{
 				setState(164);
-				match(POW);
+				((TypeContext)_localctx).POW = match(POW);
 				setState(165);
 				((TypeContext)_localctx).t = type();
-				 ((TypeContext)_localctx).ast =  new PtrType(((TypeContext)_localctx).t.ast); 
+
+				        ((TypeContext)_localctx).ast =  new PtrType(((TypeContext)_localctx).t.ast);
+				        Abstr.locAttr.put(_localctx.ast, loc(((TypeContext)_localctx).POW, ((TypeContext)_localctx).t.ast));
+				        
 				}
 				break;
 			case 7:
 				enterOuterAlt(_localctx, 7);
 				{
 				setState(168);
-				match(LPAREN);
+				((TypeContext)_localctx).LPAREN = match(LPAREN);
 				setState(169);
 				((TypeContext)_localctx).cl1 = compList();
 				setState(170);
-				match(RPAREN);
-				 ((TypeContext)_localctx).ast =  new UniType(((TypeContext)_localctx).cl1.ast); 
+				((TypeContext)_localctx).RPAREN = match(RPAREN);
+
+				        ((TypeContext)_localctx).ast =  new StrType(((TypeContext)_localctx).cl1.ast);
+				        Abstr.locAttr.put(_localctx.ast, loc(((TypeContext)_localctx).LPAREN, ((TypeContext)_localctx).RPAREN));
+				        
 				}
 				break;
 			case 8:
 				enterOuterAlt(_localctx, 8);
 				{
 				setState(173);
-				match(LBRACE);
+				((TypeContext)_localctx).LBRACE = match(LBRACE);
 				setState(175);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
@@ -1083,15 +1159,25 @@ public class Prev26Parser extends Parser {
 				}
 
 				setState(177);
-				match(RBRACE);
-				 ((TypeContext)_localctx).ast =  new StrType(((TypeContext)_localctx).cl2.ast == null ? new AST.Nodes<>() : ((TypeContext)_localctx).cl2.ast); 
+				((TypeContext)_localctx).RBRACE = match(RBRACE);
+
+				        AST.Nodes<AST.CompDefn> comps;
+				        try {
+				            comps = ((TypeContext)_localctx).cl2.ast;
+				        } catch (NullPointerException e) {
+				            comps = new AST.Nodes<>();
+				            Abstr.locAttr.put(comps, loc(((TypeContext)_localctx).LBRACE, ((TypeContext)_localctx).RBRACE));
+				        }
+				        ((TypeContext)_localctx).ast =  new UniType(comps);
+				        Abstr.locAttr.put(_localctx.ast, loc(((TypeContext)_localctx).LBRACE, ((TypeContext)_localctx).RBRACE));
+				        
 				}
 				break;
 			case 9:
 				enterOuterAlt(_localctx, 9);
 				{
 				setState(179);
-				match(LPAREN);
+				((TypeContext)_localctx).LPAREN = match(LPAREN);
 				setState(180);
 				match(COLON);
 				setState(181);
@@ -1101,8 +1187,11 @@ public class Prev26Parser extends Parser {
 				setState(183);
 				((TypeContext)_localctx).t = type();
 				setState(184);
-				match(RPAREN);
-				 ((TypeContext)_localctx).ast =  new FunType(((TypeContext)_localctx).tl.ast, ((TypeContext)_localctx).t.ast); 
+				((TypeContext)_localctx).RPAREN = match(RPAREN);
+
+				        ((TypeContext)_localctx).ast =  new FunType(((TypeContext)_localctx).tl.ast, ((TypeContext)_localctx).t.ast);
+				        Abstr.locAttr.put(_localctx.ast, loc(((TypeContext)_localctx).LPAREN, ((TypeContext)_localctx).RPAREN));
+				        
 				}
 				break;
 			case 10:
@@ -1114,7 +1203,9 @@ public class Prev26Parser extends Parser {
 				((TypeContext)_localctx).t = type();
 				setState(189);
 				match(RPAREN);
-				 ((TypeContext)_localctx).ast =  ((TypeContext)_localctx).t.ast; 
+
+				        ((TypeContext)_localctx).ast =  ((TypeContext)_localctx).t.ast;
+				        
 				}
 				break;
 			case 11:
@@ -1122,7 +1213,10 @@ public class Prev26Parser extends Parser {
 				{
 				setState(192);
 				((TypeContext)_localctx).id = match(ID);
-				 ((TypeContext)_localctx).ast =  new NameType((((TypeContext)_localctx).id!=null?((TypeContext)_localctx).id.getText():null)); 
+
+				        ((TypeContext)_localctx).ast =  new NameType((((TypeContext)_localctx).id!=null?((TypeContext)_localctx).id.getText():null));
+				        Abstr.locAttr.put(_localctx.ast, loc(((TypeContext)_localctx).id));
+				        
 				}
 				break;
 			}
@@ -1205,6 +1299,7 @@ public class Prev26Parser extends Parser {
 			            list.add(ectx.ast);
 			        }
 			        ((ExprListContext)_localctx).ast =  new AST.Nodes<>(list);
+			        Abstr.locAttr.put(_localctx.ast, loc(((ExprListContext)_localctx).es.get(0).ast, ((ExprListContext)_localctx).es.get(((ExprListContext)_localctx).es.size()-1).ast));
 			        
 			}
 		}
@@ -1315,7 +1410,10 @@ public class Prev26Parser extends Parser {
 				match(ASSIGN);
 				setState(211);
 				((AssignExprContext)_localctx).ce2 = castExpr(0);
-				 ((AssignExprContext)_localctx).ast =  new AsgnExpr(((AssignExprContext)_localctx).ce1.ast, ((AssignExprContext)_localctx).ce2.ast);  
+
+				                ((AssignExprContext)_localctx).ast =  new AsgnExpr(((AssignExprContext)_localctx).ce1.ast, ((AssignExprContext)_localctx).ce2.ast);
+				                Abstr.locAttr.put(_localctx.ast, loc(((AssignExprContext)_localctx).ce1.ast, ((AssignExprContext)_localctx).ce2.ast));
+				                
 				}
 				break;
 			case 2:
@@ -1323,7 +1421,9 @@ public class Prev26Parser extends Parser {
 				{
 				setState(214);
 				((AssignExprContext)_localctx).ce3 = castExpr(0);
-				 ((AssignExprContext)_localctx).ast =  ((AssignExprContext)_localctx).ce3.ast; 
+
+				                ((AssignExprContext)_localctx).ast =  ((AssignExprContext)_localctx).ce3.ast;
+				                
 				}
 				break;
 			}
@@ -1413,7 +1513,10 @@ public class Prev26Parser extends Parser {
 					match(AS);
 					setState(225);
 					((CastExprContext)_localctx).t = type();
-					 ((CastExprContext)_localctx).ast =  new CastExpr(((CastExprContext)_localctx).t.ast, ((CastExprContext)_localctx).ce.ast); 
+
+					                          ((CastExprContext)_localctx).ast =  new CastExpr(((CastExprContext)_localctx).t.ast, ((CastExprContext)_localctx).ce.ast);
+					                          Abstr.locAttr.put(_localctx.ast, loc(((CastExprContext)_localctx).ce.ast, ((CastExprContext)_localctx).t.ast));
+					                          
 					}
 					} 
 				}
@@ -1506,7 +1609,10 @@ public class Prev26Parser extends Parser {
 					((BoolORExprContext)_localctx).op = match(OR);
 					setState(239);
 					((BoolORExprContext)_localctx).b2 = boolANDExpr(0);
-					 ((BoolORExprContext)_localctx).ast =  new BinExpr(AST.BinExpr.Oper.OR,((BoolORExprContext)_localctx).b1.ast,((BoolORExprContext)_localctx).b2.ast); 
+
+					                          ((BoolORExprContext)_localctx).ast =  new BinExpr(AST.BinExpr.Oper.OR,((BoolORExprContext)_localctx).b1.ast,((BoolORExprContext)_localctx).b2.ast);
+					                          Abstr.locAttr.put(_localctx.ast, loc(((BoolORExprContext)_localctx).b1.ast, ((BoolORExprContext)_localctx).b2.ast));
+					                          
 					}
 					} 
 				}
@@ -1598,7 +1704,10 @@ public class Prev26Parser extends Parser {
 					match(AND);
 					setState(253);
 					((BoolANDExprContext)_localctx).ce = compExpr();
-					 ((BoolANDExprContext)_localctx).ast =  new BinExpr(AST.BinExpr.Oper.AND, ((BoolANDExprContext)_localctx).b1.ast, ((BoolANDExprContext)_localctx).ce.ast); 
+
+					                          ((BoolANDExprContext)_localctx).ast =  new BinExpr(AST.BinExpr.Oper.AND, ((BoolANDExprContext)_localctx).b1.ast, ((BoolANDExprContext)_localctx).ce.ast);
+					                          Abstr.locAttr.put(_localctx.ast, loc(((BoolANDExprContext)_localctx).b1.ast, ((BoolANDExprContext)_localctx).ce.ast));
+					                          
 					}
 					} 
 				}
@@ -1694,6 +1803,7 @@ public class Prev26Parser extends Parser {
 				                    default -> throw new Report.InternalError();
 				                };
 				                ((CompExprContext)_localctx).ast =  new BinExpr(oper, ((CompExprContext)_localctx).a1.ast, ((CompExprContext)_localctx).a2.ast);
+				                Abstr.locAttr.put(_localctx.ast, loc(((CompExprContext)_localctx).a1.ast, ((CompExprContext)_localctx).a2.ast));
 				            
 				}
 				break;
@@ -1810,6 +1920,7 @@ public class Prev26Parser extends Parser {
 					                              default -> throw new Report.InternalError();
 					                          };
 					                          ((AddExprContext)_localctx).ast =  new BinExpr(oper, ((AddExprContext)_localctx).a.ast, ((AddExprContext)_localctx).m1.ast);
+					                          Abstr.locAttr.put(_localctx.ast, loc(((AddExprContext)_localctx).a.ast, ((AddExprContext)_localctx).m1.ast));
 					                      
 					}
 					} 
@@ -1923,6 +2034,7 @@ public class Prev26Parser extends Parser {
 					                              default -> throw new Report.InternalError();
 					                          };
 					                          ((MulExprContext)_localctx).ast =  new BinExpr(oper, ((MulExprContext)_localctx).me.ast, ((MulExprContext)_localctx).pe1.ast);
+					                          Abstr.locAttr.put(_localctx.ast, loc(((MulExprContext)_localctx).me.ast, ((MulExprContext)_localctx).pe1.ast));
 					                      
 					}
 					} 
@@ -2015,6 +2127,7 @@ public class Prev26Parser extends Parser {
 				                        default -> throw new Report.InternalError();
 				                    };
 				                    ((PrefixExprContext)_localctx).ast =  new PfxExpr(oper, ((PrefixExprContext)_localctx).pe.ast);
+				                    Abstr.locAttr.put(_localctx.ast, loc(((PrefixExprContext)_localctx).op, ((PrefixExprContext)_localctx).pe.ast));
 				                
 				}
 				break;
@@ -2061,8 +2174,12 @@ public class Prev26Parser extends Parser {
 		public PostfixExprContext po2;
 		public PostfixExprContext po3;
 		public BasicExprContext b;
+		public Token POW;
+		public Token LPAREN;
 		public ExprListContext el;
+		public Token RPAREN;
 		public ExprContext e;
+		public Token RBRACK;
 		public Token id;
 		public BasicExprContext basicExpr() {
 			return getRuleContext(BasicExprContext.class,0);
@@ -2143,8 +2260,11 @@ public class Prev26Parser extends Parser {
 						setState(312);
 						if (!(precpred(_ctx, 5))) throw new FailedPredicateException(this, "precpred(_ctx, 5)");
 						setState(313);
-						match(POW);
-						 ((PostfixExprContext)_localctx).ast =  new SfxExpr(AST.SfxExpr.Oper.PTR, ((PostfixExprContext)_localctx).po.ast); 
+						((PostfixExprContext)_localctx).POW = match(POW);
+
+						                          ((PostfixExprContext)_localctx).ast =  new SfxExpr(AST.SfxExpr.Oper.PTR, ((PostfixExprContext)_localctx).po.ast);
+						                          Abstr.locAttr.put(_localctx.ast, loc(((PostfixExprContext)_localctx).po.ast, ((PostfixExprContext)_localctx).POW));
+						                          
 						}
 						break;
 					case 2:
@@ -2155,7 +2275,7 @@ public class Prev26Parser extends Parser {
 						setState(315);
 						if (!(precpred(_ctx, 4))) throw new FailedPredicateException(this, "precpred(_ctx, 4)");
 						setState(316);
-						match(LPAREN);
+						((PostfixExprContext)_localctx).LPAREN = match(LPAREN);
 						setState(318);
 						_errHandler.sync(this);
 						_la = _input.LA(1);
@@ -2167,8 +2287,18 @@ public class Prev26Parser extends Parser {
 						}
 
 						setState(320);
-						match(RPAREN);
-						 ((PostfixExprContext)_localctx).ast =  new CallExpr(((PostfixExprContext)_localctx).po1.ast, ((PostfixExprContext)_localctx).el.ast == null ? new AST.Nodes<>() : ((PostfixExprContext)_localctx).el.ast); 
+						((PostfixExprContext)_localctx).RPAREN = match(RPAREN);
+
+						                           AST.Nodes<AST.Expr> args;
+						                           try {
+						                              args = ((PostfixExprContext)_localctx).el.ast;
+						                           } catch (NullPointerException e) {
+						                              args = new AST.Nodes<>();
+						                              Abstr.locAttr.put(args, loc(((PostfixExprContext)_localctx).LPAREN, ((PostfixExprContext)_localctx).RPAREN));
+						                           }
+						                          ((PostfixExprContext)_localctx).ast =  new CallExpr(((PostfixExprContext)_localctx).po1.ast, args);
+						                          Abstr.locAttr.put(_localctx.ast, loc(((PostfixExprContext)_localctx).po1.ast, ((PostfixExprContext)_localctx).RPAREN));
+						                          
 						}
 						break;
 					case 3:
@@ -2183,8 +2313,11 @@ public class Prev26Parser extends Parser {
 						setState(324);
 						((PostfixExprContext)_localctx).e = expr();
 						setState(325);
-						match(RBRACK);
-						 ((PostfixExprContext)_localctx).ast =  new ArrExpr(((PostfixExprContext)_localctx).po2.ast, ((PostfixExprContext)_localctx).e.ast); 
+						((PostfixExprContext)_localctx).RBRACK = match(RBRACK);
+
+						                          ((PostfixExprContext)_localctx).ast =  new ArrExpr(((PostfixExprContext)_localctx).po2.ast, ((PostfixExprContext)_localctx).e.ast);
+						                          Abstr.locAttr.put(_localctx.ast, loc(((PostfixExprContext)_localctx).po2.ast, ((PostfixExprContext)_localctx).RBRACK));
+						                          
 						}
 						break;
 					case 4:
@@ -2198,7 +2331,10 @@ public class Prev26Parser extends Parser {
 						match(DOT);
 						setState(330);
 						((PostfixExprContext)_localctx).id = match(ID);
-						 ((PostfixExprContext)_localctx).ast =  new CompExpr(((PostfixExprContext)_localctx).po3.ast, (((PostfixExprContext)_localctx).id!=null?((PostfixExprContext)_localctx).id.getText():null)); 
+
+						                          ((PostfixExprContext)_localctx).ast =  new CompExpr(((PostfixExprContext)_localctx).po3.ast, (((PostfixExprContext)_localctx).id!=null?((PostfixExprContext)_localctx).id.getText():null));
+						                          Abstr.locAttr.put(_localctx.ast, loc(((PostfixExprContext)_localctx).po3.ast, ((PostfixExprContext)_localctx).id));
+						                          
 						}
 						break;
 					}
@@ -2231,15 +2367,22 @@ public class Prev26Parser extends Parser {
 		public Token bcf;
 		public Token vc;
 		public Token nc;
+		public Token LPAREN;
 		public ExprListContext es;
+		public Token RPAREN;
+		public Token SIZEOF;
 		public TypeContext t;
+		public Token IF;
 		public ExprContext e2;
 		public ExprListContext es2;
+		public Token END;
 		public ExprContext e3;
 		public ExprListContext es31;
 		public ExprListContext es32;
+		public Token WHILE;
 		public ExprContext e4;
 		public ExprListContext es4;
+		public Token LET;
 		public ProgContext pg;
 		public ExprListContext es5;
 		public Token id;
@@ -2308,7 +2451,10 @@ public class Prev26Parser extends Parser {
 				{
 				setState(337);
 				((BasicExprContext)_localctx).ic = match(INT_CONST);
-				 ((BasicExprContext)_localctx).ast =  new AtomExpr(AST.AtomExpr.Type.INT, (((BasicExprContext)_localctx).ic!=null?((BasicExprContext)_localctx).ic.getText():null)); 
+
+				             ((BasicExprContext)_localctx).ast =  new AtomExpr(AST.AtomExpr.Type.INT, (((BasicExprContext)_localctx).ic!=null?((BasicExprContext)_localctx).ic.getText():null));
+				             Abstr.locAttr.put(_localctx.ast, loc(((BasicExprContext)_localctx).ic));
+				             
 				}
 				break;
 			case 2:
@@ -2316,7 +2462,10 @@ public class Prev26Parser extends Parser {
 				{
 				setState(339);
 				((BasicExprContext)_localctx).cc = match(CHAR_CONST);
-				 ((BasicExprContext)_localctx).ast =  new AtomExpr(AST.AtomExpr.Type.CHAR, (((BasicExprContext)_localctx).cc!=null?((BasicExprContext)_localctx).cc.getText():null)); 
+
+				             ((BasicExprContext)_localctx).ast =  new AtomExpr(AST.AtomExpr.Type.CHAR, (((BasicExprContext)_localctx).cc!=null?((BasicExprContext)_localctx).cc.getText():null));
+				             Abstr.locAttr.put(_localctx.ast, loc(((BasicExprContext)_localctx).cc));
+				             
 				}
 				break;
 			case 3:
@@ -2324,7 +2473,10 @@ public class Prev26Parser extends Parser {
 				{
 				setState(341);
 				((BasicExprContext)_localctx).sc = match(STRING_CONST);
-				 ((BasicExprContext)_localctx).ast =  new AtomExpr(AST.AtomExpr.Type.STR, (((BasicExprContext)_localctx).sc!=null?((BasicExprContext)_localctx).sc.getText():null)); 
+
+				             ((BasicExprContext)_localctx).ast =  new AtomExpr(AST.AtomExpr.Type.STR, (((BasicExprContext)_localctx).sc!=null?((BasicExprContext)_localctx).sc.getText():null));
+				             Abstr.locAttr.put(_localctx.ast, loc(((BasicExprContext)_localctx).sc));
+				             
 				}
 				break;
 			case 4:
@@ -2332,7 +2484,10 @@ public class Prev26Parser extends Parser {
 				{
 				setState(343);
 				((BasicExprContext)_localctx).bct = match(TRUE);
-				 ((BasicExprContext)_localctx).ast =  new AtomExpr(AST.AtomExpr.Type.BOOL, (((BasicExprContext)_localctx).bct!=null?((BasicExprContext)_localctx).bct.getText():null)); 
+
+				             ((BasicExprContext)_localctx).ast =  new AtomExpr(AST.AtomExpr.Type.BOOL, (((BasicExprContext)_localctx).bct!=null?((BasicExprContext)_localctx).bct.getText():null));
+				             Abstr.locAttr.put(_localctx.ast, loc(((BasicExprContext)_localctx).bct));
+				             
 				}
 				break;
 			case 5:
@@ -2340,7 +2495,10 @@ public class Prev26Parser extends Parser {
 				{
 				setState(345);
 				((BasicExprContext)_localctx).bcf = match(FALSE);
-				 ((BasicExprContext)_localctx).ast =  new AtomExpr(AST.AtomExpr.Type.BOOL, (((BasicExprContext)_localctx).bcf!=null?((BasicExprContext)_localctx).bcf.getText():null)); 
+
+				             ((BasicExprContext)_localctx).ast =  new AtomExpr(AST.AtomExpr.Type.BOOL, (((BasicExprContext)_localctx).bcf!=null?((BasicExprContext)_localctx).bcf.getText():null));
+				             Abstr.locAttr.put(_localctx.ast, loc(((BasicExprContext)_localctx).bcf));
+				             
 				}
 				break;
 			case 6:
@@ -2348,7 +2506,10 @@ public class Prev26Parser extends Parser {
 				{
 				setState(347);
 				((BasicExprContext)_localctx).vc = match(NONE);
-				 ((BasicExprContext)_localctx).ast =  new AtomExpr(AST.AtomExpr.Type.VOID, (((BasicExprContext)_localctx).vc!=null?((BasicExprContext)_localctx).vc.getText():null)); 
+
+				             ((BasicExprContext)_localctx).ast =  new AtomExpr(AST.AtomExpr.Type.VOID, (((BasicExprContext)_localctx).vc!=null?((BasicExprContext)_localctx).vc.getText():null));
+				             Abstr.locAttr.put(_localctx.ast, loc(((BasicExprContext)_localctx).vc));
+				             
 				}
 				break;
 			case 7:
@@ -2356,36 +2517,45 @@ public class Prev26Parser extends Parser {
 				{
 				setState(349);
 				((BasicExprContext)_localctx).nc = match(NIL);
-				 ((BasicExprContext)_localctx).ast =  new AtomExpr(AST.AtomExpr.Type.PTR, (((BasicExprContext)_localctx).nc!=null?((BasicExprContext)_localctx).nc.getText():null)); 
+
+				             ((BasicExprContext)_localctx).ast =  new AtomExpr(AST.AtomExpr.Type.PTR, (((BasicExprContext)_localctx).nc!=null?((BasicExprContext)_localctx).nc.getText():null));
+				             Abstr.locAttr.put(_localctx.ast, loc(((BasicExprContext)_localctx).nc));
+				             
 				}
 				break;
 			case 8:
 				enterOuterAlt(_localctx, 8);
 				{
 				setState(351);
-				match(LPAREN);
+				((BasicExprContext)_localctx).LPAREN = match(LPAREN);
 				setState(352);
 				((BasicExprContext)_localctx).es = exprList();
 				setState(353);
-				match(RPAREN);
-				 ((BasicExprContext)_localctx).ast =  new Exprs(((BasicExprContext)_localctx).es.ast); 
+				((BasicExprContext)_localctx).RPAREN = match(RPAREN);
+
+				             ((BasicExprContext)_localctx).ast =  new Exprs(((BasicExprContext)_localctx).es.ast);
+				             Abstr.locAttr.put(_localctx.ast, loc(((BasicExprContext)_localctx).LPAREN, ((BasicExprContext)_localctx).RPAREN));
+				             
 				}
 				break;
 			case 9:
 				enterOuterAlt(_localctx, 9);
 				{
 				setState(356);
-				match(SIZEOF);
+				((BasicExprContext)_localctx).SIZEOF = match(SIZEOF);
 				setState(357);
 				((BasicExprContext)_localctx).t = type();
-				 ((BasicExprContext)_localctx).ast =  new SizeExpr(((BasicExprContext)_localctx).t.ast); 
+
+				             ((BasicExprContext)_localctx).ast =  new SizeExpr(((BasicExprContext)_localctx).t.ast);
+				             Abstr.locAttr.put(_localctx.ast, loc(((BasicExprContext)_localctx).SIZEOF, ((BasicExprContext)_localctx).t.ast));
+				             
 				}
 				break;
 			case 10:
 				enterOuterAlt(_localctx, 10);
 				{
 				setState(360);
-				match(IF);
+				((BasicExprContext)_localctx).IF = match(IF);
 				setState(361);
 				((BasicExprContext)_localctx).e2 = expr();
 				setState(362);
@@ -2393,15 +2563,20 @@ public class Prev26Parser extends Parser {
 				setState(363);
 				((BasicExprContext)_localctx).es2 = exprList();
 				setState(364);
-				match(END);
-				 ((BasicExprContext)_localctx).ast =  new IfThenExpr(((BasicExprContext)_localctx).e2.ast, new Exprs(((BasicExprContext)_localctx).es2.ast)); 
+				((BasicExprContext)_localctx).END = match(END);
+
+				             Exprs body = new Exprs(((BasicExprContext)_localctx).es2.ast);
+				             Abstr.locAttr.put(body, loc(((BasicExprContext)_localctx).es2.ast));
+				             ((BasicExprContext)_localctx).ast =  new IfThenExpr(((BasicExprContext)_localctx).e2.ast, body);
+				             Abstr.locAttr.put(_localctx.ast, loc(((BasicExprContext)_localctx).IF, ((BasicExprContext)_localctx).END));
+				             
 				}
 				break;
 			case 11:
 				enterOuterAlt(_localctx, 11);
 				{
 				setState(367);
-				match(IF);
+				((BasicExprContext)_localctx).IF = match(IF);
 				setState(368);
 				((BasicExprContext)_localctx).e3 = expr();
 				setState(369);
@@ -2413,15 +2588,22 @@ public class Prev26Parser extends Parser {
 				setState(372);
 				((BasicExprContext)_localctx).es32 = exprList();
 				setState(373);
-				match(END);
-				 ((BasicExprContext)_localctx).ast =  new IfThenElseExpr(((BasicExprContext)_localctx).e3.ast, new Exprs(((BasicExprContext)_localctx).es31.ast), new Exprs(((BasicExprContext)_localctx).es32.ast)); 
+				((BasicExprContext)_localctx).END = match(END);
+
+				             Exprs body31 = new Exprs(((BasicExprContext)_localctx).es31.ast);
+				             Abstr.locAttr.put(body31, loc(((BasicExprContext)_localctx).es31.ast));
+				             Exprs body32 = new Exprs(((BasicExprContext)_localctx).es32.ast);
+				             Abstr.locAttr.put(body32, loc(((BasicExprContext)_localctx).es32.ast));
+				             ((BasicExprContext)_localctx).ast =  new IfThenElseExpr(((BasicExprContext)_localctx).e3.ast, body31, body32);
+				             Abstr.locAttr.put(_localctx.ast, loc(((BasicExprContext)_localctx).IF, ((BasicExprContext)_localctx).END));
+				             
 				}
 				break;
 			case 12:
 				enterOuterAlt(_localctx, 12);
 				{
 				setState(376);
-				match(WHILE);
+				((BasicExprContext)_localctx).WHILE = match(WHILE);
 				setState(377);
 				((BasicExprContext)_localctx).e4 = expr();
 				setState(378);
@@ -2429,15 +2611,20 @@ public class Prev26Parser extends Parser {
 				setState(379);
 				((BasicExprContext)_localctx).es4 = exprList();
 				setState(380);
-				match(END);
-				 ((BasicExprContext)_localctx).ast =  new WhileExpr(((BasicExprContext)_localctx).e4.ast, new Exprs(((BasicExprContext)_localctx).es4.ast)); 
+				((BasicExprContext)_localctx).END = match(END);
+
+				             Exprs body = new Exprs(((BasicExprContext)_localctx).es4.ast);
+				             Abstr.locAttr.put(body, loc(((BasicExprContext)_localctx).es4.ast));
+				             ((BasicExprContext)_localctx).ast =  new WhileExpr(((BasicExprContext)_localctx).e4.ast, body);
+				             Abstr.locAttr.put(_localctx.ast, loc(((BasicExprContext)_localctx).WHILE, ((BasicExprContext)_localctx).END));
+				             
 				}
 				break;
 			case 13:
 				enterOuterAlt(_localctx, 13);
 				{
 				setState(383);
-				match(LET);
+				((BasicExprContext)_localctx).LET = match(LET);
 				setState(384);
 				((BasicExprContext)_localctx).pg = prog();
 				setState(385);
@@ -2445,8 +2632,13 @@ public class Prev26Parser extends Parser {
 				setState(386);
 				((BasicExprContext)_localctx).es5 = exprList();
 				setState(387);
-				match(END);
-				 ((BasicExprContext)_localctx).ast =  new LetExpr(((BasicExprContext)_localctx).pg.ast, new Exprs(((BasicExprContext)_localctx).es5.ast));  
+				((BasicExprContext)_localctx).END = match(END);
+
+				             Exprs body = new Exprs(((BasicExprContext)_localctx).es5.ast);
+				             Abstr.locAttr.put(body, loc(((BasicExprContext)_localctx).es5.ast));
+				             ((BasicExprContext)_localctx).ast =  new LetExpr(((BasicExprContext)_localctx).pg.ast, body);
+				             Abstr.locAttr.put(_localctx.ast, loc(((BasicExprContext)_localctx).LET, ((BasicExprContext)_localctx).END));
+				             
 				}
 				break;
 			case 14:
@@ -2454,7 +2646,10 @@ public class Prev26Parser extends Parser {
 				{
 				setState(390);
 				((BasicExprContext)_localctx).id = match(ID);
-				 ((BasicExprContext)_localctx).ast =  new NameExpr((((BasicExprContext)_localctx).id!=null?((BasicExprContext)_localctx).id.getText():null)); 
+
+				             ((BasicExprContext)_localctx).ast =  new NameExpr((((BasicExprContext)_localctx).id!=null?((BasicExprContext)_localctx).id.getText():null));
+				             Abstr.locAttr.put(_localctx.ast, loc(((BasicExprContext)_localctx).id));
+				             
 				}
 				break;
 			}

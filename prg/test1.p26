@@ -1,0 +1,1 @@
+typ test = (a: int, b: char)
