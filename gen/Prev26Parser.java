@@ -1199,13 +1199,14 @@ public class Prev26Parser extends Parser {
 				enterOuterAlt(_localctx, 10);
 				{
 				setState(187);
-				match(LPAREN);
+				((TypeContext)_localctx).LPAREN = match(LPAREN);
 				setState(188);
 				((TypeContext)_localctx).t = type();
 				setState(189);
-				match(RPAREN);
+				((TypeContext)_localctx).RPAREN = match(RPAREN);
 
 				        ((TypeContext)_localctx).ast =  ((TypeContext)_localctx).t.ast;
+				        Abstr.locAttr.put(_localctx.ast, loc(((TypeContext)_localctx).LPAREN, ((TypeContext)_localctx).RPAREN));
 				        
 				}
 				break;

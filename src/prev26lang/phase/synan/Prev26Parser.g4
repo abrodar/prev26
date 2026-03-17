@@ -228,6 +228,7 @@ type returns [AST.Type ast]
         | LPAREN t=type RPAREN
         {
         $ast = $t.ast;
+        Abstr.locAttr.put($ast, loc($LPAREN, $RPAREN));
         } // rekurzivni tip
         | id=ID
         {
