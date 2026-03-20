@@ -9,6 +9,7 @@ import prev26lang.common.report.*;
 import prev26lang.phase.lexan.*;
 import prev26lang.phase.synan.*;
 import prev26lang.phase.abstr.*;
+import prev26lang.phase.seman.*;
 
 /**
  * The Prev26 compiler.
@@ -33,7 +34,9 @@ public class Compiler {
             "none", // ---: no phase
             "lexan", // --: lexical analysis
             "synan", // --: syntax analysis
-            "abstr" // --: abstract syntax tree
+            "abstr", // --: abstract syntax tree
+            "seman", // --: semantic analysis
+            "all" // -----: putting it all together
     ));
 
     /** Specifies whether the compiler is run in the development mode. */
@@ -212,6 +215,15 @@ public class Compiler {
                         (new Abstr.Logger(abstr.xmlLogger)).visit(Abstr.tree);
                     }
                     if (cmdLineOpts.get("--target-phase").equals("abstr"))
+                        break;
+
+                    // === SEMANTIC ANALYSIS ===
+                    try (SemAn seman = new SemAn()) {
+                        (new NameResolver()).visit(Abstr.tree);
+                        SemAn.defAtAttr.lock();
+                        (new SemAn.Logger(seman.xmlLogger)).visit(Abstr.tree);
+                    }
+                    if (cmdLineOpts.get("--target-phase").equals("seman"))
                         break;
 
                     break;

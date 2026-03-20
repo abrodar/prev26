@@ -3,7 +3,7 @@ ANTLRDIR        = ../lib/antlr-4.13.2-complete.jar
 XSLTPROC	= xsltproc
 RM              = 'rm' -fr
 
-PHASE		= all
+PHASE		= abstr
 TARGETPHASE	?= $(PHASE)
 LOGGEDPHASE	?= $(PHASE)
 
