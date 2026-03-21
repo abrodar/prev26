@@ -14,7 +14,7 @@ import prev26lang.common.report.*;
  */
 public class AST {
 
-	/** (Unused but included to keep javadoc happy.) */
+    /** (Unused but included to keep javadoc happy.) */
 	private AST() {
 		throw new Report.InternalError();
 	}
@@ -395,7 +395,6 @@ public class AST {
 		public <Result, Argument> Result accept(Visitor<Result, Argument> visitor, Argument arg) {
 			return visitor.visit(this, arg);
 		}
-
 	}
 
 	/**
@@ -417,7 +416,6 @@ public class AST {
 		public <Result, Argument> Result accept(Visitor<Result, Argument> visitor, Argument arg) {
 			return visitor.visit(this, arg);
 		}
-
 	}
 
 	// ----- Types -----
@@ -552,7 +550,6 @@ public class AST {
 	 * A struct type.
 	 */
 	public static class StrType extends RecType {
-
 		/**
 		 * Constructs a struct type.
 		 * 
@@ -1061,7 +1058,7 @@ public class AST {
 		/**
 		 * Constructs a sequence of subexpressions.
 		 * 
-		 * @param subExprs The subexpressions.
+		 * subExprs The subexpressions.
 		 */
 		public Exprs(final Nodes<Expr> exprs) {
 			super();

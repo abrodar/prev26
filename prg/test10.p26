@@ -2,6 +2,6 @@ typ id = T
 
 var id : T
 
-fun id (par1 : { a: {}, b: (:{a: ( g : int)}:bool)}) : {}
+fun id (par1 : { a: {b:int}, b: (:{a: ( g : int)}:bool)}) : {c:int}
 
 fun id () : void = not true, +100, -100, 1+2, 1-3, 1*3, 4*22, 5/2, 35%23, true and false, false or true, assignme = 1,  a == b, 234 >= 123, 23<235, 34>2 , 3<5, 2<=2

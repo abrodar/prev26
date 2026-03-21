@@ -1,1 +1,1 @@
-var rav : { a: {}, b: (:{a: ( g : int)}:bool)}
+var rav : { a: {n:int}, b: (:{a: ( g : int)}:bool)}

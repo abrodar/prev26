@@ -207,16 +207,9 @@ type returns [AST.Type ast]
         $ast = new StrType($cl1.ast);
         Abstr.locAttr.put($ast, loc($LPAREN, $RPAREN));
         } // tip struct
-        | LBRACE cl2=compList? RBRACE
+        | LBRACE cl2=compList RBRACE
         {
-        AST.Nodes<AST.CompDefn> comps;
-        try {
-            comps = $cl2.ast;
-        } catch (NullPointerException e) {
-            comps = new AST.Nodes<>();
-            Abstr.locAttr.put(comps, loc($LBRACE, $RBRACE));
-        }
-        $ast = new UniType(comps);
+        $ast = new UniType($cl2.ast);
         Abstr.locAttr.put($ast, loc($LBRACE, $RBRACE));
         } // tip union
         | LPAREN COLON tl=typeList COLON t=type RPAREN

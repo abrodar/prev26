@@ -2,6 +2,7 @@ package prev26lang.phase.seman;
 
 import java.util.*;
 
+import prev26lang.Compiler;
 import prev26lang.common.report.*;
 import prev26lang.phase.abstr.*;
 
@@ -16,7 +17,7 @@ import prev26lang.phase.abstr.*;
  * 
  * @author bostjan.slivnik@fri.uni-lj.si
  */
-public class NameResolver implements AST.FullVisitor<Object, ??? INSERT WHATEVER NEEDED ???> {
+public class NameResolver implements AST.FullVisitor<Object, Object> {
 
 	/** Constructs a new name resolver. */
 	public NameResolver() {
@@ -25,15 +26,25 @@ public class NameResolver implements AST.FullVisitor<Object, ??? INSERT WHATEVER
 	/** The symbol table. */
 	private SymbTable symbTable = new SymbTable();
 
-	??? TODO ???
+    // Helper functions (by AB)
+    private void insDefn(String name, AST.Defn defn) {
+        try {
+            symbTable.ins(name, defn);
+        } catch (SymbTable.CannotInsNameException e) {
+            throw new Report.Error(defn, "Name '" + name + "' already defined in this scope.");
+        }
+    }
 
+    private AST.Defn fndDefn(String name, Locatable loc) {
+        try {
+            return symbTable.fnd(name);
+        } catch (SymbTable.CannotFndNameException e) {
+            throw new Report.Error(loc, "Name '" + name + "' is not defined.");
+        }
+    }
 	// ===== SYMBOL TABLE =====
 
-	/**
-	 * A symbol table.
-	 */
 	public class SymbTable {
-
 		/**
 		 * A symbol table record denoting a definition of a name within a certain scope.
 		 */
@@ -61,7 +72,7 @@ public class NameResolver implements AST.FullVisitor<Object, ??? INSERT WHATEVER
 		/**
 		 * A mapping of names into lists of records denoting definitions at different
 		 * scopes. At each moment during the lifetime of a symbol table, the definition
-		 * list corresponding to a particular name contains all definitions that name
+		 * list corresponding to a particular name contains all definitions that live
 		 * within currently active scopes: the definition at the innermost scope is the
 		 * first in the list and is visible, the other definitions are hidden.
 		 */
@@ -126,8 +137,8 @@ public class NameResolver implements AST.FullVisitor<Object, ??? INSERT WHATEVER
 					throw new CannotInsNameException();
 			}
 
-			allDefnsOfName.addFirst(new ScopedDefn(currDepth, defn));
-			scopes.getFirst().addFirst(name);
+			allDefnsOfName.addFirst(new ScopedDefn(currDepth, defn)); // doda curr ime in doseg v horizontalen ll, kjer so vse def. z istim imenom na razl. dosegih
+			scopes.getFirst().addFirst(name); //v ze ustvarjen ll dosega dodaj to ime (za hitrejsi delete kasneje)
 		}
 
 		/**
@@ -227,4 +238,77 @@ public class NameResolver implements AST.FullVisitor<Object, ??? INSERT WHATEVER
 
 	}
 
+    // Vstopna točka (top-level)
+    @Override
+    public Object visit(AST.Nodes<? extends AST.Node> nodes, Object arg) {
+        symbTable.newScope(); //program ustvari doseg
+        // 1. prehod
+        for (AST.Node node : nodes) {
+            if (node instanceof AST.FullDefn defn) {
+                insDefn(defn.name, defn);
+            }
+        }
+        // 2. prehod
+        for (AST.Node node : nodes)
+            node.accept(this, arg);
+        // konec dosega
+        symbTable.oldScope();
+        return null;
+    }
+    // Definicije
+    @Override
+    public Object visit(AST.TypDefn typDefn, Object arg) {
+        typDefn.type.accept(this, arg);
+        return null;
+    }
+
+    @Override
+    public Object visit(AST.VarDefn varDefn, Object arg) {
+        varDefn.type.accept(this, arg);
+        return null;
+    }
+
+    // Definicija funkcije ustvari nov doseg, v katerem so parameteri in morebitno telo funkcije.
+    // Ime funkcije, tipi parametrov in tip rezultata niso del novo ustvarjenega dosega.
+    @Override
+    public Object visit(AST.DefFunDefn defFunDefn, Object arg) {
+        // tip rezultata ni del novega obsega
+        defFunDefn.type.accept(this, arg);
+        // nov doseg funkcije s telesom
+        symbTable.newScope();
+        // 1. prehod, vstavi in obisci parametre (v 1. prehodu, ker tip v params ne more biti definiran)
+        for (AST.ParDefn par: defFunDefn.pars) {
+            insDefn(par.name, par);
+            par.type.accept(this, arg);
+        }
+        // 2. prehod, obisci telo funkcije
+        defFunDefn.expr.accept(this, arg);
+        // konec dosega
+        symbTable.oldScope();
+        return null;
+    }
+
+    @Override
+    public Object visit(AST.ExtFunDefn extFunDefn, Object arg) {
+        // tip rezultata funkcije
+        extFunDefn.type.accept(this, arg);
+        for (AST.ParDefn par: extFunDefn.pars) {
+            // tokrat samo pogledamo ali so te uporabe bile definirane, saj extFun nima telesa -> ni novega dosega in ins()!
+            par.type.accept(this, arg);
+        }
+        return null;
+    }
+
+    @Override
+    public Object visit(AST.ParDefn parDefn, Object arg) {
+        parDefn.type.accept(this, arg);
+        return null;
+    }
+
+    @Override
+    public Object visit(AST.CompDefn compDefn, Object arg) {
+        if ((compDefn.type != null) || (!Compiler.devMode()))
+            compDefn.type.accept(this, arg);
+        return null;
+    }
 }
