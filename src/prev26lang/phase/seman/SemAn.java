@@ -25,10 +25,13 @@ public class SemAn extends Phase {
 	// Attribute DefAt:
 
 	/** Tester for nodes that represent name usage. */
+    // preveri ce je tip vozlisca primeren za "uporabo" prej navedene "definicije"
 	private static final Predicate<AST.Node> validForDefAt = //
 			(AST.Node node) -> (node instanceof AST.NameType) || (node instanceof AST.NameExpr);
 
 	/** Mapping of names to definitions. */
+    // vozliscu uporabe doda atribut, ki pove kje je definicija v AST
+    // Preslikava iz imen v definicije, Value = AST.Defn, preveri se z validForDefAt ali je vozlisce imena tipa NameType ali NameExpr; ce ni err.
 	public static final AST.Attribute<AST.Defn> defAtAttr = new AST.Attribute<AST.Defn>(validForDefAt);
 
 	// Attribute IsType:

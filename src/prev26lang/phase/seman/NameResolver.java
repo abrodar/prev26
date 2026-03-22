@@ -159,7 +159,7 @@ public class NameResolver implements AST.FullVisitor<Object, Object> {
 			if (allDefnsOfName.isEmpty())
 				throw new CannotFndNameException();
 
-			return allDefnsOfName.getFirst().defn;
+			return allDefnsOfName.getFirst().defn; // vzame prvi element iz najdenega pov. seznama v zgosceni tabeli
 		}
 
 		/** Used for selecting the range of scopes. */
@@ -299,16 +299,43 @@ public class NameResolver implements AST.FullVisitor<Object, Object> {
         return null;
     }
 
+    // parDefn, compDefn ne potrebujeta @Override v resnici ju ze v "nadstrukturi" obiscemo v zanki
+
+    // Tipi s podstrukturo (struktura in union)
+    // Vsak zapis definira svoj lastni imenski prostor, ki vsebuje komponente tega zapisa.
     @Override
-    public Object visit(AST.ParDefn parDefn, Object arg) {
-        parDefn.type.accept(this, arg);
+    public Object visit(AST.StrType strType, Object arg) {
+        // Obisci tipe, vendar jih ne vstavi se v simbolno tabelo
+        for (AST.CompDefn comp : strType.comps) {
+            comp.accept(this, arg);
+        }
         return null;
     }
 
     @Override
-    public Object visit(AST.CompDefn compDefn, Object arg) {
-        if ((compDefn.type != null) || (!Compiler.devMode()))
-            compDefn.type.accept(this, arg);
+    public Object visit(AST.UniType uniType, Object arg) {
+        for (AST.CompDefn comp : uniType.comps) {
+            // Obisci tipe, vendar jih ne vstavi se v simbolno tabelo
+            comp.accept(this, arg);
+        }
         return null;
     }
+
+    // Tip kot ime
+    @Override
+    public Object visit(AST.NameType nameType, Object arg) {
+        // poisci definicijo
+        AST.Defn defn = fndDefn(nameType.name, nameType);
+        SemAn.defAtAttr.put(nameType, defn);
+        return null;
+    }
+
+    // Izrazi
+    @Override
+    public Object visit(AST.NameExpr nameExpr, Object arg) {
+        AST.Defn defn = fndDefn(nameExpr.name, nameExpr);
+        SemAN
+        return null;
+    }
+
 }
