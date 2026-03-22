@@ -256,18 +256,6 @@ public class NameResolver implements AST.FullVisitor<Object, Object> {
         return null;
     }
     // Definicije
-    @Override
-    public Object visit(AST.TypDefn typDefn, Object arg) {
-        typDefn.type.accept(this, arg);
-        return null;
-    }
-
-    @Override
-    public Object visit(AST.VarDefn varDefn, Object arg) {
-        varDefn.type.accept(this, arg);
-        return null;
-    }
-
     // Definicija funkcije ustvari nov doseg, v katerem so parameteri in morebitno telo funkcije.
     // Ime funkcije, tipi parametrov in tip rezultata niso del novo ustvarjenega dosega.
     @Override
@@ -279,7 +267,7 @@ public class NameResolver implements AST.FullVisitor<Object, Object> {
         // 1. prehod, vstavi in obisci parametre (v 1. prehodu, ker tip v params ne more biti definiran)
         for (AST.ParDefn par: defFunDefn.pars) {
             insDefn(par.name, par);
-            par.type.accept(this, arg);
+            par.type.accept(this, arg); // 2. prehod ni potreben za ta del, ker gre le za definicije parametrov
         }
         // 2. prehod, obisci telo funkcije
         defFunDefn.expr.accept(this, arg);
@@ -321,20 +309,42 @@ public class NameResolver implements AST.FullVisitor<Object, Object> {
         return null;
     }
 
-    // Tip kot ime
+    // Tip kot ime - uporaba
     @Override
     public Object visit(AST.NameType nameType, Object arg) {
         // poisci definicijo
         AST.Defn defn = fndDefn(nameType.name, nameType);
+        // povezi z uporabo
         SemAn.defAtAttr.put(nameType, defn);
         return null;
     }
 
     // Izrazi
+    // Izraz kot ime - uporaba
     @Override
     public Object visit(AST.NameExpr nameExpr, Object arg) {
+        // poglej ce definicija obstaja; ce ne err
         AST.Defn defn = fndDefn(nameExpr.name, nameExpr);
-        SemAN
+        // ce obstaja povezi nameExpr (uporabo) z defn (definicijo) ; dodaj kot atribut v AST node uporabe
+        SemAn.defAtAttr.put(nameExpr, defn);
+        return null;
+    }
+    //  Izraz let ... in ... end ustvari nov doseg.
+    @Override
+    public Object visit(AST.LetExpr letExpr, Object arg) {
+        // nov doseg
+        symbTable.newScope();
+        // dodaj vse definicije v let doseg, 1. prehod
+        for (AST.FullDefn defn : letExpr.defns) {
+            insDefn(defn.name, defn);
+        }
+        // 2. prehod, obisci definicije in
+        for (AST.FullDefn defn : letExpr.defns) {
+            defn.accept(this, arg);
+        }
+        letExpr.expr.accept(this, arg);
+        // konec dosega
+        symbTable.oldScope();
         return null;
     }
 

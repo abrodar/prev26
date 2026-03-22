@@ -1,3 +1,2 @@
-typ t = (((id)))
-typ t2 = (id: (int))
-typ t3 = (((({a:char}))))
+// vzajemna rekurzija
+typ list = (first: int, rest:list)

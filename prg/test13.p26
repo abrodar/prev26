@@ -1,1 +1,6 @@
-fun a():ab = if if E4 then E5, E6 else E7, E8 end then while E9 do E10, "QWERHBEQR ", (if E4 then E5, E6 else E7, E8 end), E3 end end
+ typ vv = void
+
+ fun f1(p1:(i:int, j:int)):int
+ fun f2(p2:{i:int, j:int}):char
+ fun f3(p3:{s1: {s21:{i:int, j: int}, s22:{i:int, j:int}}, s2:(i:int, j: int)}):bool
+ fun f4(p4:vv):vv

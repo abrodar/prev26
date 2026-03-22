@@ -1,3 +1,0 @@
-fun a(b: int): int =
-
-    b * while b do b + 1 end

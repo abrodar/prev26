@@ -1,4 +1,3 @@
-var a : int
-
-
-fun f() : void = none<=none<=none
+// prekrivna funkcija
+fun abc(g: int): int = g
+fun abc(h: int, c:int): int = h + c

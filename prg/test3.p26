@@ -1,7 +1,6 @@
-typ idt = int
-
-var idv : [10]idt
-
-fun idf ( id1 : T1 , id2 : T2 , id3 : T3 ) : idt
-
-fun idff ( abc : id) : idt = 1, 2, 3, while 2 do 1, 2, 3 end
+// Slivnikov primer
+var i : int
+typ s = (i:int, j:int)
+typ s1 = s
+typ s2 = s1
+var a:s2

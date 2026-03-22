@@ -1,1 +1,6 @@
-var id4 : (a:[1][2][4]bool, b: ^^^^^^^^^^^^^^void, c: randomid, x: (d : int, e : bool, f : char, g : { h : ^^int, i: void}) )
+// ciklicne definicije
+typ t1 = (i:int, n: t2)
+typ t2 = (j:int, n: t1)
+
+fun a():int = b()
+fun b():int = a()
