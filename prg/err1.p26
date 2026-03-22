@@ -1,3 +1,2 @@
-// dvojna uporaba istega imena
-typ a = int
-var a : int
+// neasociativnost
+fun f(): void = a = b = c = d = e

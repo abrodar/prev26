@@ -1,0 +1,9 @@
+typ T = int
+
+typ idtyp = T
+
+var idvar : T
+
+fun idfun1 (par1 : { a: {a: T}, b: (:{a: ( g : int)}:bool)}) : {a: int}
+
+fun idfun2 () : void = not true, +100, -100, 1+2, 1-3, 1*3, 4*22, 5/2, 35%23, true and false, false or true, let var assignme : int var a : bool var b : bool in assignme = 1,  a == b end, 234 >= 123, 23<235, 34>2 , 3<5, 2<=2

@@ -1,0 +1,17 @@
+fun f() : void =
+	let
+		fun g() : void =
+			h(),
+			let
+				fun f() : void = g()
+				fun g() : void
+				fun x() : void
+			in
+				f(),
+				g(),
+				h()
+			end
+		fun h() : void
+	in
+		f, g, h
+	end

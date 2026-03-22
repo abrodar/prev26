@@ -1,2 +1,0 @@
-// vzajemna rekurzija
-typ list = (first: int, rest:list)

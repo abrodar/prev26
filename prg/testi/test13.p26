@@ -1,0 +1,1 @@
+fun a(ab : int, E4 : bool, E5 : bool, E6 : bool, E7 : bool, E8 : bool, E9 : bool, E10 : bool, E3 : bool): int = if if E4 then E5, E6 else E7, E8 end then while E9 do E10, "QWERHBEQR ", (if E4 then E5, E6 else E7, E8 end), E3 end end

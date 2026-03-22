@@ -1,0 +1,13 @@
+typ stevilka = int
+var globalnast : stevilka
+fun funkcija (prviarg : stevilka, drugiarg : bool, a : int, b : int, c : int) : int =
+	let
+		var nvoaspr : int
+	in
+		nvoaspr = a + -b - c,
+		nvoaspr = nvoaspr * 3 + 2,
+		nvoaspr = nvoaspr + 3 * 2,
+		nvoaspr = 1 - 3 + 2,
+		nvoaspr = 1 / 3 * 2 + 1 * 3 / 2,
+		if 1 == 2 then 666 end
+	end

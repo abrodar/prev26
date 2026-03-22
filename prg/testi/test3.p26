@@ -1,0 +1,11 @@
+typ idt = int
+typ T1 = int
+typ T2 = T1
+typ T3 = T2
+typ id = idt
+
+var idv : [10]idt
+
+fun idf ( id1 : T1 , id2 : T2 , id3 : T3 ) : idt
+
+fun idff ( abc : id) : idt = 1, 2, 3, while 2 do 1, 2, 3 end

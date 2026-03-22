@@ -1,0 +1,53 @@
+// Constants
+0
+123
+00323
+0000
+
+// Char
+'a'
+'\\'
+'\''
+'\x0D'
+
+// String
+"   "
+"'"
+"\\"
+"adsf\\"
+
+// Symbols
+. , : = + - * / % == != <= >= < > ( ) [ ] { } ^
+
+// Reserverd words
+and as bool do char else end false fun if in int let nil none not or sizeof
+then true typ var void while
+
+// Names
+
+imeime
+ime^2
+a1b2c3
+123abc
+______ime
+_123
+
+// Comments
+
+// This is a comment.
+// Then what // is this?
+
+
+// Whitespaces
+
+// Random
+
+(a * b) + (a*b) / 2
+for (int i = 1, i < 1000, i=i+1) {
+    int j = 2*i
+	tabulator
+krneki	tabulator
+}
+
+
+

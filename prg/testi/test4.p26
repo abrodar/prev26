@@ -1,0 +1,4 @@
+typ id = ^^^^^^^^^^^^^^void
+typ id2 = [1][2][4]bool
+typ randomid = id2
+var id3 : (a:[1][2][4]bool, b: ^^^^^^^^^^^^^^void, c: randomid, d : int, e : bool, f : char, g : { h : ^^int, i: void} )

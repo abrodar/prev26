@@ -1,3 +1,3 @@
-// uporaba brez definicije
-fun func(a:int) : int =
-    b + 2
+// neasociativnost
+
+fun f() : bool = a > b < c

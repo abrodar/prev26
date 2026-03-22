@@ -1,0 +1,2 @@
+typ idt = int
+fun id ( id : idt ) : (a:[1][2][4][12]void) = id, 1, true, false, 'a', "niz", "niz spet", none, nil

@@ -1,0 +1,4 @@
+fun funny(a : int, b : int) : void = ^a[b].c^ as { a: {a: int}, b: (:{a: ( g : int)}:bool)}, sizeof { a: {a: int}, b: (:{a: ( g : int)}:bool)}
+
+
+typ t = (::t)
