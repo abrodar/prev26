@@ -63,6 +63,16 @@
             SemAn.isTypeAttr.put(arrType, arr);
             return null;
         }
+        //doloci tip komponent zapisa (struct/union)
+        @Override
+        public Object visit(AST.CompDefn compDefn, Object arg) {
+            // obisci tip komponente
+            compDefn.type.accept(this, arg);
+            // nastavi tip vozliscu compDefn
+            TYP.Type type = SemAn.isTypeAttr.get(compDefn.type);
+            SemAn.isTypeAttr.put(compDefn, type);
+            return null;
+        }
         // doloci tip strukture
         @Override
         public Object visit(AST.StrType strType, Object arg) {
@@ -103,10 +113,37 @@
             // razresi tipe parametrov in rezultata funkcije
             funType.parTypes.accept(this, arg);
             funType.resType.accept(this, arg);
-            List<TYP.Type> parTypes = new ArrayList<>();
-            for () {
-
+            TYP.Type resType = SemAn.isTypeAttr.get(funType.resType).actualType(); // type could be names so take actual
+            if (!(resType instanceof TYP.IntType || resType instanceof TYP.CharType ||
+                    resType instanceof TYP.BoolType || resType instanceof TYP.PtrType || resType instanceof TYP.FunType || resType instanceof TYP.VoidType)) {
+                throw new Report.Error(funType.resType, "Function has invalid return type '" + resType + "'.");
             }
+            List<TYP.Type> parTypes = new ArrayList<>();
+            for (AST.Type par: funType.parTypes) {
+                TYP.Type parType = SemAn.isTypeAttr.get(par).actualType(); // type could be names so take actual
+                if (!(parType instanceof TYP.IntType || parType instanceof TYP.CharType ||
+                        parType instanceof TYP.BoolType || parType instanceof TYP.PtrType || parType instanceof TYP.FunType)) {
+                        throw new Report.Error(par, "Function has invalid parameter type '" + parType + "'.");
+                }
+                parTypes.add(parType);
+            }
+            TYP.FunType fun = new TYP.FunType(parTypes, resType);
+            SemAn.isTypeAttr.put(funType, fun);
+            return null;
+        }
+        // doloci poimenovan tip
+        @Override
+        public Object visit(AST.NameType nameType, Object arg) {
+            // poisci definicijo za to uporabo
+            AST.TypDefn typDef = (AST.TypDefn) SemAn.defAtAttr.get(nameType);
+            // razresi tip definicije
+            typDef.type.accept(this, arg);
+            // poisci definiran tip
+            TYP.Type typ = SemAn.isTypeAttr.get(typDef.type);
+            // ustvari nov poimenovan tip
+            TYP.NameType namedType = new TYP.NameType(nameType.name);
+            namedType.setActType(typ);
+            SemAn.isTypeAttr.put(nameType, namedType);
             return null;
         }
     }
