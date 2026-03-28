@@ -51,7 +51,7 @@ public class SemAn extends Phase {
 			(AST.Node node) -> (node instanceof AST.Expr) || //
 					((node instanceof AST.Defn) && ((node instanceof AST.TypDefn)) == false);
 
-	/** Attribute specifying what is a type of a node. */
+	/** Attribute specifying what is a type of node. */
 	public static final AST.Attribute<TYP.Type> ofTypeAttr = new AST.Attribute<TYP.Type>(validForOfType);
 
 	// Attribute IsConst:

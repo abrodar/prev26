@@ -338,7 +338,7 @@ public class NameResolver implements AST.FullVisitor<Object, Object> {
         for (AST.FullDefn defn : letExpr.defns) {
             insDefn(defn.name, defn);
         }
-        // 2. prehod, obisci definicije in
+        // 2. prehod, obisci definicije
         for (AST.FullDefn defn : letExpr.defns) {
             defn.accept(this, arg);
         }

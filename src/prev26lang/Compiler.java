@@ -220,7 +220,14 @@ public class Compiler {
                     // === SEMANTIC ANALYSIS ===
                     try (SemAn seman = new SemAn()) {
                         (new NameResolver()).visit(Abstr.tree);
+                        (new TypeConstructor()).visit(Abstr.tree);
+                        (new TypeChecker()).visit(Abstr.tree);
                         SemAn.defAtAttr.lock();
+                        SemAn.ofTypeAttr.lock();
+                        SemAn.isTypeAttr.lock();
+                        SemAn.isConstAttr.lock();
+                        SemAn.isAddrAttr.lock();
+
                         (new SemAn.Logger(seman.xmlLogger)).visit(Abstr.tree);
                     }
                     if (cmdLineOpts.get("--target-phase").equals("seman"))
