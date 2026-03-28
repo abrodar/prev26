@@ -1,6 +1,5 @@
     package prev26lang.phase.seman;
 
-    import org.antlr.v4.codegen.model.chunk.RulePropertyRef_ctx;
     import prev26lang.common.report.Report;
     import prev26lang.phase.abstr.*;
 
@@ -13,6 +12,81 @@
     public class TypeConstructor implements AST.FullVisitor<Object, Object>  {
         /** Constructs a new name resolver. */
         public TypeConstructor() {
+        }
+        // 5 prehodov, najprej tipi 2x, 1x vars, 2x funkcije
+        @Override
+        public Object visit(AST.Nodes<? extends AST.Node> nodes, Object arg) {
+            // prehod 1: shells za vse typdefn
+            for (AST.Node node : nodes) {
+                if (node instanceof AST.TypDefn typDefn) {
+                    TYP.NameType shell = new TYP.NameType(typDefn.name);
+                    SemAn.isTypeAttr.put(typDefn, shell);
+                }
+            }
+            // prehod 2: tipi telesa
+            for (AST.Node node : nodes) {
+                if (node instanceof AST.TypDefn typDefn) {
+                    node.accept(this, arg);
+                }
+            }
+            // pass 3 — vars
+            for (AST.Node node : nodes)
+                if (node instanceof AST.VarDefn)
+                    node.accept(this, arg);
+
+            // pass 4 — function signatures only (pars + return type, no body)
+            for (AST.Node node : nodes)
+                if (node instanceof AST.FunDefn funDefn)
+                    visitFunSignature(funDefn, arg);
+
+            // pass 5 — function bodies
+            for (AST.Node node : nodes)
+                if (node instanceof AST.DefFunDefn defFunDefn)
+                    defFunDefn.expr.accept(this, arg);
+            return null;
+        }
+        // kot na vstopni tocki 5 prehodov
+        @Override
+        public Object visit(AST.LetExpr letExpr, Object arg) {
+            // prehod 1: shells za vse typdefn
+            for (AST.FullDefn defn : letExpr.defns) {
+                if (defn instanceof AST.TypDefn typDefn) {
+                    TYP.NameType shell = new TYP.NameType(typDefn.name);
+                    SemAn.isTypeAttr.put(typDefn, shell);
+                }
+            }
+            // prehod 2: tipi telesa
+            for (AST.FullDefn defn : letExpr.defns) {
+                if (defn instanceof AST.TypDefn typDefn) {
+                    defn.accept(this, arg);
+                }
+            }
+            // pass 3 — vars
+            for (AST.FullDefn defn : letExpr.defns)
+                if (defn instanceof AST.VarDefn)
+                    defn.accept(this, arg);
+
+            // pass 4 — function signatures only (pars + return type, no body)
+            for (AST.FullDefn defn : letExpr.defns)
+                if (defn instanceof AST.FunDefn funDefn)
+                    visitFunSignature(funDefn, arg);
+
+            // pass 5 — function bodies
+            for (AST.FullDefn defn : letExpr.defns)
+                if (defn instanceof AST.DefFunDefn defFunDefn)
+                    defFunDefn.expr.accept(this, arg);
+            letExpr.expr.accept(this, arg); // se telo let-a
+            return null;
+        }
+        @Override
+        public Object visit(AST.TypDefn typDefn, Object arg) {
+            // shell iz prehoda 1
+            TYP.NameType shell = (TYP.NameType) SemAn.isTypeAttr.get(typDefn);
+            // 2. prehod; telo
+            typDefn.type.accept(this, arg);
+            TYP.Type actual = SemAn.isTypeAttr.get(typDefn.type);
+            shell.setActType(actual);
+            return null;
         }
         // doloci tip atomarnim tipom (int, char, bool, void)
         @Override
@@ -45,9 +119,6 @@
             arrType.elemType.accept(this, arg);
             // poisci elemTYPE
             TYP.Type elem = SemAn.isTypeAttr.get(arrType.elemType);
-            if (elem.actualType() instanceof TYP.VoidType) {
-                throw new Report.Error(arrType, "Array element type cannot be void.");
-            }
             Long n;
             try {
                 n = Long.parseLong(arrType.numElems);
@@ -68,9 +139,7 @@
         public Object visit(AST.CompDefn compDefn, Object arg) {
             // obisci tip komponente
             compDefn.type.accept(this, arg);
-            // nastavi tip vozliscu compDefn
-            TYP.Type type = SemAn.isTypeAttr.get(compDefn.type);
-            SemAn.isTypeAttr.put(compDefn, type);
+            // ne nastavi tipa na vozlisce, ker je CompDefn prepovedan za istype
             return null;
         }
         // doloci tip strukture
@@ -80,10 +149,7 @@
             strType.comps.accept(this, arg);
             List<TYP.Type> compTypes = new ArrayList<>();
             for (AST.CompDefn comp : strType.comps) {
-                TYP.Type compType =  SemAn.isTypeAttr.get(comp);
-                if (compType.actualType() instanceof TYP.VoidType) {
-                    throw new Report.Error(comp, "Struct components cannot have void type.");
-                }
+                TYP.Type compType =  SemAn.isTypeAttr.get(comp.type);
                 compTypes.add(compType);
             }
             TYP.StrType str = new TYP.StrType(compTypes);
@@ -97,10 +163,7 @@
             uniType.comps.accept(this, arg);
             List<TYP.Type> compTypes = new ArrayList<>();
             for (AST.CompDefn comp : uniType.comps) {
-                TYP.Type compType =  SemAn.isTypeAttr.get(comp);
-                if (compType.actualType() instanceof TYP.VoidType) {
-                    throw new Report.Error(comp, "Union components cannot have void type.");
-                }
+                TYP.Type compType =  SemAn.isTypeAttr.get(comp.type);
                 compTypes.add(compType);
             }
             TYP.UniType str = new TYP.UniType(compTypes);
@@ -113,18 +176,10 @@
             // razresi tipe parametrov in rezultata funkcije
             funType.parTypes.accept(this, arg);
             funType.resType.accept(this, arg);
-            TYP.Type resType = SemAn.isTypeAttr.get(funType.resType).actualType(); // type could be names so take actual
-            if (!(resType instanceof TYP.IntType || resType instanceof TYP.CharType ||
-                    resType instanceof TYP.BoolType || resType instanceof TYP.PtrType || resType instanceof TYP.FunType || resType instanceof TYP.VoidType)) {
-                throw new Report.Error(funType.resType, "Function has invalid return type '" + resType + "'.");
-            }
+            TYP.Type resType = SemAn.isTypeAttr.get(funType.resType);
             List<TYP.Type> parTypes = new ArrayList<>();
             for (AST.Type par: funType.parTypes) {
-                TYP.Type parType = SemAn.isTypeAttr.get(par).actualType(); // type could be names so take actual
-                if (!(parType instanceof TYP.IntType || parType instanceof TYP.CharType ||
-                        parType instanceof TYP.BoolType || parType instanceof TYP.PtrType || parType instanceof TYP.FunType)) {
-                        throw new Report.Error(par, "Function has invalid parameter type '" + parType + "'.");
-                }
+                TYP.Type parType = SemAn.isTypeAttr.get(par);
                 parTypes.add(parType);
             }
             TYP.FunType fun = new TYP.FunType(parTypes, resType);
@@ -134,21 +189,10 @@
         // doloci poimenovan tip
         @Override
         public Object visit(AST.NameType nameType, Object arg) {
-            // (za rek. def. straza) ce je nametype ze razresen koncaj
-            if (SemAn.isTypeAttr.get(nameType) != null) {
-                return null;
-            }
-            // poisci definicijo za to uporabo
-            AST.TypDefn typDef = (AST.TypDefn) SemAn.defAtAttr.get(nameType);
-            // registraj poimenovan tip brez dejanskega, kar prekine cikel ce obstaja
-            TYP.NameType name = new TYP.NameType(nameType.name);
-            SemAn.isTypeAttr.put(nameType, name); // daj ga zgodaj notri
-            // razresi tip definicije
-            typDef.type.accept(this, arg);
-            // poisci definiran tip
-            TYP.Type typ = SemAn.isTypeAttr.get(typDef.type);
-            // ustvari nov poimenovan tip
-            name.setActType(typ); // sedaj dodaj dejanski tip
+            AST.TypDefn typDefn = (AST.TypDefn) SemAn.defAtAttr.get(nameType);
+            TYP.NameType shell = (TYP.NameType) SemAn.isTypeAttr.get(typDefn);
+            // shell gotovo obstaja zaradi 1. prehoda, ki je ze bil pognan
+            SemAn.isTypeAttr.put(nameType, shell);
             return null;
         }
     }
