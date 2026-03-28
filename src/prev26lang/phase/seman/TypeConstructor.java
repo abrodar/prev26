@@ -32,10 +32,7 @@
             ptrType.baseType.accept(this, arg);
             // poisci base type
             TYP.Type base = SemAn.isTypeAttr.get(ptrType.baseType);
-            // preveri da basetype ni void
-            if (base instanceof TYP.VoidType) {
-                throw new Report.Error(ptrType, "Cannot create pointer to void type");
-            }
+            // void check odstranjen - zakasnjen do type checkerja (sicer crasha na rek. tipih)
             // ustvari dejanski nov ptrtype
             TYP.PtrType ptr = new TYP.PtrType(base);
             SemAn.isTypeAttr.put(ptrType, ptr);
@@ -48,6 +45,9 @@
             arrType.elemType.accept(this, arg);
             // poisci elemTYPE
             TYP.Type elem = SemAn.isTypeAttr.get(arrType.elemType);
+            if (elem.actualType() instanceof TYP.VoidType) {
+                throw new Report.Error(arrType, "Array element type cannot be void.");
+            }
             Long n;
             try {
                 n = Long.parseLong(arrType.numElems);
@@ -81,8 +81,8 @@
             List<TYP.Type> compTypes = new ArrayList<>();
             for (AST.CompDefn comp : strType.comps) {
                 TYP.Type compType =  SemAn.isTypeAttr.get(comp);
-                if (compType instanceof TYP.VoidType) {
-                    throw new Report.Error(comp, "Struct components can not have void type.");
+                if (compType.actualType() instanceof TYP.VoidType) {
+                    throw new Report.Error(comp, "Struct components cannot have void type.");
                 }
                 compTypes.add(compType);
             }
@@ -98,8 +98,8 @@
             List<TYP.Type> compTypes = new ArrayList<>();
             for (AST.CompDefn comp : uniType.comps) {
                 TYP.Type compType =  SemAn.isTypeAttr.get(comp);
-                if (compType instanceof TYP.VoidType) {
-                    throw new Report.Error(comp, "Union components can not have void type.");
+                if (compType.actualType() instanceof TYP.VoidType) {
+                    throw new Report.Error(comp, "Union components cannot have void type.");
                 }
                 compTypes.add(compType);
             }
@@ -134,16 +134,21 @@
         // doloci poimenovan tip
         @Override
         public Object visit(AST.NameType nameType, Object arg) {
+            // (za rek. def. straza) ce je nametype ze razresen koncaj
+            if (SemAn.isTypeAttr.get(nameType) != null) {
+                return null;
+            }
             // poisci definicijo za to uporabo
             AST.TypDefn typDef = (AST.TypDefn) SemAn.defAtAttr.get(nameType);
+            // registraj poimenovan tip brez dejanskega, kar prekine cikel ce obstaja
+            TYP.NameType name = new TYP.NameType(nameType.name);
+            SemAn.isTypeAttr.put(nameType, name); // daj ga zgodaj notri
             // razresi tip definicije
             typDef.type.accept(this, arg);
             // poisci definiran tip
             TYP.Type typ = SemAn.isTypeAttr.get(typDef.type);
             // ustvari nov poimenovan tip
-            TYP.NameType namedType = new TYP.NameType(nameType.name);
-            namedType.setActType(typ);
-            SemAn.isTypeAttr.put(nameType, namedType);
+            name.setActType(typ); // sedaj dodaj dejanski tip
             return null;
         }
     }
