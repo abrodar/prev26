@@ -10,6 +10,26 @@
     // also handles TypDefn, VarDefn, FunDefn type signatures
     // runs before typechecker
     public class TypeConstructor implements AST.FullVisitor<Object, Object>  {
+        // helper metode
+        private void visitFunSignature(AST.FunDefn funDefn, Object arg) {
+            // razresi tipe parametrov in rezultata funkcije
+            funDefn.type.accept(this, arg);
+            TYP.Type resType = SemAn.isTypeAttr.get(funDefn.type);
+            List<TYP.Type> parTypes = new ArrayList<>();
+            for (AST.ParDefn par: funDefn.pars) {
+                par.accept(this, arg);
+                TYP.Type parType = SemAn.isTypeAttr.get(par.type);
+                parTypes.add(parType);
+                // parametri atributa
+                SemAn.ofTypeAttr.put(par, parType);
+                SemAn.isConstAttr.put(par, false);
+                SemAn.isAddrAttr.put(par, true);
+            }
+            TYP.FunType fun = new TYP.FunType(parTypes, resType);
+            SemAn.ofTypeAttr.put(funDefn, fun);
+            SemAn.isConstAttr.put(funDefn, false);
+            SemAn.isAddrAttr.put(funDefn, false);
+        }
         /** Constructs a new name resolver. */
         public TypeConstructor() {
         }
@@ -37,7 +57,7 @@
             // pass 4 — function signatures only (pars + return type, no body)
             for (AST.Node node : nodes)
                 if (node instanceof AST.FunDefn funDefn)
-                    visitFunSignature(funDefn, arg);
+                    visitFunSignature((AST.FunDefn)node, arg);
 
             // pass 5 — function bodies
             for (AST.Node node : nodes)
@@ -69,7 +89,7 @@
             // pass 4 — function signatures only (pars + return type, no body)
             for (AST.FullDefn defn : letExpr.defns)
                 if (defn instanceof AST.FunDefn funDefn)
-                    visitFunSignature(funDefn, arg);
+                    visitFunSignature((AST.FunDefn)defn, arg);
 
             // pass 5 — function bodies
             for (AST.FullDefn defn : letExpr.defns)
@@ -78,6 +98,7 @@
             letExpr.expr.accept(this, arg); // se telo let-a
             return null;
         }
+        // definicija tipa
         @Override
         public Object visit(AST.TypDefn typDefn, Object arg) {
             // shell iz prehoda 1
@@ -86,8 +107,34 @@
             typDefn.type.accept(this, arg);
             TYP.Type actual = SemAn.isTypeAttr.get(typDefn.type);
             shell.setActType(actual);
+            // nastavi tudi oftype
+            SemAn.ofTypeAttr.put(typDefn, TYP.VoidType.type);
             return null;
         }
+        // definicija spremenljivke
+        @Override
+        public Object visit(AST.VarDefn varDefn, Object arg) {
+            // razresi tip spremenljivke
+            varDefn.type.accept(this, arg);
+            TYP.Type type = SemAn.isTypeAttr.get(varDefn.type);
+            SemAn.ofTypeAttr.put(varDefn, type);
+            SemAn.isConstAttr.put(varDefn, false);
+            SemAn.isAddrAttr.put(varDefn, true);
+            return null;
+        }
+        // definicija funkcije; 2 prehod
+        @Override
+        public Object visit(AST.DefFunDefn defFunDefn, Object arg) {
+            // telo funkcije ; podpis ze v 1. prehodu
+            defFunDefn.expr.accept(this, arg);
+            return null;
+        }
+        @Override
+        public Object visit(AST.ExtFunDefn extFunDefn, Object arg) {
+            // ze v 1. prehodu
+            return null;
+        }
+
         // doloci tip atomarnim tipom (int, char, bool, void)
         @Override
         public Object visit(AST.AtomType atomType, Object arg) {
