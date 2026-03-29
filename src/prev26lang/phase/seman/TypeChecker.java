@@ -168,8 +168,36 @@ public class TypeChecker implements AST.FullVisitor<Object, Object> {
                 if (!(equiv(fType, sType))) {
                     throw new Report.Error(expr, "Comparison requires equal types of operands.");
                 }
+                if (!(isComparable(fType))) {
+                    throw new Report.Error(expr, "Operand type is not comparable. Comparison is allowed only on int, char, bool, ptr or fun types.");
+                }
+                SemAn.ofTypeAttr.put(expr, TYP.BoolType.type);
+                SemAn.isConstAttr.put(expr, SemAn.isConstAttr.get(expr.fstExpr) && SemAn.isConstAttr.get(expr.sndExpr));
+                SemAn.isAddrAttr.put(expr, false);
             }
         }
         return null;
     }
+    @Override
+    public Object visit(AST.ArrExpr expr, Object arg) {
+        expr.arrExpr.accept(this, arg);
+        expr.idx.accept(this, arg);
+        TYP.Type aType = SemAn.ofTypeAttr.get(expr.arrExpr);
+        TYP.Type iType = SemAn.ofTypeAttr.get(expr.idx);
+        /*
+        if (!(equiv(iType, TYP.IntType.type))) {
+            throw new Report.Error(expr, "Array index must be of type int.");
+        }
+        if (!(SemAn.isAddrAttr.get(expr))) {
+            throw new Report.Error(expr, "Array must be addressable.");
+        }
+        if (!(aType instanceof TYP.ArrType)) {
+            throw new Report.Error(expr, "Must have an array type instead of: '"+aType.toString()+"'.");
+        }
+        SemAn.ofTypeAttr.put(expr, ((TYP.ArrType) aType).elemType);
+        SemAn.isConstAttr.put(expr, false);
+        SemAn.isAddrAttr.put(expr, true);*/
+        return null;
+    }
+
 }

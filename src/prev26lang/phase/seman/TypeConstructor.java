@@ -22,13 +22,9 @@
                 parTypes.add(parType);
                 // parametri atributa
                 SemAn.ofTypeAttr.put(par, parType);
-                SemAn.isConstAttr.put(par, false);
-                SemAn.isAddrAttr.put(par, true);
             }
             TYP.FunType fun = new TYP.FunType(parTypes, resType);
             SemAn.ofTypeAttr.put(funDefn, fun);
-            SemAn.isConstAttr.put(funDefn, false);
-            SemAn.isAddrAttr.put(funDefn, false);
         }
         /** Constructs a new name resolver. */
         public TypeConstructor() {
@@ -43,7 +39,7 @@
                     SemAn.isTypeAttr.put(typDefn, shell);
                 }
             }
-            // prehod 2: tipi telesa
+            // prehod 2: tipi
             for (AST.Node node : nodes) {
                 if (node instanceof AST.TypDefn typDefn) {
                     node.accept(this, arg);
@@ -107,8 +103,7 @@
             typDefn.type.accept(this, arg);
             TYP.Type actual = SemAn.isTypeAttr.get(typDefn.type);
             shell.setActType(actual);
-            // nastavi tudi oftype
-            SemAn.ofTypeAttr.put(typDefn, TYP.VoidType.type);
+            System.out.println("actual type shell"+shell.actualType());
             return null;
         }
         // definicija spremenljivke
@@ -118,8 +113,6 @@
             varDefn.type.accept(this, arg);
             TYP.Type type = SemAn.isTypeAttr.get(varDefn.type);
             SemAn.ofTypeAttr.put(varDefn, type);
-            SemAn.isConstAttr.put(varDefn, false);
-            SemAn.isAddrAttr.put(varDefn, true);
             return null;
         }
         // definicija funkcije; 2 prehod
@@ -239,7 +232,7 @@
             AST.TypDefn typDefn = (AST.TypDefn) SemAn.defAtAttr.get(nameType);
             TYP.NameType shell = (TYP.NameType) SemAn.isTypeAttr.get(typDefn);
             // shell gotovo obstaja zaradi 1. prehoda, ki je ze bil pognan
-            SemAn.isTypeAttr.put(nameType, shell);
+            SemAn.isTypeAttr.put(nameType, shell.actualType());
             return null;
         }
     }
