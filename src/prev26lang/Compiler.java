@@ -220,8 +220,9 @@ public class Compiler {
                     // === SEMANTIC ANALYSIS ===
                     try (SemAn seman = new SemAn()) {
                         (new NameResolver()).visit(Abstr.tree);
-                        (new TypeConstructor()).visit(Abstr.tree);
-                        (new TypeChecker()).visit(Abstr.tree);
+                        TypeConstructor tc = new TypeConstructor();
+                        tc.visit(Abstr.tree);
+                        (new TypeChecker(tc)).visit(Abstr.tree);
                         SemAn.defAtAttr.lock();
                         SemAn.ofTypeAttr.lock();
                         SemAn.isTypeAttr.lock();

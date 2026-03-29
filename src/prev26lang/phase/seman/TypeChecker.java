@@ -3,11 +3,17 @@ package prev26lang.phase.seman;
 import prev26lang.common.report.Report;
 import prev26lang.phase.abstr.*;
 
+
 // handles AST.Expr nodes → checks types → stores in ofTypeAttr, isConstAttr, isAddrAttr
 // also resolves component names (CompExpr)
 // also checks program has fun main():int
 // runs after type constructor
 public class TypeChecker implements AST.FullVisitor<Object, Object> {
+    private final TypeConstructor tc;
+    /** Constructs a new TypeChecke+r. */
+    public TypeChecker(TypeConstructor tc) {
+        this.tc = tc;
+    }
     // helpers
     private boolean equiv(TYP.Type a, TYP.Type b) {
         // EQU:1
@@ -46,17 +52,43 @@ public class TypeChecker implements AST.FullVisitor<Object, Object> {
     }
     // per TYP:25 - τ' ∈ {int, char, bool} ∪ {ptr, fun}
     private boolean isComparable(TYP.Type t) {
-        TYP.Type actual = t.actualType();
+        TYP.Type actual = t;
+        if (actual instanceof TYP.NameType) {
+            actual = actual.actualType();
+        }
         return actual instanceof TYP.IntType
                 || actual instanceof TYP.CharType
                 || actual instanceof TYP.BoolType
                 || actual instanceof TYP.PtrType
                 || actual instanceof TYP.FunType;
     }
-    /** Constructs a new TypeChecke+r. */
-    public TypeChecker() {
+    // per TYP: 36
+    private boolean isAssignable(TYP.Type type) {
+        return type instanceof TYP.IntType ||
+                type instanceof TYP.CharType ||
+                type instanceof TYP.BoolType ||
+                type instanceof TYP.PtrType ||
+                type instanceof TYP.FunType;
     }
-
+    /*
+    @Override
+    public Object visit(AST.Nodes<? extends AST.Node> nodes, Object arg) {
+        // same multi-pass as TypeConstructor for top level
+        // ... passes 1-5 ...
+        // then check main exists per TYP:1
+        boolean hasMain = false;
+        for (AST.Node node : nodes) {
+            if (node instanceof AST.DefFunDefn dfd && dfd.name.equals("main")) {
+                TYP.Type retType = SemAn.isTypeAttr.get(dfd.type);
+                if (dfd.pars.size() == 0 && equiv(retType, TYP.IntType.type))
+                    hasMain = true;
+            }
+        }
+        if (!hasMain)
+            throw new Report.Error("Program must define 'fun main() : int'.");
+        return null;
+    }
+     */
     @Override
     public Object visit(AST.AtomExpr expr, Object arg) {
         switch (expr.type) {
@@ -95,6 +127,24 @@ public class TypeChecker implements AST.FullVisitor<Object, Object> {
                 SemAn.isConstAttr.put(expr, true);
                 SemAn.isAddrAttr.put(expr, false);
             }
+        }
+        return null;
+    }
+
+    @Override
+    public Object visit(AST.NameExpr nameExpr, Object arg) {
+        AST.Defn defn = SemAn.defAtAttr.get(nameExpr);
+        TYP.Type type;
+        if (defn instanceof AST.VarDefn || defn instanceof AST.VarDefn) {
+            type = SemAn.isTypeAttr.get(defn.type);
+            SemAn.ofTypeAttr.put(nameExpr, type);
+            SemAn.isConstAttr.put(nameExpr, false);
+            SemAn.isAddrAttr.put(nameExpr, true);
+        } else if (defn instanceof AST.FunDefn) {
+            type = tc.funTypes.get(defn);
+            SemAn.ofTypeAttr.put(nameExpr, type);
+            SemAn.isConstAttr.put(nameExpr, false);
+            SemAn.isAddrAttr.put(nameExpr, false);
         }
         return null;
     }
@@ -184,20 +234,139 @@ public class TypeChecker implements AST.FullVisitor<Object, Object> {
         expr.idx.accept(this, arg);
         TYP.Type aType = SemAn.ofTypeAttr.get(expr.arrExpr);
         TYP.Type iType = SemAn.ofTypeAttr.get(expr.idx);
-        /*
         if (!(equiv(iType, TYP.IntType.type))) {
             throw new Report.Error(expr, "Array index must be of type int.");
         }
         if (!(SemAn.isAddrAttr.get(expr))) {
             throw new Report.Error(expr, "Array must be addressable.");
         }
-        if (!(aType instanceof TYP.ArrType)) {
-            throw new Report.Error(expr, "Must have an array type instead of: '"+aType.toString()+"'.");
+        TYP.Type actual = aType;
+        if (aType instanceof TYP.NameType) {
+            actual = actual.actualType();
         }
-        SemAn.ofTypeAttr.put(expr, ((TYP.ArrType) aType).elemType);
+        if (!(actual instanceof TYP.ArrType)) {
+            throw new Report.Error(expr, "Expression is not an array, got: " + aType);
+        }
+        SemAn.ofTypeAttr.put(expr, ((TYP.ArrType) actual).elemType);
         SemAn.isConstAttr.put(expr, false);
-        SemAn.isAddrAttr.put(expr, true);*/
+        SemAn.isAddrAttr.put(expr, true);
         return null;
     }
+
+    @Override
+    public Object visit(AST.SfxExpr sfxExpr, Object arg) {
+        sfxExpr.subExpr.accept(this, arg);
+        TYP.Type sType =  SemAn.ofTypeAttr.get(sfxExpr.subExpr);
+        // mora biti kazalec
+        TYP.Type actual = sType;
+        if (actual instanceof TYP.NameType) {
+            actual = actual.actualType();
+        }
+        if (actual instanceof TYP.PtrType) {
+            throw new Report.Error(sfxExpr, "Cannot dereference a non-pointer type.");
+        }
+        TYP.Type baseType = ((TYP.PtrType) actual).baseType;
+        // baza ne sme biti void
+        if (baseType instanceof TYP.NameType) {
+            baseType =  baseType.actualType();
+        }
+        if (baseType instanceof TYP.VoidType) {
+            throw new Report.Error(sfxExpr, "Cannot dereference a pointer to void.");
+        }
+        // izraz ne sme biti konstanta
+        if (SemAn.isConstAttr.get(sfxExpr.subExpr)) {
+            throw new Report.Error(sfxExpr, "Cannot dereference a constant.");
+        }
+
+        SemAn.ofTypeAttr.put(sfxExpr, baseType);
+        SemAn.isAddrAttr.put(sfxExpr, true);
+        SemAn.isConstAttr.put(sfxExpr, false);
+        return null;
+    }
+    /*
+    @Override
+    public Object visit(AST.CallExpr callExpr, Object arg) {
+        callExpr.funExpr.accept(this, arg);
+        for (AST.Expr argExpr : callExpr.argExprs) {
+            argExpr.accept(this, arg);
+        }
+        TYP.Type fType = tc.funTypes.get(SemAn.defAtAttr.get(callExpr.funExpr));
+
+
+        SemAn.isConstAttr.put(callExpr, false);
+        SemAn.isAddrAttr.put(callExpr, false);
+        return null;
+    }*/
+
+    @Override
+    public Object visit(AST.SizeExpr sizeExpr, Object arg) {
+        sizeExpr.type.accept(this, arg);
+        TYP.Type sType =  SemAn.ofTypeAttr.get(sizeExpr.type);
+        // ne sme biti void
+        TYP.Type actual = sType;
+        if (actual instanceof TYP.NameType) {
+            actual = actual.actualType();
+        }
+        if (actual instanceof TYP.VoidType) {
+            throw new Report.Error(sizeExpr, "Cannot take size of void type.");
+        }
+        SemAn.ofTypeAttr.put(sizeExpr, TYP.IntType.type);
+        SemAn.isAddrAttr.put(sizeExpr, false);
+        SemAn.isConstAttr.put(sizeExpr, true);
+        return null;
+    }
+
+    @Override
+    public Object visit(AST.CastExpr castExpr, Object arg) {
+        castExpr.expr.accept(this, arg);
+        castExpr.type.accept(this, arg);
+        TYP.Type eType =  SemAn.ofTypeAttr.get(castExpr.expr);
+        TYP.Type tType = SemAn.isTypeAttr.get(castExpr.type);
+        // oba ne smeta biti void
+        TYP.Type eActual = eType;
+        if (eActual instanceof TYP.NameType) {
+            eActual = eActual.actualType();
+        }
+        if (eActual instanceof TYP.VoidType) {
+            throw new Report.Error(castExpr, "Cannot cast void expression.");
+        }
+        TYP.Type tActual = tType;
+        if (tActual instanceof TYP.NameType) {
+            tActual = tActual.actualType();
+        }
+        if (tActual instanceof TYP.VoidType) {
+            throw new Report.Error(castExpr, "Cannot expression to void.");
+        }
+        SemAn.ofTypeAttr.put(castExpr, tActual);
+        SemAn.isAddrAttr.put(castExpr, SemAn.isAddrAttr.get(castExpr.expr));
+        SemAn.isConstAttr.put(castExpr, SemAn.isConstAttr.get(castExpr.expr));
+        return null;
+    }
+
+    @Override
+    public Object visit(AST.AsgnExpr asgnExpr, Object arg) {
+        asgnExpr.fstExpr.accept(this, arg);
+        asgnExpr.sndExpr.accept(this, arg);
+        TYP.Type fType =  SemAn.ofTypeAttr.get(asgnExpr.fstExpr);
+        TYP.Type sType = SemAn.ofTypeAttr.get(asgnExpr.sndExpr);
+        if (!equiv(fType, sType)) {
+            throw new Report.Error(asgnExpr, "Cannot assign non-equivalent types.");
+        }
+        if (!isAssignable(fType)) {
+            throw new Report.Error(asgnExpr, "First expression is not assignable.");
+        }
+        if (!isAssignable(sType)) {
+            throw new Report.Error(asgnExpr, "Second expression is not assignable.");
+        }
+        // prvi mora biti naslovljiv
+        if (!SemAn.isAddrAttr.get(asgnExpr.fstExpr)) {
+            throw new Report.Error(asgnExpr, "Cannot assign to non-addr type.");
+        }
+        SemAn.ofTypeAttr.put(asgnExpr, TYP.VoidType.type);
+        SemAn.isAddrAttr.put(asgnExpr, false);
+        SemAn.isConstAttr.put(asgnExpr, false);
+        return null;
+    }
+
 
 }

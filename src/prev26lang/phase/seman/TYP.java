@@ -524,7 +524,7 @@ public class TYP {
 			types.add(this);
 			return this.actType.actualType(types);
 		}
-
+        // rekurzija za nametype
 		@Override
 		public Type actualType(final HashSet<NameType> types) {
 			if (this.actType == null)

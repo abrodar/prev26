@@ -374,7 +374,7 @@ postfixExpr returns [AST.Expr ast]
                     args = new AST.Nodes<>();
                     Abstr.locAttr.put(args, loc($LPAREN, $RPAREN));
                  }
-                $ast = new CallExpr($po1.ast, args);
+                    $ast = new CallExpr($po1.ast, args);
                 Abstr.locAttr.put($ast, loc($po1.ast, $RPAREN));
                 }
                 | po2=postfixExpr LBRACK e=expr RBRACK

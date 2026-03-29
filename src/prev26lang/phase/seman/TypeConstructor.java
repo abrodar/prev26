@@ -4,12 +4,18 @@
     import prev26lang.phase.abstr.*;
 
     import java.util.ArrayList;
+    import java.util.HashMap;
     import java.util.List;
 
     // handles AST.Type nodes → builds TYP.Type objects → stores in isTypeAttr
     // also handles TypDefn, VarDefn, FunDefn type signatures
     // runs before typechecker
     public class TypeConstructor implements AST.FullVisitor<Object, Object>  {
+        /** Constructs a new name resolver. */
+        public TypeConstructor() {
+        }
+        // za hranjenje funTypes za vsal funDefn
+        public final HashMap<AST.FunDefn, TYP.FunType> funTypes = new HashMap<>();
         // helper metode
         private void visitFunSignature(AST.FunDefn funDefn, Object arg) {
             // razresi tipe parametrov in rezultata funkcije
@@ -23,11 +29,10 @@
                 // parametri atributa
                 SemAn.ofTypeAttr.put(par, parType);
             }
-            TYP.FunType fun = new TYP.FunType(parTypes, resType);
-            SemAn.ofTypeAttr.put(funDefn, fun);
-        }
-        /** Constructs a new name resolver. */
-        public TypeConstructor() {
+            TYP.FunType funType = new TYP.FunType(parTypes, resType);
+            funTypes.put(funDefn, funType);
+            // TYP:4 — definicija funkcije je void
+            SemAn.ofTypeAttr.put(funDefn, TYP.VoidType.type);
         }
         // 5 prehodov, najprej tipi 2x, 1x vars, 2x funkcije
         @Override
@@ -73,7 +78,7 @@
             }
             // prehod 2: tipi telesa
             for (AST.FullDefn defn : letExpr.defns) {
-                if (defn instanceof AST.TypDefn typDefn) {
+                if (defn instanceof AST.TypDefn) {
                     defn.accept(this, arg);
                 }
             }
@@ -94,7 +99,7 @@
             letExpr.expr.accept(this, arg); // se telo let-a
             return null;
         }
-        // definicija tipa
+        // definicija tipa; NE SME IMETI OFTYPE!
         @Override
         public Object visit(AST.TypDefn typDefn, Object arg) {
             // shell iz prehoda 1
@@ -103,7 +108,6 @@
             typDefn.type.accept(this, arg);
             TYP.Type actual = SemAn.isTypeAttr.get(typDefn.type);
             shell.setActType(actual);
-            System.out.println("actual type shell"+shell.actualType());
             return null;
         }
         // definicija spremenljivke
@@ -111,8 +115,7 @@
         public Object visit(AST.VarDefn varDefn, Object arg) {
             // razresi tip spremenljivke
             varDefn.type.accept(this, arg);
-            TYP.Type type = SemAn.isTypeAttr.get(varDefn.type);
-            SemAn.ofTypeAttr.put(varDefn, type);
+            SemAn.ofTypeAttr.put(varDefn, TYP.VoidType.type);
             return null;
         }
         // definicija funkcije; 2 prehod
@@ -232,7 +235,7 @@
             AST.TypDefn typDefn = (AST.TypDefn) SemAn.defAtAttr.get(nameType);
             TYP.NameType shell = (TYP.NameType) SemAn.isTypeAttr.get(typDefn);
             // shell gotovo obstaja zaradi 1. prehoda, ki je ze bil pognan
-            SemAn.isTypeAttr.put(nameType, shell.actualType());
+            SemAn.isTypeAttr.put(nameType, shell);
             return null;
         }
     }
