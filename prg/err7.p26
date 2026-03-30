@@ -1,0 +1,3 @@
+typ a = ^void
+var b:a
+fun main():int=b, 1

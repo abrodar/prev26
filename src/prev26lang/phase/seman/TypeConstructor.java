@@ -129,8 +129,9 @@
 
             // pass 5 — function bodies
             for (AST.Node node : nodes)
-                if (node instanceof AST.DefFunDefn defFunDefn)
+                if (node instanceof AST.DefFunDefn defFunDefn) {
                     defFunDefn.expr.accept(this, arg);
+                }
             return null;
         }
         // kot na vstopni tocki 5 prehodov

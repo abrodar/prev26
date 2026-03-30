@@ -3,6 +3,9 @@ package prev26lang.phase.seman;
 import prev26lang.common.report.Report;
 import prev26lang.phase.abstr.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 // handles AST.Expr nodes → checks types → stores in ofTypeAttr, isConstAttr, isAddrAttr
 // also resolves component names (CompExpr)
@@ -69,6 +72,29 @@ public class TypeChecker implements AST.FullVisitor<Object, Object> {
                 type instanceof TYP.BoolType ||
                 type instanceof TYP.PtrType ||
                 type instanceof TYP.FunType;
+    }
+    public boolean isValidParType(TYP.Type type) {
+        TYP.Type actual = type;
+        if (actual instanceof TYP.NameType) {
+            actual = type.actualType();
+        }
+        return actual instanceof TYP.IntType
+                || actual instanceof TYP.CharType
+                || actual instanceof TYP.BoolType
+                || actual instanceof TYP.PtrType
+                || actual instanceof TYP.FunType;
+    }
+    public boolean isValidResType(TYP.Type type) {
+        TYP.Type actual = type;
+        if (actual instanceof TYP.NameType) {
+            actual = type.actualType();
+        }
+        return actual instanceof TYP.IntType
+                || actual instanceof TYP.CharType
+                || actual instanceof TYP.BoolType
+                || actual instanceof TYP.PtrType
+                || actual instanceof TYP.FunType
+                || actual instanceof TYP.VoidType;
     }
 
     public void checkMain(AST.Nodes<? extends AST.Node> program) {
@@ -526,6 +552,84 @@ public class TypeChecker implements AST.FullVisitor<Object, Object> {
         SemAn.ofTypeAttr.put(letExpr, exprType);
         SemAn.isConstAttr.put(letExpr, false);
         SemAn.isAddrAttr.put(letExpr, false);
+        return null;
+    }
+    @Override
+    public Object visit(AST.DefFunDefn defFunDefn, Object arg) {
+        // najprej obisci parametre in telo
+        for (AST.ParDefn par : defFunDefn.pars)
+            par.accept(this, arg);
+        defFunDefn.expr.accept(this, arg);
+
+        // TYP:4 — tip zadnjega izraza mora biti ekvivalenten tipu rezultata
+        // this check must be performed in typechecker!
+        TYP.Type bodyType = SemAn.ofTypeAttr.get(defFunDefn.expr);
+        TYP.FunType funType = tc.funTypes.get(defFunDefn);
+        if (!equiv(funType.resType, bodyType))
+            throw new Report.Error(defFunDefn, "Function '" + defFunDefn.name
+                    + "' return type mismatch: declared " + funType.resType
+                    + " but body returns " + bodyType + ".");
+        return null;
+    }
+    @Override
+    public Object visit(AST.PtrType ptrType, Object arg) {
+        ptrType.baseType.accept(this, arg);
+        TYP.Type baseType = SemAn.isTypeAttr.get(ptrType.baseType);
+        // probably needs clarification
+        if (baseType instanceof TYP.VoidType) {
+            throw new Report.Error(ptrType, "Void type cannot be (directly) void.");
+        }
+        return null;
+    }
+    @Override
+    public Object visit(AST.ArrType arrType, Object arg) {
+        // typecheck elemType
+        arrType.elemType.accept(this, arg);
+        TYP.Type elemType = SemAn.isTypeAttr.get(arrType.elemType);
+        if (elemType instanceof TYP.VoidType) {
+            throw new Report.Error(arrType, "Array cannot have elements of type void.");
+        }
+        return null;
+    }
+    @Override
+    public Object visit(AST.StrType strType, Object arg) {
+        // preveri tipe komponent
+        for (AST.CompDefn comp : strType.comps) {
+            comp.accept(this, arg);
+            TYP.Type compType =  SemAn.isTypeAttr.get(comp.type);
+            if (compType instanceof TYP.VoidType) {
+                throw new Report.Error(comp, "Struct cannot have components of type void.");
+            }
+        }
+        return null;
+    }
+    @Override
+    public Object visit(AST.UniType uniType, Object arg) {
+        // preveri tipe komponent
+        for (AST.CompDefn comp : uniType.comps) {
+            comp.accept(this, arg);
+            TYP.Type compType =  SemAn.isTypeAttr.get(comp.type);
+            if (compType instanceof TYP.VoidType) {
+                throw new Report.Error(comp, "Union cannot have components of type void.");
+            }
+        }
+        return null;
+    }
+    @Override
+    public Object visit(AST.FunType funType, Object arg) {
+        funType.resType.accept(this, arg);
+        TYP.Type resType = SemAn.isTypeAttr.get(funType.resType);
+        if (!isValidResType(resType)) {
+            throw new Report.Error(funType, "Invalid function result type "+resType+".");
+        }
+        for (AST.Type par: funType.parTypes) {
+            par.accept(this, arg);
+            TYP.Type parType = SemAn.isTypeAttr.get(par);
+            if (!isValidParType(parType)) {
+                throw new Report.Error(funType, "Invalid function parameter type " + parType + ".");
+            }
+        }
+
         return null;
     }
 }
