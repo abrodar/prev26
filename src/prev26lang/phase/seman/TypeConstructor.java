@@ -16,6 +16,9 @@
         }
         // za hranjenje funTypes za vsal funDefn
         public final HashMap<AST.FunDefn, TYP.FunType> funTypes = new HashMap<>();
+        // za razresevanje uni/str komponent
+        public final HashMap<TYP.StrType, AST.StrType> strTypeMap = new HashMap<>();
+        public final HashMap<TYP.UniType, AST.UniType> uniTypeMap = new HashMap<>();
         // helper metode
         private void visitFunSignature(AST.FunDefn funDefn, Object arg) {
             // razresi tipe parametrov in rezultata funkcije
@@ -188,40 +191,49 @@
         // doloci tip strukture
         @Override
         public Object visit(AST.StrType strType, Object arg) {
+            // Iterate manually — do NOT call strType.comps.accept(this, arg)
+            // because that would dispatch to the overridden 5-pass visit(Nodes<?>)
+            // which ignores CompDefn entirely.
             // razresi tipe komponent
-            strType.comps.accept(this, arg);
             List<TYP.Type> compTypes = new ArrayList<>();
             for (AST.CompDefn comp : strType.comps) {
+                comp.accept(this, arg);
                 TYP.Type compType =  SemAn.isTypeAttr.get(comp.type);
                 compTypes.add(compType);
             }
             TYP.StrType str = new TYP.StrType(compTypes);
             SemAn.isTypeAttr.put(strType, str);
+            strTypeMap.put(str, strType);
             return null;
         }
         // doloci tip unije
         @Override
         public Object visit(AST.UniType uniType, Object arg) {
+            // Iterate manually — do NOT call strType.comps.accept(this, arg)
+            // because that would dispatch to the overridden 5-pass visit(Nodes<?>)
+            // which ignores CompDefn entirely.
             // razresi tipe komponent
-            uniType.comps.accept(this, arg);
             List<TYP.Type> compTypes = new ArrayList<>();
             for (AST.CompDefn comp : uniType.comps) {
+                comp.accept(this, arg);
                 TYP.Type compType =  SemAn.isTypeAttr.get(comp.type);
                 compTypes.add(compType);
             }
-            TYP.UniType str = new TYP.UniType(compTypes);
-            SemAn.isTypeAttr.put(uniType, str);
+            TYP.UniType uni = new TYP.UniType(compTypes);
+            SemAn.isTypeAttr.put(uniType, uni);
+            uniTypeMap.put(uni, uniType);
             return null;
         }
         // doloci tip funkcije
         @Override
         public Object visit(AST.FunType funType, Object arg) {
+            // do not call  funType.parTypes.accept(this, arg);!
             // razresi tipe parametrov in rezultata funkcije
-            funType.parTypes.accept(this, arg);
             funType.resType.accept(this, arg);
             TYP.Type resType = SemAn.isTypeAttr.get(funType.resType);
             List<TYP.Type> parTypes = new ArrayList<>();
             for (AST.Type par: funType.parTypes) {
+                par.accept(this, arg);
                 TYP.Type parType = SemAn.isTypeAttr.get(par);
                 parTypes.add(parType);
             }

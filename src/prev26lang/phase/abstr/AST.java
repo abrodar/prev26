@@ -562,7 +562,6 @@ public class AST {
 		public <Result, Argument> Result accept(Visitor<Result, Argument> visitor, Argument arg) {
 			return visitor.visit(this, arg);
 		}
-
 	}
 
 	/**

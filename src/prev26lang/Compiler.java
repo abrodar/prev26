@@ -222,7 +222,9 @@ public class Compiler {
                         (new NameResolver()).visit(Abstr.tree);
                         TypeConstructor tc = new TypeConstructor();
                         tc.visit(Abstr.tree);
-                        (new TypeChecker(tc)).visit(Abstr.tree);
+                        TypeChecker checker = new TypeChecker(tc);
+                        checker.visit(Abstr.tree);
+                        checker.checkMain(Abstr.tree);
                         SemAn.defAtAttr.lock();
                         SemAn.ofTypeAttr.lock();
                         SemAn.isTypeAttr.lock();

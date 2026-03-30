@@ -2,3 +2,5 @@ typ c = ^c
 typ a = [10]int
 var b : a
 fun f():int = b[1]
+
+fun main():int=1
