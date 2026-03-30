@@ -405,7 +405,7 @@ public class TypeChecker implements AST.FullVisitor<Object, Object> {
             for (int i = 0; i < astStr.comps.size(); i++) {
                 AST.CompDefn comp = astStr.comps.get(i);
                 if (comp.name.equals(compExpr.name)) {
-                    SemAn.defAtAttr.put(compExpr, comp);
+                    //SemAn.defAtAttr.put(compExpr, comp); causes internal error due to keychecker isvaliddefat
                     SemAn.ofTypeAttr.put(compExpr, strType.compTypes.get(i));
                     SemAn.isConstAttr.put(compExpr, false);
                     SemAn.isAddrAttr.put(compExpr, true);
@@ -421,7 +421,7 @@ public class TypeChecker implements AST.FullVisitor<Object, Object> {
             for (int i = 0; i < astUni.comps.size(); i++) {
                 AST.CompDefn comp = astUni.comps.get(i);
                 if (comp.name.equals(compExpr.name)) {
-                    SemAn.defAtAttr.put(compExpr, comp);
+                    //SemAn.defAtAttr.put(compExpr, comp);
                     SemAn.ofTypeAttr.put(compExpr, uniType.compTypes.get(i));
                     SemAn.isConstAttr.put(compExpr, false);
                     SemAn.isAddrAttr.put(compExpr, true);

@@ -20,16 +20,80 @@
         public final HashMap<TYP.StrType, AST.StrType> strTypeMap = new HashMap<>();
         public final HashMap<TYP.UniType, AST.UniType> uniTypeMap = new HashMap<>();
         // helper metode
+        private boolean equiv(TYP.Type a, TYP.Type b) {
+            // EQU:1
+            if (a == b) return true;
+            // unwrap name types - EQU:2, EQU:3
+            if (a instanceof TYP.NameType na) return equiv(na.type(), b);
+            if (b instanceof TYP.NameType nb) return equiv(a, nb.type());
+            // EQU:4 - arrays
+            if (a instanceof TYP.ArrType aa && b instanceof TYP.ArrType ab)
+                return aa.numElems.equals(ab.numElems) && equiv(aa.elemType, ab.elemType);
+            // EQU:5 - pointers
+            if (a instanceof TYP.PtrType pa && b instanceof TYP.PtrType pb)
+                return equiv(pa.baseType, pb.baseType);
+            // EQU:6 - structs
+            if (a instanceof TYP.StrType sa && b instanceof TYP.StrType sb) {
+                if (sa.compTypes.size() != sb.compTypes.size()) return false;
+                for (int i = 0; i < sa.compTypes.size(); i++)
+                    if (!equiv(sa.compTypes.get(i), sb.compTypes.get(i))) return false;
+                return true;
+            }
+            // EQU:7 - unions
+            if (a instanceof TYP.UniType ua && b instanceof TYP.UniType ub) {
+                if (ua.compTypes.size() != ub.compTypes.size()) return false;
+                for (int i = 0; i < ua.compTypes.size(); i++)
+                    if (!equiv(ua.compTypes.get(i), ub.compTypes.get(i))) return false;
+                return true;
+            }
+            // EQU:8 - functions
+            if (a instanceof TYP.FunType fa && b instanceof TYP.FunType fb) {
+                if (fa.parTypes.size() != fb.parTypes.size()) return false;
+                for (int i = 0; i < fa.parTypes.size(); i++)
+                    if (!equiv(fa.parTypes.get(i), fb.parTypes.get(i))) return false;
+                return equiv(fa.resType, fb.resType);
+            }
+            return false;
+        }
+        public boolean isValidParType(TYP.Type type) {
+            TYP.Type actual = type;
+            if (actual instanceof TYP.NameType) {
+                actual = type.actualType();
+            }
+            return actual instanceof TYP.IntType
+                    || actual instanceof TYP.CharType
+                    || actual instanceof TYP.BoolType
+                    || actual instanceof TYP.PtrType
+                    || actual instanceof TYP.FunType;
+        }
+        public boolean isValidResType(TYP.Type type) {
+            TYP.Type actual = type;
+            if (actual instanceof TYP.NameType) {
+                actual = type.actualType();
+            }
+            return actual instanceof TYP.IntType
+                    || actual instanceof TYP.CharType
+                    || actual instanceof TYP.BoolType
+                    || actual instanceof TYP.PtrType
+                    || actual instanceof TYP.FunType
+                    || actual instanceof TYP.VoidType;
+        }
         private void visitFunSignature(AST.FunDefn funDefn, Object arg) {
             // razresi tipe parametrov in rezultata funkcije
             funDefn.type.accept(this, arg);
             TYP.Type resType = SemAn.isTypeAttr.get(funDefn.type);
+            if (!isValidResType(resType)) {
+                throw new Report.Error(funDefn, "Invalid result type " +resType+" for fun "+ funDefn.name);
+            }
             List<TYP.Type> parTypes = new ArrayList<>();
             for (AST.ParDefn par: funDefn.pars) {
                 par.accept(this, arg);
                 TYP.Type parType = SemAn.isTypeAttr.get(par.type);
+                if (!isValidParType(parType)) {
+                    throw new Report.Error(funDefn, "Invalid par type " + parType + " for fun " + funDefn.name);
+                }
                 parTypes.add(parType);
-                // parametri atributa
+                // parametri atributa; ni valid node za isconst in isaddresable
                 SemAn.ofTypeAttr.put(par, parType);
             }
             TYP.FunType funType = new TYP.FunType(parTypes, resType);
@@ -92,7 +156,7 @@
 
             // pass 4 — function signatures only (pars + return type, no body)
             for (AST.FullDefn defn : letExpr.defns)
-                if (defn instanceof AST.FunDefn funDefn)
+                if (defn instanceof AST.FunDefn)
                     visitFunSignature((AST.FunDefn)defn, arg);
 
             // pass 5 — function bodies
@@ -118,6 +182,10 @@
         public Object visit(AST.VarDefn varDefn, Object arg) {
             // razresi tip spremenljivke
             varDefn.type.accept(this, arg);
+            TYP.Type varType = SemAn.isTypeAttr.get(varDefn.type);
+            if (equiv(varType, TYP.VoidType.type)) {
+                throw new Report.Error(varDefn, "Variable cannot be void type.");
+            }
             SemAn.ofTypeAttr.put(varDefn, TYP.VoidType.type);
             return null;
         }
@@ -186,6 +254,8 @@
             // obisci tip komponente
             compDefn.type.accept(this, arg);
             // ne nastavi tipa na vozlisce, ker je CompDefn prepovedan za istype
+            TYP.Type compType = SemAn.isTypeAttr.get(compDefn.type);
+            SemAn.ofTypeAttr.put(compDefn, compType);
             return null;
         }
         // doloci tip strukture
@@ -248,6 +318,15 @@
             TYP.NameType shell = (TYP.NameType) SemAn.isTypeAttr.get(typDefn);
             // shell gotovo obstaja zaradi 1. prehoda, ki je ze bil pognan
             SemAn.isTypeAttr.put(nameType, shell);
+            return null;
+        }
+
+        // need a manual check because of generic nodes visit AB ?!
+        @Override
+        public Object visit(AST.Exprs exprs, Object arg) {
+            for (AST.Expr expr : exprs.exprs) {
+                expr.accept(this, arg);
+            }
             return null;
         }
     }

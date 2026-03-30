@@ -1,0 +1,3 @@
+var a:void
+
+fun main():int=a, 1
