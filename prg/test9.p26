@@ -1,7 +1,0 @@
-
-
-fun main():int=let
-                 typ T = (x: int, y: int)
-                 var a : T
-                 fun f() : int = a.x
-               in f() end

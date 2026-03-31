@@ -1,3 +1,0 @@
-typ a = (b:void, c:int)
-
-fun main():int=1

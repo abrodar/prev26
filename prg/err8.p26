@@ -1,3 +1,0 @@
-typ a = [10]void
-
-fun main():int=1

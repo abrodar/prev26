@@ -1,5 +1,0 @@
-typ a = ^a
-fun f():a
-
-
-fun main():int=1

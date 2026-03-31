@@ -1,3 +1,0 @@
-typ a = (::int)
-fun f() : {a: int} = 
-    ^a^

@@ -1,3 +1,0 @@
-typ a = [10]int
-var b : a
-fun f():int = b[1]

@@ -67,11 +67,15 @@ public class TypeChecker implements AST.FullVisitor<Object, Object> {
     }
     // per TYP: 36
     private boolean isAssignable(TYP.Type type) {
-        return type instanceof TYP.IntType ||
-                type instanceof TYP.CharType ||
-                type instanceof TYP.BoolType ||
-                type instanceof TYP.PtrType ||
-                type instanceof TYP.FunType;
+        TYP.Type actual = type;
+        if (actual instanceof TYP.NameType) {
+            actual = actual.actualType();
+        }
+        return actual instanceof TYP.IntType ||
+                actual instanceof TYP.CharType ||
+                actual instanceof TYP.BoolType ||
+                actual instanceof TYP.PtrType ||
+                actual instanceof TYP.FunType;
     }
     public boolean isValidParType(TYP.Type type) {
         TYP.Type actual = type;
@@ -190,7 +194,7 @@ public class TypeChecker implements AST.FullVisitor<Object, Object> {
                 SemAn.isAddrAttr.put(expr, false);
             }
             case PTR -> {
-                if (SemAn.isAddrAttr.get(expr.subExpr)) {
+                if (!SemAn.isAddrAttr.get(expr.subExpr)) {
                     throw new Report.Error(expr, "Cannot take address of non-addresable expression.");
                 }
                 if (equiv(subType,TYP.VoidType.type)) {

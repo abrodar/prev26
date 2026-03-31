@@ -1,3 +1,0 @@
-fun f():char=10
-
-fun main():int = 1

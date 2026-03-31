@@ -1,4 +1,0 @@
-fun a(x: int) : int = b(x - 1)
-fun b(x: int) : int = a(x - 1)
-
-fun main():int=1

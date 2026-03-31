@@ -1,3 +1,0 @@
-typ a = (:char, int:(a:int))
-
-fun main():int=1

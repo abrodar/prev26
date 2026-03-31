@@ -1,7 +1,0 @@
-
-
-var a : (b:int, c:int)
-
-fun f():void= let var a:(b:int, c:int) in a.b end
-
-fun main():int=1

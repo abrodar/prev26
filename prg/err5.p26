@@ -1,4 +1,0 @@
-fun f():(a:int, b:int)=1
-
-
-fun main():int=1
