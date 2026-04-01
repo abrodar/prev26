@@ -346,7 +346,7 @@ public class TypeChecker implements AST.FullVisitor<Object, Object> {
     @Override
     public Object visit(AST.SizeExpr sizeExpr, Object arg) {
         sizeExpr.type.accept(this, arg);
-        TYP.Type sType =  SemAn.ofTypeAttr.get(sizeExpr.type);
+        TYP.Type sType =  SemAn.isTypeAttr.get(sizeExpr.type); // Should be SemAn.isTypeAttr.get(sizeExpr.type).
         // ne sme biti void
         TYP.Type actual = sType;
         if (actual instanceof TYP.NameType) {
@@ -601,7 +601,12 @@ public class TypeChecker implements AST.FullVisitor<Object, Object> {
         for (AST.CompDefn comp : strType.comps) {
             comp.accept(this, arg);
             TYP.Type compType =  SemAn.isTypeAttr.get(comp.type);
-            if (compType instanceof TYP.VoidType) {
+            // komponente strukture ne smejo biti void
+            TYP.Type actual = compType.actualType();
+            if (actual instanceof TYP.NameType) {
+                actual = actual.actualType();
+            }
+            if (actual instanceof TYP.VoidType) {
                 throw new Report.Error(comp, "Struct cannot have components of type void.");
             }
         }
@@ -613,7 +618,12 @@ public class TypeChecker implements AST.FullVisitor<Object, Object> {
         for (AST.CompDefn comp : uniType.comps) {
             comp.accept(this, arg);
             TYP.Type compType =  SemAn.isTypeAttr.get(comp.type);
-            if (compType instanceof TYP.VoidType) {
+            // komponente uniona ne smejo biti void
+            TYP.Type actual = compType;
+            if (actual instanceof TYP.NameType) {
+                actual = actual.actualType();
+            }
+            if (actual instanceof TYP.VoidType) {
                 throw new Report.Error(comp, "Union cannot have components of type void.");
             }
         }
@@ -633,7 +643,6 @@ public class TypeChecker implements AST.FullVisitor<Object, Object> {
                 throw new Report.Error(funType, "Invalid function parameter type " + parType + ".");
             }
         }
-
         return null;
     }
 }

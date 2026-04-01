@@ -230,7 +230,6 @@ public class Compiler {
                         SemAn.isTypeAttr.lock();
                         SemAn.isConstAttr.lock();
                         SemAn.isAddrAttr.lock();
-
                         (new SemAn.Logger(seman.xmlLogger)).visit(Abstr.tree);
                     }
                     if (cmdLineOpts.get("--target-phase").equals("seman"))
