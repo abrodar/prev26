@@ -1,0 +1,7 @@
+typ a = b
+typ b = a
+var c: a
+var d: b
+fun main () : int =
+	c == d,
+	0

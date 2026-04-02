@@ -1,0 +1,3 @@
+typ a = int
+typ b = (x: (y: (z: a)))
+fun main () : int = 0

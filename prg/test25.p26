@@ -1,0 +1,7 @@
+typ a = a
+typ a2 = b
+typ b = c
+typ c = a2
+typ a3 = ^ a3
+typ a4 = {c:int, b:a4}
+fun main () : int = 0

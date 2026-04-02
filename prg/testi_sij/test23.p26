@@ -1,0 +1,2 @@
+typ ecka = int var pecka : ecka
+fun main () : int = 0

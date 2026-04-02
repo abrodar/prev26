@@ -1,0 +1,13 @@
+
+var i: int
+var c: int
+fun main():int =
+    i = 0,
+    c = 345325,
+    while i < c do
+        if i % 2 == 0 then
+            c = c - 1
+        end,
+        i = i + 1
+    end,
+	i

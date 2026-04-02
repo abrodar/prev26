@@ -1,0 +1,8 @@
+// vnaprejsnje deklaracije
+typ a = b
+typ b = int
+
+
+fun f() : int = g()
+fun g() : int = 1
+fun main () : int = 0

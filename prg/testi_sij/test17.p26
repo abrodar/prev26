@@ -1,0 +1,11 @@
+
+fun h(): void = none
+
+
+fun f(): void = h()
+
+
+
+fun main():int =
+    f(),
+	0

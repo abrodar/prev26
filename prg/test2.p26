@@ -1,0 +1,10 @@
+// Slivnikov primer
+typ a = int
+fun f(x:a) : int =
+    let
+        typ a = char
+        var y : a
+    in
+        (x + (y as int), 3)
+    end
+fun main () : int = 0

@@ -1,0 +1,2 @@
+typ list = void
+fun main():int= let var a:{b:int,c:list} in a end, 1

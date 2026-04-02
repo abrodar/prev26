@@ -1,0 +1,4 @@
+var b : int
+fun f(x:int) : bool =
+    true and true
+fun main () : int = 0

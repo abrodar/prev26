@@ -1,2 +1,4 @@
-typ list = void
-fun main():int= let var a:{b:int,c:list} in a end, 1
+// cikel
+typ a = b
+typ b = a
+fun main () : int = 0
