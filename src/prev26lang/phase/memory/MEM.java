@@ -79,7 +79,7 @@ public class MEM {
 	}
 
 	/**
-	 * An access to a variable at a fixed address.
+	 * Access to a variable at a fixed address.
 	 * 
 	 * (Also used for string constants.)
 	 * 
