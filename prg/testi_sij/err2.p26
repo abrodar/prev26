@@ -1,3 +1,0 @@
-// uporaba brez definicije
-fun func(a:int) : int =
-    b + 2

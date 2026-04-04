@@ -5,6 +5,7 @@ import prev26lang.phase.abstr.AST;
 import prev26lang.phase.seman.SemAn;
 import prev26lang.phase.seman.TYP;
 
+import java.nio.channels.ScatteringByteChannel;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
@@ -13,48 +14,52 @@ public class Layouter implements AST.FullVisitor<Object, Object>{
     private static long align(long size) {
         return (size + 7) / 8 * 8;
     }
-    private static long sizeOf(TYP.Type type) {
-        if (type instanceof TYP.IntType) {
-            return 8;
-        }
-        if (type instanceof TYP.BoolType) {
-            return 1;
-        }
-        if (type instanceof TYP.CharType) {
-            return 1;
-        }
-        if (type instanceof TYP.VoidType) {
-            return 8;
-        }
-        if (type instanceof TYP.PtrType) {
-            return 8;
-        }
-        if (type instanceof TYP.NameType nt) {
-            return sizeOf(nt.actualType());
-        }
-        if (type instanceof TYP.FunType) {
-            return 8;
-        }
-        if (type instanceof TYP.ArrType at) {
-            long elSize = sizeOf(at.elemType);
-            return elSize* at.numElems;
-        }
-        if (type instanceof TYP.StrType st) {
-            long size = 0;
-            for (TYP.Type t : st.compTypes) {
-                size += align(sizeOf(t));
+    private static long sizeOf(TYP.Type type){
+        try {
+            if (type instanceof TYP.IntType) {
+                return 8;
             }
-            return size;
-        }
-        if (type instanceof TYP.UniType ut) {
-            long maxSize = 0;
-            for (TYP.Type t : ut.compTypes) {
-                long temp = sizeOf(t);
-                if (maxSize < temp) {
-                    maxSize = temp;
+            if (type instanceof TYP.BoolType) {
+                return 1;
+            }
+            if (type instanceof TYP.CharType) {
+                return 1;
+            }
+            if (type instanceof TYP.VoidType) {
+                return 0;
+            }
+            if (type instanceof TYP.PtrType) {
+                return 8;
+            }
+            if (type instanceof TYP.NameType nt) {
+                return sizeOf(nt.actualType());
+            }
+            if (type instanceof TYP.FunType) {
+                return 8;
+            }
+            if (type instanceof TYP.ArrType at) {
+                long elSize = sizeOf(at.elemType);
+                return elSize* at.numElems;
+            }
+            if (type instanceof TYP.StrType st) {
+                long size = 0;
+                for (TYP.Type t : st.compTypes) {
+                    size += align(sizeOf(t));
                 }
+                return size;
             }
-            return align(maxSize);
+            if (type instanceof TYP.UniType ut) {
+                long maxSize = 0;
+                for (TYP.Type t : ut.compTypes) {
+                    long temp = sizeOf(t);
+                    if (maxSize < temp) {
+                        maxSize = temp;
+                    }
+                }
+                return align(maxSize);
+            }
+        } catch (StackOverflowError e) {
+            throw new Report.Error("Cyclic type definition causes infinite size.");
         }
         throw new Report.Error("Couldn't get size of the following type: '"+type+"'.");
     }
@@ -67,7 +72,7 @@ public class Layouter implements AST.FullVisitor<Object, Object>{
         MEM.Label label;
         long depth;
         long parOffset = 8; // incoming params začnejp na +8 (SL na 0 od SP)
-        long locsOffset = -8; // nasl. spr. (raste negativno)
+        long locsOffset = 0; // nasl. spr. (raste negativno)
         long argsOffset = 8; // outgoing args, zacne na 8 za SL (od FP)
 
         public FrameCtx(MEM.Label label, long depth) {
@@ -108,23 +113,23 @@ public class Layouter implements AST.FullVisitor<Object, Object>{
 
     @Override
     public Object visit(AST.VarDefn varDefn, Object arg) {
-        long size = align(sizeOf(SemAn.isTypeAttr.get(varDefn.type)));
-        if (stack.isEmpty()) { // globana spremenljivka
+        long size = sizeOf(SemAn.isTypeAttr.get(varDefn.type));
+        if (stack.isEmpty()) { // globalna spremenljivka
             Memory.accessAttr.put(varDefn, new MEM.AbsAccess(size, new MEM.Label(varDefn.name)));
         } else {
             FrameCtx currFrame = stack.peek();
+            currFrame.locsOffset -= align(size);
             Memory.accessAttr.put(varDefn, new MEM.RelAccess(size, currFrame.locsOffset, currFrame.depth));
-            currFrame.locsOffset -= size;
         }
         return null;
     }
 
     @Override
     public Object visit(AST.ParDefn parDefn, Object arg) {
-        long size = align(sizeOf(SemAn.isTypeAttr.get(parDefn.type)));
+        long size = sizeOf(SemAn.isTypeAttr.get(parDefn.type));
         FrameCtx currFrame = stack.peek();
         Memory.accessAttr.put(parDefn, new MEM.RelAccess(size, currFrame.parOffset, currFrame.depth));
-        currFrame.parOffset += size;
+        currFrame.parOffset += align(size);
         return null;
     }
 
@@ -133,9 +138,9 @@ public class Layouter implements AST.FullVisitor<Object, Object>{
         long offset = 0;
         long size;
         for (AST.CompDefn compDefn : strType.comps) {
-            size =  align(sizeOf(SemAn.isTypeAttr.get(compDefn.type)));
+            size =  sizeOf(SemAn.isTypeAttr.get(compDefn.type));
             Memory.accessAttr.put(compDefn, new MEM.RelAccess(size, offset, -1));
-            offset += size;
+            offset += align(size);
         }
         return null;
     }
@@ -143,7 +148,7 @@ public class Layouter implements AST.FullVisitor<Object, Object>{
     public Object visit(AST.UniType uniType, Object arg) {
         long size;
         for (AST.CompDefn compDefn : uniType.comps) {
-            size =  align(sizeOf(SemAn.isTypeAttr.get(compDefn.type)));
+            size =  sizeOf(SemAn.isTypeAttr.get(compDefn.type));
             Memory.accessAttr.put(compDefn, new MEM.RelAccess(size, 0, -1));
         }
         return null;
@@ -154,11 +159,35 @@ public class Layouter implements AST.FullVisitor<Object, Object>{
     public Object visit(AST.AtomExpr atomExpr, Object arg) {
         //string type only
         if (atomExpr.type == AST.AtomExpr.Type.STR) {
-            // string constant — each char is 8 bytes + null terminator
-            long size = ((long) atomExpr.value.length() + 1) * 8;
+            // string constant — each char is 1 byte + null terminator
+            long size = ((long) atomExpr.value.length() + 1);
             Memory.stringAttr.put(atomExpr, new MEM.AbsAccess(size, new MEM.Label(), atomExpr.value));
         }
         return null;
     }
 
+    @Override
+    public Object visit(AST.CallExpr callExpr, Object arg) {
+        callExpr.funExpr.accept(this, arg);
+        for (AST.Expr argExpr : callExpr.argExprs)
+            argExpr.accept(this, arg);
+        if (!stack.isEmpty()) {
+            long needed = 8 + (long) callExpr.argExprs.size() * 8;
+            FrameCtx ctx = stack.peek();
+            ctx.argsOffset = Math.max(ctx.argsOffset, needed);
+        }
+        return null;
+    }
+    @Override
+    public Object visit(AST.NameExpr nameExpr, Object arg)   { return null; }
+    @Override
+    public Object visit(AST.AtomType atomType, Object arg)   { return null; }
+    @Override
+    public Object visit(AST.NameType nameType, Object arg)   { return null; }
+    @Override
+    public Object visit(AST.ArrType arrType, Object arg)     { return null; }
+    @Override
+    public Object visit(AST.PtrType ptrType, Object arg)     { return null; }
+    @Override
+    public Object visit(AST.FunType funType, Object arg)     { return null; }
 }

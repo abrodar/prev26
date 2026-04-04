@@ -1,3 +1,0 @@
-// dvojna uporaba istega imena
-typ a = int
-var a : int

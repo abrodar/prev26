@@ -1,3 +1,0 @@
-// vzajemna rekurzija
-typ list = (first: int, rest:list)
-fun main () : int = 0

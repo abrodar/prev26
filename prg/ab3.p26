@@ -1,0 +1,4 @@
+typ strukt = (a:int, c:char)
+
+
+fun main():int=let var a:strukt in a.a end, 1

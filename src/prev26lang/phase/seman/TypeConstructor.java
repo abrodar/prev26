@@ -117,6 +117,17 @@
                     node.accept(this, arg);
                 }
             }
+            // cycle check — only AFTER all shells are filled
+            for (AST.Node node : nodes) {
+                if (node instanceof AST.TypDefn typDefn) {
+                    TYP.NameType shell = (TYP.NameType) SemAn.isTypeAttr.get(typDefn);
+                    try {
+                        shell.actualType();
+                    } catch (Report.InternalError e) {
+                        throw new Report.Error(typDefn, "Cyclic type definition: '" + typDefn.name + "'.");
+                    }
+                }
+            }
             // pass 3 — vars
             for (AST.Node node : nodes)
                 if (node instanceof AST.VarDefn)
@@ -148,6 +159,17 @@
             for (AST.FullDefn defn : letExpr.defns) {
                 if (defn instanceof AST.TypDefn) {
                     defn.accept(this, arg);
+                }
+            }
+            // cycle check — only AFTER all shells are filled
+            for (AST.Node node : letExpr.defns) {
+                if (node instanceof AST.TypDefn typDefn) {
+                    TYP.NameType shell = (TYP.NameType) SemAn.isTypeAttr.get(typDefn);
+                    try {
+                        shell.actualType();
+                    } catch (Report.InternalError e) {
+                        throw new Report.Error(typDefn, "Cyclic type definition: '" + typDefn.name + "'.");
+                    }
                 }
             }
             // pass 3 — vars

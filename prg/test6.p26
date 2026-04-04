@@ -1,6 +1,4 @@
-// ciklicne definicije
 typ a = b
-typ b = d
-typ c = a
-typ d = a
-fun main () : int = 0
+typ b = ^a
+
+fun main():int=1

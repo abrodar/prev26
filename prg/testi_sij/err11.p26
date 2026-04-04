@@ -1,3 +1,0 @@
-fun funkcija () : void =
-	let var a : int in a end,
-	a

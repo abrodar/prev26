@@ -1,7 +1,0 @@
- typ vv = void
-
- typ p1 = (i:int, j:int)
- typ p2 = {i:int, j:int}
- typ p3 = {s1: {s21:{i:int, j: int}, s22:{i:int, j:int}}, s2:(i:int, j: int)}
- fun f4(p4:int):vv
-fun main () : int = 0
