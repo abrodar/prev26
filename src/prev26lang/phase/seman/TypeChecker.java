@@ -380,7 +380,7 @@ public class TypeChecker implements AST.FullVisitor<Object, Object> {
             tActual = tActual.actualType();
         }
         if (tActual instanceof TYP.VoidType) {
-            throw new Report.Error(castExpr, "Cannot expression to void.");
+            throw new Report.Error(castExpr, "Cannot cast expression to void.");
         }
         SemAn.ofTypeAttr.put(castExpr, tActual);
         SemAn.isAddrAttr.put(castExpr, SemAn.isAddrAttr.get(castExpr.expr));
@@ -398,10 +398,10 @@ public class TypeChecker implements AST.FullVisitor<Object, Object> {
             throw new Report.Error(asgnExpr, "Cannot assign non-equivalent types.");
         }
         if (!isAssignable(fType)) {
-            throw new Report.Error(asgnExpr, "First expression is not assignable.");
+            throw new Report.Error(asgnExpr, "First expression is not assignable. Its type is: '"+fType+"' .");
         }
         if (!isAssignable(sType)) {
-            throw new Report.Error(asgnExpr, "Second expression is not assignable.");
+            throw new Report.Error(asgnExpr, "Second expression is not assignable. Its type is: '"+sType+"' .");
         }
         // prvi mora biti naslovljiv
         if (!SemAn.isAddrAttr.get(asgnExpr.fstExpr)) {

@@ -1,0 +1,11 @@
+
+typ shell = int
+fun main():int= let
+                    typ s1 = {k1:shell, k2:int}
+                    typ s2 = {k1:int, k2:shell}
+                    var a:s1
+                    var b:s2
+                in
+                    b.k1 = a.k1 + b.k2
+                end,
+                100

@@ -1,4 +1,2 @@
-typ a = b
-typ b = a
 
-fun main():int=1
+fun main():int=let typ a = b typ b = a in 1 end, 1

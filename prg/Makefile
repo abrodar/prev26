@@ -23,5 +23,5 @@ clean   :
 .PHONY: all_tests
 all_tests:
 	for f in *.p26 ; do \
-	    make $${f%.p26} TARGETPHASE=seman																																																																														 ; \
+	    make $${f%.p26} TARGETPHASE=memory																																																																														 ; \
 	done
