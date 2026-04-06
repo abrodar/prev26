@@ -37,6 +37,7 @@ public class Compiler {
             "synan", // --: syntax analysis
             "abstr", // --: abstract syntax tree
             "seman", // --: semantic analysis
+            "memory",
             "all" // -----: putting it all together
     ));
 

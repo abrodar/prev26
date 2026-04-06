@@ -1,15 +1,21 @@
 fun even(n:int):bool =
-    if n == 0 then
-        true
-    else
-        odd(n - 1)
+    let var result:bool in
+        if n == 0 then
+            result = true
+        else
+            result = odd(n - 1)
+        end,
+        result
     end
 
 fun odd(n:int):bool =
-    if n == 0 then
-        false
-    else
-        even(n - 1)
+    let var result:bool in
+        if n == 0 then
+            result = false
+        else
+            result = even(n - 1)
+        end,
+        result
     end
 
 fun main():int = 300

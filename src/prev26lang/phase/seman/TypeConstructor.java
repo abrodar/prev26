@@ -20,6 +20,22 @@
         public final HashMap<TYP.StrType, AST.StrType> strTypeMap = new HashMap<>();
         public final HashMap<TYP.UniType, AST.UniType> uniTypeMap = new HashMap<>();
         // helper metode
+        private void checkFiniteSize(TYP.Type type, java.util.HashSet<TYP.NameType> visited) {
+            if (type instanceof TYP.NameType nt) {
+                if (!visited.add(nt)) // ce je ze v hashsetu vrzemo error
+                    throw new Report.InternalError(); // cycle = infinite size
+                checkFiniteSize(nt.type(), visited);
+            } else if (type instanceof TYP.ArrType at) {
+                checkFiniteSize(at.elemType, visited);
+            } else if (type instanceof TYP.StrType st) {
+                for (TYP.Type c : st.compTypes)
+                    checkFiniteSize(c, new java.util.HashSet<>(visited)); // vsaka komp. je neodvisna zato vsaka dobi svojo (trenutno kopijo visited)
+            } else if (type instanceof TYP.UniType ut) {
+                for (TYP.Type c : ut.compTypes)
+                    checkFiniteSize(c, new java.util.HashSet<>(visited)); // vsaka komp. je neodvisna zato vsaka dobi svojo (trenutno kopijo visited)
+            }
+            // PtrType, FunType, atomics — always finite, stop here
+        }
         private boolean equiv(TYP.Type a, TYP.Type b) {
             // EQU:1
             if (a == b) return true;
@@ -125,6 +141,11 @@
                         shell.actualType();
                     } catch (Report.InternalError e) {
                         throw new Report.Error(typDefn, "Cyclic type definition: '" + typDefn.name + "'.");
+                    }
+                    try {
+                        checkFiniteSize(shell, new java.util.HashSet<>());
+                    } catch (Report.InternalError e) {
+                        throw new Report.Error(typDefn, "Type '" + typDefn.name + "' has infinite size.");
                     }
                 }
             }

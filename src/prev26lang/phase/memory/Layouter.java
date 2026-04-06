@@ -87,6 +87,7 @@ public class Layouter implements AST.FullVisitor<Object, Object>{
     @Override
     public Object visit(AST.DefFunDefn defFunDefn, Object arg) {
         // globalne funckije dobijo named label druge anonymous label
+        defFunDefn.type.accept(this, arg);
         MEM.Label label = (currentdepth == 0) ?
                           new MEM.Label(defFunDefn.name)
                          :new MEM.Label();
@@ -101,18 +102,21 @@ public class Layouter implements AST.FullVisitor<Object, Object>{
         stack.pop();
         long locsSize = -frameCtx.locsOffset;
         long argsSize = frameCtx.argsOffset;
-        long frameSize = 8 + locsSize + argsSize; // + 8 za ret. addr.
+        long frameSize = locsSize + 8 + 8 + argsSize;  // 8 + 8 za ret addr in old FP
         Memory.frameAttr.put(defFunDefn, new MEM.Frame(label, frameCtx.depth, locsSize, argsSize, frameSize));
         return null;
     }
     @Override
     public Object visit(AST.ExtFunDefn extFunDefn, Object arg) {
         // external functions have no frame
+        extFunDefn.type.accept(this, arg);
+        extFunDefn.pars.accept(this, arg);
         return null;
     }
 
     @Override
     public Object visit(AST.VarDefn varDefn, Object arg) {
+        varDefn.type.accept(this, arg);
         long size = sizeOf(SemAn.isTypeAttr.get(varDefn.type));
         if (stack.isEmpty()) { // globalna spremenljivka
             Memory.accessAttr.put(varDefn, new MEM.AbsAccess(size, new MEM.Label(varDefn.name)));
@@ -126,6 +130,7 @@ public class Layouter implements AST.FullVisitor<Object, Object>{
 
     @Override
     public Object visit(AST.ParDefn parDefn, Object arg) {
+        parDefn.type.accept(this, arg);
         long size = sizeOf(SemAn.isTypeAttr.get(parDefn.type));
         FrameCtx currFrame = stack.peek();
         Memory.accessAttr.put(parDefn, new MEM.RelAccess(size, currFrame.parOffset, currFrame.depth));
@@ -138,6 +143,7 @@ public class Layouter implements AST.FullVisitor<Object, Object>{
         long offset = 0;
         long size;
         for (AST.CompDefn compDefn : strType.comps) {
+            compDefn.type.accept(this, arg);
             size =  sizeOf(SemAn.isTypeAttr.get(compDefn.type));
             Memory.accessAttr.put(compDefn, new MEM.RelAccess(size, offset, -1));
             offset += align(size);
@@ -148,6 +154,7 @@ public class Layouter implements AST.FullVisitor<Object, Object>{
     public Object visit(AST.UniType uniType, Object arg) {
         long size;
         for (AST.CompDefn compDefn : uniType.comps) {
+            compDefn.type.accept(this, arg);
             size =  sizeOf(SemAn.isTypeAttr.get(compDefn.type));
             Memory.accessAttr.put(compDefn, new MEM.RelAccess(size, 0, -1));
         }
@@ -159,8 +166,8 @@ public class Layouter implements AST.FullVisitor<Object, Object>{
     public Object visit(AST.AtomExpr atomExpr, Object arg) {
         //string type only
         if (atomExpr.type == AST.AtomExpr.Type.STR) {
-            // string constant — each char is 1 byte + null terminator
-            long size = ((long) atomExpr.value.length() + 1);
+            // string constant — each char is 1 byte + null terminator, -2 za narekovaje iz atomExpr.value
+            long size = ((long) atomExpr.value.length() + 1 - 2);
             Memory.stringAttr.put(atomExpr, new MEM.AbsAccess(size, new MEM.Label(), atomExpr.value));
         }
         return null;
@@ -178,16 +185,5 @@ public class Layouter implements AST.FullVisitor<Object, Object>{
         }
         return null;
     }
-    @Override
-    public Object visit(AST.NameExpr nameExpr, Object arg)   { return null; }
-    @Override
-    public Object visit(AST.AtomType atomType, Object arg)   { return null; }
-    @Override
-    public Object visit(AST.NameType nameType, Object arg)   { return null; }
-    @Override
-    public Object visit(AST.ArrType arrType, Object arg)     { return null; }
-    @Override
-    public Object visit(AST.PtrType ptrType, Object arg)     { return null; }
-    @Override
-    public Object visit(AST.FunType funType, Object arg)     { return null; }
+
 }

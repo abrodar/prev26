@@ -116,6 +116,19 @@ public class TypeChecker implements AST.FullVisitor<Object, Object> {
     public Object visit(AST.AtomExpr expr, Object arg) {
         switch (expr.type) {
             case INT -> {
+                boolean underNegation = Boolean.TRUE.equals(arg);
+                try {
+                    if (underNegation) {
+                        Long.parseLong("-" + expr.value);  // allows 2^63
+                    } else {
+                        Long.parseLong(expr.value);         // only allows up to 2^63-1
+                    }
+                } catch (NumberFormatException e) {
+                    throw new Report.Error(expr, "Integer constant out of range.");
+                }
+                SemAn.ofTypeAttr.put(expr, TYP.IntType.type);
+                SemAn.isConstAttr.put(expr, true);
+                SemAn.isAddrAttr.put(expr, false);
                 SemAn.ofTypeAttr.put(expr, TYP.IntType.type);
                 SemAn.isConstAttr.put(expr, true);
                 SemAn.isAddrAttr.put(expr, false);
@@ -174,10 +187,20 @@ public class TypeChecker implements AST.FullVisitor<Object, Object> {
 
     @Override
     public Object visit(AST.PfxExpr expr, Object arg) {
-        expr.subExpr.accept(this, arg);
-        TYP.Type subType = SemAn.ofTypeAttr.get(expr.subExpr);
         switch (expr.oper) {
-            case ADD, SUB -> {
+            case ADD -> {
+                expr.subExpr.accept(this, Boolean.FALSE);
+                TYP.Type subType = SemAn.ofTypeAttr.get(expr.subExpr);
+                if (!equiv(subType,TYP.IntType.type)) {
+                    throw new Report.Error(expr, "Unary + requires int operand.");
+                }
+                SemAn.ofTypeAttr.put(expr, TYP.IntType.type);
+                SemAn.isConstAttr.put(expr, SemAn.isConstAttr.get(expr.subExpr));
+                SemAn.isAddrAttr.put(expr, false);
+            }
+            case SUB -> {
+                expr.subExpr.accept(this, Boolean.TRUE); // signal negation to AtomExpr for int size check
+                TYP.Type subType = SemAn.ofTypeAttr.get(expr.subExpr);
                 if (!equiv(subType,TYP.IntType.type)) {
                     throw new Report.Error(expr, "Unary +/- requires int operand.");
                 }
@@ -186,6 +209,8 @@ public class TypeChecker implements AST.FullVisitor<Object, Object> {
                 SemAn.isAddrAttr.put(expr, false);
             }
             case NOT -> {
+                expr.subExpr.accept(this, arg);
+                TYP.Type subType = SemAn.ofTypeAttr.get(expr.subExpr);
                 if (!equiv(subType,TYP.BoolType.type)) {
                     throw new Report.Error(expr, "Unary not requires boolean operand.");
                 }
@@ -194,6 +219,8 @@ public class TypeChecker implements AST.FullVisitor<Object, Object> {
                 SemAn.isAddrAttr.put(expr, false);
             }
             case PTR -> {
+                expr.subExpr.accept(this, arg);
+                TYP.Type subType = SemAn.ofTypeAttr.get(expr.subExpr);
                 if (!SemAn.isAddrAttr.get(expr.subExpr)) {
                     throw new Report.Error(expr, "Cannot take address of non-addresable expression.");
                 }
@@ -560,7 +587,8 @@ public class TypeChecker implements AST.FullVisitor<Object, Object> {
     }
     @Override
     public Object visit(AST.DefFunDefn defFunDefn, Object arg) {
-        // najprej obisci parametre in telo
+        // najprej obisci parametre in telo in return type
+        defFunDefn.type.accept(this, arg);
         for (AST.ParDefn par : defFunDefn.pars)
             par.accept(this, arg);
         defFunDefn.expr.accept(this, arg);
@@ -590,7 +618,7 @@ public class TypeChecker implements AST.FullVisitor<Object, Object> {
         // typecheck elemType
         arrType.elemType.accept(this, arg);
         TYP.Type elemType = SemAn.isTypeAttr.get(arrType.elemType);
-        if (elemType instanceof TYP.VoidType) {
+        if (equiv(elemType, TYP.VoidType.type)) {
             throw new Report.Error(arrType, "Array cannot have elements of type void.");
         }
         return null;

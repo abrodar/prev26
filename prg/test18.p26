@@ -7,7 +7,7 @@ fun main():int= let typ struktura=(komp1: shell1, komp2:shell2)
                     var kazalec1:^struktura
                     var kazalec2:^se_ena
                 in
-                    kazalec1 = //nil as ^struktura,
+                    kazalec1 = nil as ^struktura,
                     kazalec2 = kazalec1
                 end,
 

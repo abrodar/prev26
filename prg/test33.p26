@@ -1,6 +1,6 @@
 
-
-typ posreden = void
+typ lab=void
+typ posreden = ^lab
 var a : posreden
 
 
