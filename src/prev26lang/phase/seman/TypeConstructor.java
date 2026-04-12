@@ -14,7 +14,7 @@
         /** Constructs a new name resolver. */
         public TypeConstructor() {
         }
-        // za hranjenje funTypes za vsal funDefn
+        // za hranjenje funTypes za vsak unDefn
         public final HashMap<AST.FunDefn, TYP.FunType> funTypes = new HashMap<>();
         // za razresevanje uni/str komponent
         public final HashMap<TYP.StrType, AST.StrType> strTypeMap = new HashMap<>();

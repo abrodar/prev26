@@ -220,9 +220,10 @@ public class Compiler {
                         break;
 
                     // === SEMANTIC ANALYSIS ===
+                    TypeConstructor tc;
                     try (SemAn seman = new SemAn()) {
                         (new NameResolver()).visit(Abstr.tree);
-                        TypeConstructor tc = new TypeConstructor();
+                        tc = new TypeConstructor();
                         tc.visit(Abstr.tree);
                         TypeChecker checker = new TypeChecker(tc);
                         checker.visit(Abstr.tree);
@@ -249,7 +250,7 @@ public class Compiler {
 
                     // === GENERATION OF INTERMEDIATE REPRESENTATION ===
                     try (ImrGen imrGen = new ImrGen()) {
-                        (new ImrGenerator()).visit(Abstr.tree);
+                        (new ImrGenerator(tc)).visit(Abstr.tree);
                         (new ImrGen.Logger(imrGen.xmlLogger)).visit(Abstr.tree);
                     }
                     if (cmdLineOpts.get("--target-phase").equals("imrgen"))

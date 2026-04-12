@@ -13,7 +13,41 @@ import prev26lang.*;
  * @author bostjan.slivnik@fri.uni-lj.si
  */
 public class TYP {
-
+    public static boolean equiv(TYP.Type a, TYP.Type b) {
+        // EQU:1
+        if (a == b) return true;
+        // unwrap name types - EQU:2, EQU:3
+        if (a instanceof TYP.NameType na) return equiv(na.type(), b);
+        if (b instanceof TYP.NameType nb) return equiv(a, nb.type());
+        // EQU:4 - arrays
+        if (a instanceof TYP.ArrType aa && b instanceof TYP.ArrType ab)
+            return aa.numElems.equals(ab.numElems) && equiv(aa.elemType, ab.elemType);
+        // EQU:5 - pointers
+        if (a instanceof TYP.PtrType pa && b instanceof TYP.PtrType pb)
+            return equiv(pa.baseType, pb.baseType);
+        // EQU:6 - structs
+        if (a instanceof TYP.StrType sa && b instanceof TYP.StrType sb) {
+            if (sa.compTypes.size() != sb.compTypes.size()) return false;
+            for (int i = 0; i < sa.compTypes.size(); i++)
+                if (!equiv(sa.compTypes.get(i), sb.compTypes.get(i))) return false;
+            return true;
+        }
+        // EQU:7 - unions
+        if (a instanceof TYP.UniType ua && b instanceof TYP.UniType ub) {
+            if (ua.compTypes.size() != ub.compTypes.size()) return false;
+            for (int i = 0; i < ua.compTypes.size(); i++)
+                if (!equiv(ua.compTypes.get(i), ub.compTypes.get(i))) return false;
+            return true;
+        }
+        // EQU:8 - functions
+        if (a instanceof TYP.FunType fa && b instanceof TYP.FunType fb) {
+            if (fa.parTypes.size() != fb.parTypes.size()) return false;
+            for (int i = 0; i < fa.parTypes.size(); i++)
+                if (!equiv(fa.parTypes.get(i), fb.parTypes.get(i))) return false;
+            return equiv(fa.resType, fb.resType);
+        }
+        return false;
+    }
 	/** (Unused but included to keep javadoc happy.) */
 	private TYP() {
 		throw new Report.InternalError();

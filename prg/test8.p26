@@ -1,0 +1,1 @@
+fun main():int='a', true, false, nil ,1 // char needs escape handling!!!

@@ -891,13 +891,11 @@ public class AST {
 	 * A component access expression.
 	 */
 	public static class CompExpr extends Expr {
-
 		/** The container. */
 		public final Expr recExpr;
 
 		/** The component name. */
 		public final String name;
-
 		/**
 		 * Constructs a component access expression.
 		 * 
@@ -914,7 +912,6 @@ public class AST {
 		public <Result, Argument> Result accept(Visitor<Result, Argument> visitor, Argument arg) {
 			return visitor.visit(this, arg);
 		}
-
 	}
 
 	/**

@@ -1,0 +1,5 @@
+fun f(a:^int):int=a^
+
+var a:int
+var c:^int
+fun main():int=a=10, c=^a, f(c)

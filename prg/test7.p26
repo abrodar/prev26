@@ -1,0 +1,1 @@
+fun main():int= let var c:^int in c = nil as ^int end, 1

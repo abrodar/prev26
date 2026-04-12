@@ -14,7 +14,7 @@ public class Layouter implements AST.FullVisitor<Object, Object>{
     private static long align(long size) {
         return (size + 7) / 8 * 8;
     }
-    private static long sizeOf(TYP.Type type){
+    public static long sizeOf(TYP.Type type){
         try {
             if (type instanceof TYP.IntType) {
                 return 8;
