@@ -1,3 +1,0 @@
-typ shell = int
-
-fun main(a:int, b:shell) : int = -0, +a, -b

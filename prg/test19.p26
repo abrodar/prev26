@@ -1,3 +1,0 @@
-typ lab = void
-fun v():^lab=nil
-fun main():int =1

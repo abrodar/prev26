@@ -1,3 +1,0 @@
-typ struktura = (ne:int, sme:int, biti:int, voidd:void)
-
-fun main():int=300

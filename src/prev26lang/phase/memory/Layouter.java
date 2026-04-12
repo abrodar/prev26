@@ -5,7 +5,7 @@ import prev26lang.phase.abstr.AST;
 import prev26lang.phase.seman.SemAn;
 import prev26lang.phase.seman.TYP;
 
-import java.nio.channels.ScatteringByteChannel;
+
 import java.util.ArrayDeque;
 import java.util.Deque;
 
@@ -73,7 +73,7 @@ public class Layouter implements AST.FullVisitor<Object, Object>{
         long depth;
         long parOffset = 8; // incoming params začnejp na +8 (SL na 0 od SP)
         long locsOffset = 0; // nasl. spr. (raste negativno)
-        long argsOffset = 8; // outgoing args, zacne na 8 za SL (od FP)
+        long argsOffset = 0; // outgoing args, zacne na 0 (od FP; btw SL samo ce imas klic)
 
         public FrameCtx(MEM.Label label, long depth) {
             this.label = label;

@@ -45,4 +45,6 @@
 module prev26lang {
 	requires java.xml;
 	requires antlr;
+    requires prev26lang;
+    //requires prev26lang;
 }

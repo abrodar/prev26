@@ -1,7 +1,0 @@
-// arr, str, uni
-
-fun funny(a:[10]int):int
-
-
-
-fun main():int = 300

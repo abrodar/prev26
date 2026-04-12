@@ -1,8 +1,0 @@
-typ shellc = char
-typ shell = {k1:int, k2:shellc}
-typ union = {k1: int, k2:char}
-typ se_ena = shell
-
-fun f(a:^se_ena):^union=a
-
-fun main():int=300

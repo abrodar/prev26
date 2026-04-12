@@ -1,3 +1,0 @@
-typ a = [10]a
-
-fun main():int=1

@@ -1,3 +1,8 @@
-fun f():void=none
+var b:[100]int
+fun c(kc:^[10]int, s:int):int= b[1] + kc^[s]
 
-fun main():int=1
+fun main():int=let
+                    var a:[10]int
+               in
+                    c(^a, 9)
+               end
