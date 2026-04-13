@@ -1,0 +1,2 @@
+fun felicita(a:int, b:bool, c:char):int=felicita(2421, true, 'a')+felicita(a-1, b, c)
+fun main () : int = felicita(300, true, '\\')

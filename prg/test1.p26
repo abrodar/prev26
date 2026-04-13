@@ -11,4 +11,4 @@ fun x():int =
             in
                 f()
             end
-fun main():int=1
+fun main():int=x(),1

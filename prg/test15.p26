@@ -1,0 +1,10 @@
+
+fun main():int=let
+                    fun f(a:int):int=let
+                                        fun g():int=f(1), 1
+                                     in
+                                     g()
+                                     end
+                in
+                    f(2)
+                end
