@@ -300,6 +300,61 @@ public class ImrGenerator implements AST.FullVisitor<Object, Object> {
 
         return null;
     }
+
+    // sem20 - 22
+    @Override
+    public Object visit(AST.CastExpr castExpr, Object arg) {
+        castExpr.type.accept(this, arg);
+        castExpr.expr.accept(this, arg);
+        IMR.Expr E = ImrGen.genExprIMRAttr.get(castExpr.expr);
+        E = deref(E, castExpr.expr);
+
+        // type ne sme biti bool ali char
+        TYP.Type castType = SemAn.isTypeAttr.get(castExpr.type);
+        if (TYP.equiv(castType, TYP.BoolType.type)) {
+            E = new IMR.BINOP(IMR.BINOP.Oper.MOD, E, new IMR.CONST(2));
+        } else if(TYP.equiv(castType, TYP.CharType.type)) {
+            E = new IMR.BINOP(IMR.BINOP.Oper.MOD, E, new IMR.CONST(256));
+        }
+        ImrGen.genExprIMRAttr.put(castExpr, E);
+        return null;
+    }
+
+    @Override
+    public Object visit(AST.SizeExpr sizeExpr, Object arg) {
+        sizeExpr.type.accept(this, arg);
+        TYP.Type  sizeType = SemAn.isTypeAttr.get(sizeExpr.type);
+        ImrGen.genExprIMRAttr.put(sizeExpr, new IMR.CONST(sizeOf(sizeType)));
+        return null;
+    }
+
+    @Override
+    public Object visit(AST.AsgnExpr asgnExpr, Object arg) {
+        asgnExpr.fstExpr.accept(this, arg);
+        asgnExpr.sndExpr.accept(this, arg);
+        IMR.Expr E1 = ImrGen.genExprIMRAttr.get(asgnExpr.fstExpr);
+        IMR.Expr E2 = ImrGen.genExprIMRAttr.get(asgnExpr.sndExpr);
+        E2 =  deref(E2, asgnExpr.sndExpr);
+
+        IMR.Stmt move = new IMR.MOVE(E1, E2);
+        ImrGen.genExprIMRAttr.put(asgnExpr, new IMR.SEXPR(move, new IMR.CONST(0)));
+
+        return null;
+    }
+
+    @Override
+    public Object visit(AST.IfThenExpr ifThenExpr, Object arg) {
+        ifThenExpr.condExpr.accept(this, arg);
+        ifThenExpr.thenExpr.accept(this, arg);
+        IMR.Expr condExpr = ImrGen.genExprIMRAttr.get(ifThenExpr.condExpr);
+        IMR.Expr thenExpr = ImrGen.genExprIMRAttr.get(ifThenExpr.thenExpr);
+        condExpr = deref(condExpr, ifThenExpr.condExpr);
+        thenExpr = deref(thenExpr, ifThenExpr.thenExpr);
+        IMR.STMTS
+        if (con)
+        return null;
+    }
+
 }
 
 

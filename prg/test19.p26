@@ -1,0 +1,5 @@
+
+
+var b:bool
+
+fun main():int=b=false, if true then 1,2,3,4 end, if b then 1,2,3,4 end, 1

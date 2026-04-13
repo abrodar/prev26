@@ -6,5 +6,6 @@ fun main():int=let
                                      g()
                                      end
                 in
-                    f(2)
+                    f(2),
+                    main()
                 end

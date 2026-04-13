@@ -1,0 +1,7 @@
+
+var a :int
+var b:(a:int, b:int)
+var d :char
+
+
+fun main():int=a = 1 , b.a =3,b.b=2,let var a:int in a=300 end, d='a', 1

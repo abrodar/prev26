@@ -1,0 +1,3 @@
+typ a=(a:int,b:char,c:int)
+
+fun main():int=sizeof int, sizeof char, sizeof bool, sizeof a

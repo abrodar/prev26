@@ -1,0 +1,4 @@
+var a:int
+var b:bool
+var c:char
+fun main():int=a as int, b as bool, c as char, a as bool, 300 as int,   1
