@@ -1,1 +1,11 @@
-fun main():int= ((1)), 1
+
+typ shell = int
+
+
+fun main():int= let
+                    var a:^shell
+                    var b:^int
+                in
+                    a = b
+                end,
+                100

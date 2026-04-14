@@ -1,3 +1,18 @@
-typ a=(a:int,b:char,c:int)
+typ shell100 = int
 
-fun main():int=sizeof int, sizeof char, sizeof bool, sizeof a
+typ shell5 = [100]^shell100
+typ shell4 = shell5
+typ shell3 = shell4
+typ shell2 = shell3
+typ shell = shell2
+
+typ shell8 = [100]^int
+typ shell7 = shell8
+typ shell6 = shell7
+fun main():int= let
+                    var a:^shell
+                    var b:^shell6
+                in
+                    a = b
+                end,
+                100

@@ -1,11 +1,4 @@
-var b:[100](a:int, b:int)
-var w:(a:int, b:int)
-fun c(kc:^[10]int, s:int):int= b[1].a,w.a, w.b,b[2].b, 1
+typ strukt = (a:int, c:char)
 
 
-
-fun main():int=let
-                    var a:[10]int
-               in
-                    c(^a, 9)
-               end
+fun main():int=let var a:strukt in a.a end, 1

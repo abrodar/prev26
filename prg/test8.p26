@@ -1,1 +1,5 @@
-fun main():int='a', '\\', '\'',true, false, nil, '\x11', '\x1B', '\x0A',1
+fun a():int=b()-1
+fun b():int=a()-1
+
+
+fun main():int=1

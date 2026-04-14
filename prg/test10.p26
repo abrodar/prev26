@@ -1,7 +1,2 @@
-var a:int
-var b:int
-var c:int
-
-var g:bool
-var h:bool
-fun main():int=23452/324,a+b,c%24,h and h, 1+1
+typ a = [9223372036854775807]int
+fun main():int=1

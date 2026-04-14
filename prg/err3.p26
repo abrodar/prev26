@@ -1,0 +1,8 @@
+typ a = b
+typ b = c
+typ c = d
+typ d = e
+typ e = f
+typ f = a
+
+fun main():int = 1

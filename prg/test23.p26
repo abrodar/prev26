@@ -1,16 +1,11 @@
-fun z():char
 
-fun x():int =
-            let
-                fun f():int = let
-                            var a:int
-                            fun g(b:int):int=b+a
-                         in
-                            a = 1,
-                            g(10),
-                            g(20)
-                         end
-            in
-                f()
-            end
-fun main():int=x(),z(),1
+typ shell = int
+fun main():int= let
+                    typ s1 = {k1:shell, k2:int}
+                    typ s2 = {k1:int, k2:shell}
+                    var a:s1
+                    var b:s2
+                in
+                    b.k1 = a.k1 + b.k2
+                end,
+                100

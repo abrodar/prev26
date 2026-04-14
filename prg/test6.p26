@@ -1,13 +1,4 @@
-typ sy = [100](a:int, b:int)
+typ a = b
+typ b = ^a
 
-var b:sy
-var w:(a:int, b:int)
-fun c(kc:^[10]int, s:int):int=b[1].a,w.a,w.b,b[2].b, 1
-
-
-
-fun main():int=let
-                    var a:[10]int
-               in
-                    c(^a, 9)
-               end
+fun main():int=1

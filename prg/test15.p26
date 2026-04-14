@@ -1,11 +1,9 @@
-
-fun main():int=let
-                    fun f(a:int):int=let
-                                        fun g():int=f(1), 1
-                                     in
-                                     g()
-                                     end
+typ shell = int
+fun main():int= let
+                    var a:[10][20][30][40][50]shell
+                    var b:[10][20][30][40][50]int
                 in
-                    f(2),
-                    main()
-                end
+                    b[1][2][3][4][5] = 10,
+                    a[1][2][3][4][5] = b[1][2][3][4][5]
+                end,
+                100

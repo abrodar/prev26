@@ -1,9 +1,9 @@
-fun f(x:int):int=
-    let fun g(y:int):int=x+y
-    in g(3)
+fun main() : int =
+    let
+        var s : ^char
+        var c : char
+    in
+        s = "hello",
+        c = s^,        // first character 'h'
+        300
     end
-
-
-var cy:int
-var cs:(x:int, y:int, c:char)
-fun main() : int = let var a:int var str:^char in a = f(3), str = "aljaz", cy = 300, a end

@@ -1,1 +1,4 @@
-fun main():int= let var c:^int in c = nil as ^int end, 1
+typ a = {c:int, d:^b}
+typ b = {c:int, d:^a}
+
+fun main():int=1

@@ -1,0 +1,4 @@
+typ a = b
+typ b = int
+
+fun main():int=1

@@ -301,7 +301,10 @@ public class ImrGenerator implements AST.FullVisitor<Object, Object> {
         Vector<Long> offsets = new Vector<>();
         Vector<IMR.Expr> argsE = new  Vector<>();
         //the static link must be included
-        AST.Defn calleDefn = SemAn.defAtAttr.get(callExpr.funExpr);
+        AST.Defn calleDefn = null;
+        if (callExpr.funExpr instanceof AST.NameExpr) {
+            calleDefn = SemAn.defAtAttr.get(callExpr.funExpr);
+        }
         MEM.Frame calleFrame = null;
         if (calleDefn instanceof AST.DefFunDefn) {
             calleFrame = Memory.frameAttr.get(calleDefn);
