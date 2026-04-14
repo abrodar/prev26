@@ -10,6 +10,7 @@ import prev26lang.phase.seman.SemAn;
 import prev26lang.phase.seman.TYP;
 import prev26lang.phase.seman.TypeConstructor;
 
+import java.io.DataOutput;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Map;
@@ -257,10 +258,21 @@ public class ImrGenerator implements AST.FullVisitor<Object, Object> {
     @Override
     public Object visit(AST.Exprs exprs, Object arg) {
         exprs.exprs.accept(this, arg);
-        if (exprs.exprs.size() == 1) {
+        int size = exprs.exprs.size();
+        if (size == 1) {
             IMR.Expr E = ImrGen.genExprIMRAttr.get(exprs.exprs.get(0));
             E = deref(E, exprs.exprs.get(0));
             ImrGen.genExprIMRAttr.put(exprs, E);
+        } else {
+            Vector<IMR.Stmt> stmts = new Vector<>();
+            for (int i = 0; i < size - 1; i++) {
+                AST.Expr e = exprs.exprs.get(i);
+                IMR.Expr imrE = ImrGen.genExprIMRAttr.get(e);
+                stmts.add(new IMR.ESTMT(imrE));
+            }
+            AST.Expr last = exprs.exprs.get(size - 1);
+            IMR.Expr lastE = deref(ImrGen.genExprIMRAttr.get(last), last);
+            ImrGen.genExprIMRAttr.put(exprs, new IMR.SEXPR(new IMR.STMTS(stmts), lastE));
         }
         return null;
     }
@@ -343,18 +355,89 @@ public class ImrGenerator implements AST.FullVisitor<Object, Object> {
     }
 
     @Override
-    public Object visit(AST.IfThenExpr ifThenExpr, Object arg) {
-        ifThenExpr.condExpr.accept(this, arg);
-        ifThenExpr.thenExpr.accept(this, arg);
-        IMR.Expr condExpr = ImrGen.genExprIMRAttr.get(ifThenExpr.condExpr);
-        IMR.Expr thenExpr = ImrGen.genExprIMRAttr.get(ifThenExpr.thenExpr);
-        condExpr = deref(condExpr, ifThenExpr.condExpr);
-        thenExpr = deref(thenExpr, ifThenExpr.thenExpr);
-        IMR.STMTS
-        if (con)
+    public Object visit(AST.LetExpr letExpr, Object arg) {
+        letExpr.defns.accept(this, arg);
+        letExpr.expr.accept(this, arg);
+        IMR.Expr E = ImrGen.genExprIMRAttr.get(letExpr.expr);
+        E = deref(E, letExpr.expr);
+        ImrGen.genExprIMRAttr.put(letExpr, E);
         return null;
     }
 
+    @Override
+    public Object visit(AST.IfThenExpr ifExpr, Object arg) {
+        ifExpr.condExpr.accept(this, arg);
+        ifExpr.thenExpr.accept(this, arg);
+
+        IMR.Expr cond = deref(ImrGen.genExprIMRAttr.get(ifExpr.condExpr), ifExpr.condExpr);
+
+        MEM.Label thenLabel = new MEM.Label();
+        MEM.Label endLabel = new MEM.Label();
+
+        Vector<IMR.Stmt> stmts = new Vector<>();
+
+        // CJUMP(cond, then, end)
+        stmts.add(new IMR.CJUMP(cond, new IMR.NAME(thenLabel), new IMR.NAME(endLabel)));
+        // LABEL(then)
+        stmts.add(new IMR.LABEL(thenLabel));
+        // then body as ESTMT (result is void/discarded per SEM:25)
+        stmts.add(new IMR.ESTMT(ImrGen.genExprIMRAttr.get(ifExpr.thenExpr)));
+        // LABEL(end)
+        stmts.add(new IMR.LABEL(endLabel));
+
+        // if returns void = 0
+        ImrGen.genExprIMRAttr.put(ifExpr, new IMR.SEXPR(new IMR.STMTS(stmts), new IMR.CONST(0)));
+        return null;
+    }
+    @Override
+    public Object visit(AST.IfThenElseExpr ifThenElseExpr, Object arg) {
+        ifThenElseExpr.condExpr.accept(this, arg);
+        ifThenElseExpr.thenExpr.accept(this, arg);
+        ifThenElseExpr.elseExpr.accept(this, arg);
+
+        IMR.Expr cond = deref(ImrGen.genExprIMRAttr.get(ifThenElseExpr.condExpr), ifThenElseExpr.condExpr);
+        MEM.Label thenLabel = new MEM.Label();
+        MEM.Label elseLabel = new MEM.Label();
+        MEM.Label endLabel = new MEM.Label();
+
+        Vector<IMR.Stmt> stmts = new Vector<>();
+
+        stmts.add(new IMR.CJUMP(cond, new IMR.NAME(thenLabel), new IMR.NAME(elseLabel)));
+        stmts.add(new IMR.LABEL(thenLabel));
+        stmts.add(new IMR.ESTMT(ImrGen.genExprIMRAttr.get(ifThenElseExpr.thenExpr)));
+        stmts.add(new IMR.JUMP(new IMR.NAME(endLabel)));
+        stmts.add(new IMR.LABEL(elseLabel));
+        stmts.add(new IMR.ESTMT(ImrGen.genExprIMRAttr.get(ifThenElseExpr.elseExpr)));
+        stmts.add(new IMR.LABEL(endLabel));
+
+        ImrGen.genExprIMRAttr.put(ifThenElseExpr, new IMR.SEXPR(new IMR.STMTS(stmts), new IMR.CONST(0)));
+        return null;
+    }
+
+    @Override
+    public Object visit(AST.WhileExpr whileExpr, Object arg) {
+        whileExpr.condExpr.accept(this, arg);
+        whileExpr.expr.accept(this, arg);
+        IMR.Expr cond = ImrGen.genExprIMRAttr.get(whileExpr.condExpr);
+        IMR.Expr body = ImrGen.genExprIMRAttr.get(whileExpr.expr);
+
+        cond = deref(cond, whileExpr.condExpr);
+
+        MEM.Label testLabel = new MEM.Label();
+        MEM.Label bodyLabel = new MEM.Label();
+        MEM.Label doneLabel = new MEM.Label();
+
+        Vector<IMR.Stmt> stmts = new Vector<>();
+        stmts.add(new IMR.LABEL(testLabel));
+        stmts.add(new IMR.CJUMP(cond, new IMR.NAME(bodyLabel), new IMR.NAME(doneLabel)));
+        stmts.add(new IMR.LABEL(bodyLabel));
+        stmts.add(new IMR.ESTMT(body));
+        stmts.add(new IMR.JUMP(new IMR.NAME(testLabel)));
+        stmts.add(new IMR.LABEL(doneLabel));
+
+        ImrGen.genExprIMRAttr.put(whileExpr, new IMR.SEXPR(new IMR.STMTS(stmts), new IMR.CONST(0)));
+        return null;
+    }
 }
 
 

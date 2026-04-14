@@ -537,11 +537,11 @@ public class TypeChecker implements AST.FullVisitor<Object, Object> {
         ifThenExpr.condExpr.accept(this, arg);
         TYP.Type condType = SemAn.ofTypeAttr.get(ifThenExpr.condExpr);
         if (!equiv(condType, TYP.BoolType.type)) {
-            throw new Report.Error(ifThenExpr, "While condition is not bool.");
+            throw new Report.Error(ifThenExpr, "If condition is not bool.");
         }
         TYP.Type bodyType = SemAn.ofTypeAttr.get(ifThenExpr.thenExpr);
         if (bodyType == null)
-            throw new Report.Error(ifThenExpr, "While body has invalid type.");
+            throw new Report.Error(ifThenExpr, "If body has invalid type.");
         SemAn.ofTypeAttr.put(ifThenExpr, TYP.VoidType.type);
         SemAn.isConstAttr.put(ifThenExpr, false);
         SemAn.isAddrAttr.put(ifThenExpr, false);
@@ -554,14 +554,14 @@ public class TypeChecker implements AST.FullVisitor<Object, Object> {
         ifThenElseExpr.elseExpr.accept(this, arg);
         TYP.Type condType = SemAn.ofTypeAttr.get(ifThenElseExpr.condExpr);
         if (!equiv(condType, TYP.BoolType.type)) {
-            throw new Report.Error(ifThenElseExpr, "While condition is not bool.");
+            throw new Report.Error(ifThenElseExpr, "If condition is not bool.");
         }
         TYP.Type thenType =  SemAn.ofTypeAttr.get(ifThenElseExpr.thenExpr);
         if (thenType == null)
-            throw new Report.Error(ifThenElseExpr, "While then has invalid type.");
+            throw new Report.Error(ifThenElseExpr, "If's then part has invalid type. Check if null.");
         TYP.Type elseType = SemAn.ofTypeAttr.get(ifThenElseExpr.elseExpr);
         if (elseType == null)
-            throw new Report.Error(ifThenElseExpr, "While else has invalid type.");
+            throw new Report.Error(ifThenElseExpr, "If's else part has invalid type. Check if null.");
         SemAn.ofTypeAttr.put(ifThenElseExpr, TYP.VoidType.type);
         SemAn.isConstAttr.put(ifThenElseExpr, false);
         SemAn.isAddrAttr.put(ifThenElseExpr, false);

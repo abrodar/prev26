@@ -1,0 +1,4 @@
+var a:bool
+var aa:int
+
+fun main():int=while a do 1+aa end, 1
