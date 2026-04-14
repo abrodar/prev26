@@ -85,6 +85,18 @@ public class ImrGenerator implements AST.FullVisitor<Object, Object> {
         defFunDefn.type.accept(this, arg);
         defFunDefn.pars.accept(this, arg);
         defFunDefn.expr.accept(this, arg);
+        // entry and exit labels
+        MEM.Label entryLabel = new MEM.Label();
+        MEM.Label exitLabel = new MEM.Label();
+        ImrGen.bodyEntryLabelAttr.put(defFunDefn, entryLabel);
+        ImrGen.bodyExitLabelAttr.put(defFunDefn, exitLabel);
+        // function body IMR — entry label, body, move result to RV, exit label
+        IMR.Expr bodyExpr = ImrGen.genExprIMRAttr.get(defFunDefn.expr);
+        Vector<IMR.Stmt> stmts = new Vector<>();
+        stmts.add(new IMR.LABEL(entryLabel));
+        stmts.add(new IMR.MOVE(new IMR.TEMP(frame.RV), deref(bodyExpr, defFunDefn.expr)));
+        stmts.add(new IMR.LABEL(exitLabel));
+        ImrGen.genStmtIMRAttr.put(defFunDefn, new IMR.STMTS(stmts));
 
         // stack bookeeping
         currentdepth--;
@@ -128,6 +140,9 @@ public class ImrGenerator implements AST.FullVisitor<Object, Object> {
                                         }
                                         ImrGen.genExprIMRAttr.put(atomExpr, new IMR.CONST(c));
                                         break;
+            case AST.AtomExpr.Type.VOID:
+                ImrGen.genExprIMRAttr.put(atomExpr, new IMR.CONST(0));
+                break;
 
         }
         return null;
@@ -144,12 +159,10 @@ public class ImrGenerator implements AST.FullVisitor<Object, Object> {
             ImrGen.genExprIMRAttr.put(nameExpr, new IMR.NAME(frame.label));
             return null;
         }
-        /*
         if (astDefn instanceof AST.ExtFunDefn extFunDefn) {
-            // external function — also has a label
-            ImrGen.genExprIMRAttr.put(nameExpr, new IMR.NAME(extFunDefn.???));
+            ImrGen.genExprIMRAttr.put(nameExpr, new IMR.NAME(new MEM.Label(extFunDefn.name)));
             return null;
-        }*/
+        }
         MEM.Access accessType = Memory.accessAttr.get(astDefn);
         if (SemAn.isAddrAttr.get(nameExpr)) {
             FrameCtx currentFrame = stack.peek();
@@ -289,11 +302,14 @@ public class ImrGenerator implements AST.FullVisitor<Object, Object> {
         Vector<IMR.Expr> argsE = new  Vector<>();
         //the static link must be included
         AST.Defn calleDefn = SemAn.defAtAttr.get(callExpr.funExpr);
-        MEM.Frame calleFrame = Memory.frameAttr.get(calleDefn);
+        MEM.Frame calleFrame = null;
+        if (calleDefn instanceof AST.DefFunDefn) {
+            calleFrame = Memory.frameAttr.get(calleDefn);
+        }
         FrameCtx currFrame = stack.peek();
 
         IMR.Expr sl;
-        if (calleFrame.depth == 0) {
+        if (calleFrame == null || calleFrame.depth == 0) {
             sl = new IMR.CONST(0); // globalne nimajo SL
         } else {
             sl = getNestedFP(currFrame, calleFrame.depth - 1); // tre.globina-calle.glob. da prides do klicateljeve globine, nato -1 da prides do njegovega static encloserja
