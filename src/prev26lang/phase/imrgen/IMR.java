@@ -17,7 +17,7 @@ public class IMR {
 	 * Instruction of the intermediate representation.
 	 */
 	public static abstract class Instr implements Loggable {
-
+        abstract public Vector<IMR.Expr> kids();
 		public abstract <Result, Arg> Result accept(Visitor<Result, Arg> visitor, Arg accArg);
 
 	}
@@ -26,9 +26,10 @@ public class IMR {
 	 * Instruction denoting an expression.
 	 */
 	public static abstract class Expr extends Instr {
+        abstract public Expr build(Vector<IMR.Expr> kids);
 	}
 
-	/**
+    /**
 	 * Binary operation (logical, relational, and arithmetic).
 	 * 
 	 * Evaluates the first subexpression, evaluates the second expression, performs
@@ -306,6 +307,7 @@ public class IMR {
 	 * Statement expression.
 	 * 
 	 * Executes the statement, evaluates the expression and returns its value.
+     * kot eseq
 	 */
 	public static class SEXPR extends Expr {
 
@@ -438,6 +440,7 @@ public class IMR {
 	 * Instruction denoting a statement.
 	 */
 	public static abstract class Stmt extends Instr {
+        abstract public IMR.Stmt build(Vector<IMR.Expr> kids);
 	}
 
 	/**
