@@ -63,6 +63,21 @@ public class IMR {
 			this.sndExpr = sndExpr;
 		}
 
+        public Vector<IMR.Expr> kids() {
+            Vector<IMR.Expr> kids = new Vector<IMR.Expr>();
+            kids.add(fstExpr);
+            kids.add(sndExpr);
+            return kids;
+        }
+
+        public Expr build(Vector<IMR.Expr> kids) {
+            if (kids.size() != 2) {
+                System.err.println("Invalid number of kids in binop expr: " + kids.size());
+                throw new Report.InternalError();
+            }
+            return new BINOP(oper, kids.get(0), kids.get(1));
+        }
+
 		@Override
 		public <Result, Arg> Result accept(Visitor<Result, Arg> visitor, Arg accArg) {
 			return visitor.visit(this, accArg);
@@ -114,6 +129,22 @@ public class IMR {
 			this.offs = new Vector<Long>(offs);
 			this.args = new Vector<Expr>(args);
 		}
+        public Vector<IMR.Expr> kids() {
+            Vector<IMR.Expr> kids = new Vector<IMR.Expr>();
+            kids.add(addr);
+            for (Expr expr: args) {
+                kids.add(expr);
+            }
+            return kids;
+        }
+
+        public Expr build(Vector<IMR.Expr> kids) {
+            Vector<IMR.Expr> noviArgs = new Vector<IMR.Expr>();
+            for (int i = 1; i < kids.size(); i++) {
+                noviArgs.add(kids.get(i));
+            }
+            return new CALL(kids.get(0), offs, noviArgs);
+        }
 
 		@Override
 		public <Result, Arg> Result accept(Visitor<Result, Arg> visitor, Arg accArg) {
@@ -166,6 +197,15 @@ public class IMR {
 			this.value = value;
 		}
 
+        public Vector<IMR.Expr> kids() {
+            Vector<IMR.Expr> kids = new Vector<IMR.Expr>();
+            return kids;
+        }
+
+        public Expr build(Vector<IMR.Expr> kids) {
+            return new CONST(value);
+        }
+
 		@Override
 		public <Result, Arg> Result accept(Visitor<Result, Arg> visitor, Arg accArg) {
 			return visitor.visit(this, accArg);
@@ -204,6 +244,20 @@ public class IMR {
 		public MEM1(Expr addr) {
 			this.addr = addr;
 		}
+
+        public Vector<IMR.Expr> kids() {
+            Vector<IMR.Expr> kids = new Vector<IMR.Expr>();
+            kids.add(addr);
+            return kids;
+        }
+
+        public Expr build(Vector<IMR.Expr> kids) {
+            if (kids.size() != 1) {
+                System.err.println("Invalid number of kids in MEM1 expr: " + kids.size());
+                throw new Report.InternalError();
+            }
+            return new MEM1(kids.get(0));
+        }
 
 		@Override
 		public <Result, Arg> Result accept(Visitor<Result, Arg> visitor, Arg accArg) {
@@ -245,6 +299,19 @@ public class IMR {
 			this.addr = addr;
 		}
 
+        public Vector<IMR.Expr> kids() {
+            Vector<IMR.Expr> kids = new Vector<IMR.Expr>();
+            kids.add(addr);
+            return kids;
+        }
+
+        public Expr build(Vector<IMR.Expr> kids) {
+            if (kids.size() != 1) {
+                System.err.println("Invalid number of kids in MEM8 expr: " + kids.size());
+                throw new Report.InternalError();
+            }
+            return new MEM8(kids.get(0));
+        }
 		@Override
 		public <Result, Arg> Result accept(Visitor<Result, Arg> visitor, Arg accArg) {
 			return visitor.visit(this, accArg);
@@ -284,6 +351,14 @@ public class IMR {
 			this.label = label;
 		}
 
+        public Vector<IMR.Expr> kids() {
+            Vector<IMR.Expr> kids = new Vector<IMR.Expr>();
+            return kids;
+        }
+
+        public Expr build(Vector<IMR.Expr> kids) {
+            return new NAME(label);
+        }
 		@Override
 		public <Result, Arg> Result accept(Visitor<Result, Arg> visitor, Arg accArg) {
 			return visitor.visit(this, accArg);
@@ -327,7 +402,19 @@ public class IMR {
 			this.stmt = stmt;
 			this.expr = expr;
 		}
+        public Vector<IMR.Expr> kids() {
+            Vector<IMR.Expr> kids = new Vector<IMR.Expr>();
+            kids.add(expr);
+            return kids;
+        }
 
+        public Expr build(Vector<IMR.Expr> kids) {
+            if (kids.size() != 1) {
+                System.err.println("Invalid number of kids in SEXPR expr: " + kids.size());
+                throw new Report.InternalError();
+            }
+            return new SEXPR(stmt, kids.get(0));
+        }
 		@Override
 		public <Result, Arg> Result accept(Visitor<Result, Arg> visitor, Arg accArg) {
 			return visitor.visit(this, accArg);
@@ -367,6 +454,15 @@ public class IMR {
 		public TEMP(MEM.Temp temp) {
 			this.temp = temp;
 		}
+
+        public Vector<IMR.Expr> kids() {
+            Vector<IMR.Expr> kids = new Vector<IMR.Expr>();
+            return kids;
+        }
+
+        public Expr build(Vector<IMR.Expr> kids) {
+            return new TEMP(temp);
+        }
 
 		@Override
 		public <Result, Arg> Result accept(Visitor<Result, Arg> visitor, Arg accArg) {
@@ -415,6 +511,19 @@ public class IMR {
 			this.oper = oper;
 			this.subExpr = subExpr;
 		}
+        public Vector<IMR.Expr> kids() {
+            Vector<IMR.Expr> kids = new Vector<IMR.Expr>();
+            kids.add(subExpr);
+            return kids;
+        }
+
+        public Expr build(Vector<IMR.Expr> kids) {
+            if (kids.size() != 1) {
+                System.err.println("Invalid number of kids in UNOP expr: " + kids.size());
+                throw new Report.InternalError();
+            }
+            return new UNOP(oper, kids.get(0));
+        }
 
 		@Override
 		public <Result, Arg> Result accept(Visitor<Result, Arg> visitor, Arg accArg) {
@@ -473,6 +582,22 @@ public class IMR {
 			this.negAddr = negLabel;
 		}
 
+        public Vector<IMR.Expr> kids() {
+            Vector<IMR.Expr> kids = new Vector<IMR.Expr>();
+            kids.add(cond);
+            kids.add(posAddr);
+            kids.add(negAddr);
+            return kids;
+        }
+
+        public Stmt build(Vector<IMR.Expr> kids) {
+            if (kids.size() != 3) {
+                System.err.println("Invalid number of kids in CJUMP stmt: " + kids.size());
+                throw new Report.InternalError();
+            }
+            return new CJUMP(kids.get(0), kids.get(1), kids.get(2));
+        }
+
 		@Override
 		public <Result, Arg> Result accept(Visitor<Result, Arg> visitor, Arg accArg) {
 			return visitor.visit(this, accArg);
@@ -514,6 +639,19 @@ public class IMR {
 			this.expr = expr;
 		}
 
+        public Vector<IMR.Expr> kids() {
+            Vector<IMR.Expr> kids = new Vector<IMR.Expr>();
+            kids.add(expr);
+            return kids;
+        }
+
+        public Stmt build(Vector<IMR.Expr> kids) {
+            if (kids.size() != 1) {
+                System.err.println("Invalid number of kids in ESTMT stmt: " + kids.size());
+                throw new Report.InternalError();
+            }
+            return new ESTMT(kids.get(0));
+        }
 		@Override
 		public <Result, Arg> Result accept(Visitor<Result, Arg> visitor, Arg accArg) {
 			return visitor.visit(this, accArg);
@@ -553,6 +691,20 @@ public class IMR {
 			this.addr = addr;
 		}
 
+        public Vector<IMR.Expr> kids() {
+            Vector<IMR.Expr> kids = new Vector<IMR.Expr>();
+            kids.add(addr);
+            return kids;
+        }
+
+        public Stmt build(Vector<IMR.Expr> kids) {
+            if (kids.size() != 1) {
+                System.err.println("Invalid number of kids in JUMP stmt: " + kids.size());
+                throw new Report.InternalError();
+            }
+            return new JUMP(kids.get(0));
+        }
+
 		@Override
 		public <Result, Arg> Result accept(Visitor<Result, Arg> visitor, Arg accArg) {
 			return visitor.visit(this, accArg);
@@ -591,6 +743,14 @@ public class IMR {
 		public LABEL(MEM.Label label) {
 			this.label = label;
 		}
+        public Vector<IMR.Expr> kids() {
+            Vector<IMR.Expr> kids = new Vector<IMR.Expr>();
+            return kids;
+        }
+
+        public Stmt build(Vector<IMR.Expr> kids) {
+            return new LABEL(label);
+        }
 
 		@Override
 		public <Result, Arg> Result accept(Visitor<Result, Arg> visitor, Arg accArg) {
@@ -633,7 +793,20 @@ public class IMR {
 			this.dst = dst;
 			this.src = src;
 		}
+        public Vector<IMR.Expr> kids() {
+            Vector<IMR.Expr> kids = new Vector<IMR.Expr>();
+            kids.add(dst);
+            kids.add(src);
+            return kids;
+        }
 
+        public Stmt build(Vector<IMR.Expr> kids) {
+            if (kids.size() != 2) {
+                System.err.println("Invalid number of kids in MOVE stmt: " + kids.size());
+                throw new Report.InternalError();
+            }
+            return new MOVE(kids.get(0), kids.get(1));
+        }
 		@Override
 		public <Result, Arg> Result accept(Visitor<Result, Arg> visitor, Arg accArg) {
 			return visitor.visit(this, accArg);
@@ -673,7 +846,14 @@ public class IMR {
 		public STMTS(Vector<Stmt> stmts) {
 			this.stmts = new Vector<Stmt>(stmts);
 		}
+        public Vector<IMR.Expr> kids() {
+            Vector<IMR.Expr> kids = new Vector<IMR.Expr>();
+            return kids;
+        }
 
+        public Stmt build(Vector<IMR.Expr> kids) {
+            return new STMTS(stmts);
+        }
 		@Override
 		public <Result, Arg> Result accept(Visitor<Result, Arg> visitor, Arg accArg) {
 			return visitor.visit(this, accArg);
