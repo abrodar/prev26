@@ -795,17 +795,19 @@ public class IMR {
 		}
         public Vector<IMR.Expr> kids() {
             Vector<IMR.Expr> kids = new Vector<IMR.Expr>();
-            kids.add(dst);
+            if (dst instanceof MEM1 || dst instanceof MEM8) {
+                kids.add(dst); // addr is a source; else is temp and we dont pull anything out
+            }
             kids.add(src);
             return kids;
         }
 
         public Stmt build(Vector<IMR.Expr> kids) {
-            if (kids.size() != 2) {
-                System.err.println("Invalid number of kids in MOVE stmt: " + kids.size());
-                throw new Report.InternalError();
+            if (dst instanceof MEM1 || dst instanceof MEM8) {
+                return new MOVE(kids.get(0), kids.get(1));
+            } else {
+                return new MOVE(dst, kids.get(0)); // dst unchanged since it's not MEM
             }
-            return new MOVE(kids.get(0), kids.get(1));
         }
 		@Override
 		public <Result, Arg> Result accept(Visitor<Result, Arg> visitor, Arg accArg) {
