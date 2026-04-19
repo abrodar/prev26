@@ -39,7 +39,7 @@ public class Compiler {
             "abstr", // --: abstract syntax tree
             "seman", // --: semantic analysis
             "memory", // --: memory layout
-            "imrgen" // --: generation of intermediate representation
+            "imrgen", // --: generation of intermediate representation
             "imrlin"
     ));
 
@@ -258,9 +258,23 @@ public class Compiler {
                     if (cmdLineOpts.get("--target-phase").equals("imrgen"))
                         break;
                     // === LINEARIZATION OF INTERMEDIATE REPRESENTATION ===
-                    try (ImrLin imrLin = new ImrLin()) {
-                        //(new ImrGenerator(tc)).visit(Abstr.tree);
-                        //(new ImrGen.Logger(imrGen.xmlLogger)).visit(Abstr.tree);
+                    try {
+                        ImrLin imrLin = new ImrLin();
+                        Abstr.tree.accept(new AST.FullVisitor<Object,Object>(){
+                            @Override
+                            public Object visit(AST.DefFunDefn defFunDefn, Object arg) {
+                                IMR.Stmt body = ImrGen.genStmtIMRAttr.get(defFunDefn);
+                                if (body == null) return null;
+                                Vector<IMR.Stmt> stmts = ImrLin.do_stmt(body);
+                                System.out.println("=== " + defFunDefn.name + " ===");
+                                for (IMR.Stmt s : stmts) {
+                                    System.out.println(s);
+                                }
+                                return null;
+                            }
+                        }, null);
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
                     if (cmdLineOpts.get("--target-phase").equals("imrlin"))
                         break;

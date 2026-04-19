@@ -1,9 +1,4 @@
-fun main() : int =
-    let
-        var s : ^char
-        var c : char
-    in
-        s = "hello",
-        c = s^,        // first character 'h'
-        300
-    end
+fun a(p1:int):int=p1+10
+fun f(p1:int, p2:int):int = p1+ p2
+
+fun main() : int = f(1, a(10))

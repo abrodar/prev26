@@ -315,7 +315,7 @@ public class ImrGenerator implements AST.FullVisitor<Object, Object> {
         if (calleFrame == null || calleFrame.depth == 0) {
             sl = new IMR.CONST(0); // globalne nimajo SL
         } else {
-            sl = getNestedFP(currFrame, calleFrame.depth - 1); // tre.globina-calle.glob. da prides do klicateljeve globine, nato -1 da prides do njegovega static encloserja
+            sl = getNestedFP(currFrame, calleFrame.depth - 1); // tre.globina-calle.globina da prides do klicateljeve globine, nato -1 da prides do njegovega static encloserja
         }
         argsE.add(sl);
         offsets.add(0L);
