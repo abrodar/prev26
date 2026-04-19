@@ -108,9 +108,9 @@ public class Layouter implements AST.FullVisitor<Object, Object>{
     }
     @Override
     public Object visit(AST.ExtFunDefn extFunDefn, Object arg) {
-        // external functions have no frame
+        // external functions have no frame, skip pars entirely
         extFunDefn.type.accept(this, arg);
-        extFunDefn.pars.accept(this, arg);
+        //extFunDefn.pars.accept(this, arg);
         return null;
     }
 

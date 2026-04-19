@@ -75,7 +75,7 @@
 		    <td>
 		      <nobr>
 			<font style="font-family:helvetica; font-size:85%">
-			  GENERATED IMR:
+			  GENERATED :
 			</font>
 		      </nobr>
 		      <br/>

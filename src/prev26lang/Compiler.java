@@ -258,24 +258,16 @@ public class Compiler {
                     if (cmdLineOpts.get("--target-phase").equals("imrgen"))
                         break;
                     // === LINEARIZATION OF INTERMEDIATE REPRESENTATION ===
-                    try {
-                        ImrLin imrLin = new ImrLin();
-                        Abstr.tree.accept(new AST.FullVisitor<Object,Object>(){
-                            @Override
-                            public Object visit(AST.DefFunDefn defFunDefn, Object arg) {
-                                IMR.Stmt body = ImrGen.genStmtIMRAttr.get(defFunDefn);
-                                if (body == null) return null;
-                                Vector<IMR.Stmt> stmts = ImrLin.do_stmt(body);
-                                System.out.println("=== " + defFunDefn.name + " ===");
-                                for (IMR.Stmt s : stmts) {
-                                    System.out.println(s);
-                                }
-                                return null;
-                            }
-                        }, null);
-                    } catch (Exception e) {
-                        e.printStackTrace();
+                    ImrLin.linearize(Abstr.tree);
+                    Vector<LIN.DataChunk> dataChunks = new Vector<>();
+                    Vector<LIN.CodeChunk> codeChunks = new Vector<>();
+                    for (LIN.Chunk c : ImrLin.chunks) {
+                        if (c instanceof LIN.DataChunk dc) dataChunks.add(dc);
+                        else if (c instanceof LIN.CodeChunk cc) codeChunks.add(cc);
                     }
+                    Interpreter interp = new Interpreter(dataChunks, codeChunks);
+                    long result = interp.run("_main");
+                    System.out.println("\nResult: " + result);
                     if (cmdLineOpts.get("--target-phase").equals("imrlin"))
                         break;
 

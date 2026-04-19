@@ -367,7 +367,11 @@ public class ImrGenerator implements AST.FullVisitor<Object, Object> {
         IMR.Expr E2 = ImrGen.genExprIMRAttr.get(asgnExpr.sndExpr);
         E2 =  deref(E2, asgnExpr.sndExpr);
 
-        IMR.Stmt move = new IMR.MOVE(E1, E2);
+        // E1 is an address — wrap in MEM to make it a valid MOVE dst
+        long size = Layouter.sizeOf(SemAn.ofTypeAttr.get(asgnExpr.fstExpr));
+        IMR.Expr dst = size == 1 ? new IMR.MEM1(E1) : new IMR.MEM8(E1);
+
+        IMR.Stmt move = new IMR.MOVE(dst, E2);
         ImrGen.genExprIMRAttr.put(asgnExpr, new IMR.SEXPR(move, new IMR.CONST(0)));
 
         return null;

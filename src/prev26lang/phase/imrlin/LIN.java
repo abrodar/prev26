@@ -14,7 +14,6 @@ public class LIN {
      * A chuck of data.
      */
     public static class DataChunk extends Chunk {
-
         /** The label where data is placed at. */
         public final MEM.Label label;
 
@@ -41,7 +40,7 @@ public class LIN {
         public final MEM.Frame frame;
 
         /** The statements of a function body. */
-        private final Vector<IMR.Stmt> stmts;
+        final Vector<IMR.Stmt> stmts;
 
         /**
          * The function's body entry label, i.e., the label the prologue jumps to.
