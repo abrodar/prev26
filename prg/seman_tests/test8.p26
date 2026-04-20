@@ -1,5 +1,0 @@
-fun a():int=b()-1
-fun b():int=a()-1
-
-
-fun main():int=1

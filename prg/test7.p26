@@ -1,4 +1,9 @@
-typ a = {c:int, d:^b}
-typ b = {c:int, d:^a}
-
-fun main():int=1
+// test7
+fun fact(n:int):int =
+    let var r:int in
+        if n <= 1 then r = 1
+        else r = n * fact(n - 1)
+        end,
+        r
+    end
+fun main():int = fact(5)

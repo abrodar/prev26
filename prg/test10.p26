@@ -1,2 +1,10 @@
-typ a = [9223372036854775807]int
-fun main():int=1
+// test10: nested functions and static link (access outer var)
+// expect Result: 13
+fun main():int =
+    let
+        var x:int
+        fun add(y:int):int = x + y
+    in
+        x = 10,
+        add(3)
+    end

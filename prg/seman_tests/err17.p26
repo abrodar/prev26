@@ -1,3 +1,0 @@
-typ arrrrrrrray = [300]arrrrrrrray   // inf size
-
-fun main():int=300

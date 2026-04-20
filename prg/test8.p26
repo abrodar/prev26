@@ -1,5 +1,11 @@
-fun a():int=b()-1
-fun b():int=a()-1
-
-
-fun main():int=1
+// test8: global variable
+// expect Result: 42
+var g:int
+fun main():int =
+    let
+        var a:int
+    in
+        g = 20,
+        a = 22,
+        g + a
+    end

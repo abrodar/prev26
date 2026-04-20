@@ -1,0 +1,7 @@
+// test7: recursion - factorial
+// expect Result: 120
+fun fact(n:int):int =
+    if n <= 1 then 1
+    else n * fact(n - 1)
+    end
+fun main():int = fact(5)

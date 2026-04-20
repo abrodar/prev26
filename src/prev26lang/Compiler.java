@@ -265,9 +265,10 @@ public class Compiler {
                         if (c instanceof LIN.DataChunk dc) dataChunks.add(dc);
                         else if (c instanceof LIN.CodeChunk cc) codeChunks.add(cc);
                     }
+                    Vector<LIN.CodeChunk> tracedChunks = new Vector<>();
                     for (LIN.CodeChunk c : codeChunks) {
                         BasicBlocks b = new BasicBlocks(c.stmts());
-                        System.out.println("===== "+c.frame.label.name + "'s basic blocks: =====");
+                        System.out.println("===== "+c.frame.label.name + "'s basic blocks and trace schedule: =====");
                         System.out.println();
                         for (int i = 0; i < b.blocks.size(); i++) {
                             System.out.println("Basic block no. "+ i);
@@ -277,12 +278,20 @@ public class Compiler {
                             System.out.println();
                         }
                         System.out.println();
+                        // trace schedule
+                        TraceSchedule ts = new TraceSchedule(b, c.entryLabel);
+                        tracedChunks.add(new LIN.CodeChunk(c.frame, ts.stmts, c.entryLabel, c.exitLabel));
+                        System.out.println("Trace schedule:");
+                        for (IMR.Stmt s : ts.stmts) {
+                            System.out.println(s);
+                        }
+                        System.out.println();
                         System.out.println();
                     }
-                    /*
-                    Interpreter interp = new Interpreter(dataChunks, codeChunks);
+
+                    Interpreter interp = new Interpreter(dataChunks, tracedChunks);
                     long result = interp.run("_main");
-                    System.out.println("\nResult: " + result);*/
+                    System.out.println("\nResult: " + result);
                     if (cmdLineOpts.get("--target-phase").equals("imrlin"))
                         break;
 

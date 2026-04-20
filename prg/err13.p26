@@ -1,3 +1,0 @@
-fun z():^void
-fun v():^void=nil
-fun main():int =1

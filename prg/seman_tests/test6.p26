@@ -1,4 +1,0 @@
-typ a = b
-typ b = ^a
-
-fun main():int=1

@@ -1,1 +1,9 @@
-fun main():int=let var b:int var a:int in b = -9223372036854775808, a = 9223372036854775807 end, 1
+// test11: putint builtin
+// expect printed: 42, Result: 0
+fun putint(i:int):void
+fun main():int =
+    let var a:int in
+        a = 42,
+        putint(a),
+        0
+    end

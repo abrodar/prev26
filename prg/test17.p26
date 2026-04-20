@@ -1,18 +1,5 @@
-typ shell100 = int
-
-typ shell5 = [100]^shell100
-typ shell4 = shell5
-typ shell3 = shell4
-typ shell2 = shell3
-typ shell = shell2
-
-typ shell8 = [100]^int
-typ shell7 = shell8
-typ shell6 = shell7
-fun main():int= let
-                    var a:^shell
-                    var b:^shell6
-                in
-                    a = b
-                end,
-                100
+// test17: multiple nested calls
+// expect Result: 22
+fun double(x:int):int = x * 2
+fun inc(x:int):int = x + 1
+fun main():int = double(inc(double(5)))

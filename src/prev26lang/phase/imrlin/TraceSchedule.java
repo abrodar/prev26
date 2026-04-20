@@ -10,13 +10,21 @@ public class TraceSchedule {
 
     public Vector<IMR.Stmt> stmts = new Vector<>();
 
-    public TraceSchedule(BasicBlocks b) {
+    public TraceSchedule(BasicBlocks b, MEM.Label entryLabel) {
         // map label -> block for quick lookup
         HashMap<MEM.Label, Vector<IMR.Stmt>> table = new HashMap<>();
         for (Vector<IMR.Stmt> block : b.blocks) {
-            if (!block.isEmpty() && block.get(0) instanceof IMR.LABEL lbl)
-                table.put(lbl.label, block);
+            if (!block.isEmpty() && block.get(0) instanceof IMR.LABEL lbl) {
+                // skip the done block — we'll append it manually at the end
+                if (lbl.label != b.done)
+                    table.put(lbl.label, block);
+            }
         }
+
+        // always start from entry block
+        Vector<IMR.Stmt> entryBlock = table.get(entryLabel);
+        if (entryBlock != null)
+            trace(entryBlock, table, b.done);
 
         while (!table.isEmpty()) {
             // pick any remaining block and start a trace from it

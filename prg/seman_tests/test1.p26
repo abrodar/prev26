@@ -1,3 +1,0 @@
-var s : ^char
-
-fun main () : int = 0

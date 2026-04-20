@@ -20,16 +20,16 @@ public class ImrLin {
             @Override
             public Object visit(AST.DefFunDefn defFunDefn, Object arg) {
                 IMR.Stmt body = ImrGen.genStmtIMRAttr.get(defFunDefn);
-                if (body == null) return null;
-                MEM.Frame frame = Memory.frameAttr.get(defFunDefn);
-                MEM.Label entryLabel = ImrGen.bodyEntryLabelAttr.get(defFunDefn);
-                MEM.Label exitLabel = ImrGen.bodyExitLabelAttr.get(defFunDefn);
-                Vector<IMR.Stmt> stmts = ImrLinearize.linearize(body);
-                chunks.add(new LIN.CodeChunk(frame, stmts, entryLabel, exitLabel));
-                /*System.out.println("=== " + defFunDefn.name + " ===");
-                for (IMR.Stmt s : stmts) {
-                    System.out.println(s);
-                }*/
+                if (body != null) {
+                    MEM.Frame frame = Memory.frameAttr.get(defFunDefn);
+                    MEM.Label entryLabel = ImrGen.bodyEntryLabelAttr.get(defFunDefn);
+                    MEM.Label exitLabel = ImrGen.bodyExitLabelAttr.get(defFunDefn);
+                    Vector<IMR.Stmt> stmts = ImrLinearize.linearize(body);
+                    chunks.add(new LIN.CodeChunk(frame, stmts, entryLabel, exitLabel));
+                }
+                // recurse into children so nested functions get processed
+                defFunDefn.pars.accept(this, arg);
+                if (defFunDefn.expr != null) defFunDefn.expr.accept(this, arg);
                 return null;
             }
             @Override

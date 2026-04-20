@@ -1,11 +1,12 @@
-typ shell = int
-typ shell3 = int
-typ shell2 = shell3
-fun main():int= let
-                    var a:[10][20][30][40][50]shell
-                    var b:[10][20][30][40][50]shell3
-                in
-                    b[1][2][3][4][5] = 10,
-                    a[1][2][3][4][5] = b[1][2][3][4][5]
-                end,
-                100
+// test16
+fun main():int =
+    let
+        var a:int
+        var b:int
+        var r:int
+    in
+        a = 5,
+        b = 10,
+        if a < b then r = 1 else r = 0 end,
+        r
+    end

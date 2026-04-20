@@ -94,7 +94,7 @@ public class ImrGenerator implements AST.FullVisitor<Object, Object> {
         IMR.Expr bodyExpr = ImrGen.genExprIMRAttr.get(defFunDefn.expr);
         Vector<IMR.Stmt> stmts = new Vector<>();
         stmts.add(new IMR.LABEL(entryLabel));
-        stmts.add(new IMR.MOVE(new IMR.TEMP(frame.RV), deref(bodyExpr, defFunDefn.expr)));
+        stmts.add(new IMR.MOVE(new IMR.TEMP(frame.RV), bodyExpr));
         stmts.add(new IMR.LABEL(exitLabel));
         ImrGen.genStmtIMRAttr.put(defFunDefn, new IMR.STMTS(stmts));
 
@@ -381,7 +381,7 @@ public class ImrGenerator implements AST.FullVisitor<Object, Object> {
         letExpr.defns.accept(this, arg);
         letExpr.expr.accept(this, arg);
         IMR.Expr E = ImrGen.genExprIMRAttr.get(letExpr.expr);
-        E = deref(E, letExpr.expr);
+        // no deref — Exprs already handled it
         ImrGen.genExprIMRAttr.put(letExpr, E);
         return null;
     }
@@ -391,7 +391,7 @@ public class ImrGenerator implements AST.FullVisitor<Object, Object> {
         ifExpr.condExpr.accept(this, arg);
         ifExpr.thenExpr.accept(this, arg);
 
-        IMR.Expr cond = deref(ImrGen.genExprIMRAttr.get(ifExpr.condExpr), ifExpr.condExpr);
+        IMR.Expr cond = ImrGen.genExprIMRAttr.get(ifExpr.condExpr);
 
         MEM.Label thenLabel = new MEM.Label();
         MEM.Label endLabel = new MEM.Label();
@@ -417,7 +417,7 @@ public class ImrGenerator implements AST.FullVisitor<Object, Object> {
         ifThenElseExpr.thenExpr.accept(this, arg);
         ifThenElseExpr.elseExpr.accept(this, arg);
 
-        IMR.Expr cond = deref(ImrGen.genExprIMRAttr.get(ifThenElseExpr.condExpr), ifThenElseExpr.condExpr);
+        IMR.Expr cond = ImrGen.genExprIMRAttr.get(ifThenElseExpr.condExpr);
         MEM.Label thenLabel = new MEM.Label();
         MEM.Label elseLabel = new MEM.Label();
         MEM.Label endLabel = new MEM.Label();
@@ -443,7 +443,7 @@ public class ImrGenerator implements AST.FullVisitor<Object, Object> {
         IMR.Expr cond = ImrGen.genExprIMRAttr.get(whileExpr.condExpr);
         IMR.Expr body = ImrGen.genExprIMRAttr.get(whileExpr.expr);
 
-        cond = deref(cond, whileExpr.condExpr);
+        //cond = deref(cond, whileExpr.condExpr);
 
         MEM.Label testLabel = new MEM.Label();
         MEM.Label bodyLabel = new MEM.Label();

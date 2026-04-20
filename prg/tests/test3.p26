@@ -1,0 +1,5 @@
+// test3: if-then-else, both branches
+// expect Result: 100 (p1 > 30 so multiply by 100... wait p1=2 so Result: 6)
+// expect Result: 6
+fun c(p1:int):int = if p1 > 30 then p1 = p1 * 100 else p1 = p1 * 3 end, p1
+fun main():int = c(2)

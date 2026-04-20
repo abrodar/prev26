@@ -1,16 +1,10 @@
-typ shell5 = int
-typ shell4 = shell5
-typ shell3 = shell4
-typ shell2 = shell3
-typ shell = shell2
-
-typ shell8 = int
-typ shell7 = shell8
-typ shell6 = shell7
-fun main():int= let
-                    var a:^shell
-                    var b:^shell6
-                in
-                    a = b
-                end,
-                100
+// test14: struct access
+// expect Result: 30
+fun main():int =
+    let
+        var s:(x:int, y:int)
+    in
+        s.x = 10,
+        s.y = 20,
+        s.x + s.y
+    end

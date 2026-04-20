@@ -1,0 +1,11 @@
+// test16: boolean logic and comparison
+// expect Result: 1
+fun main():int =
+    let
+        var a:int
+        var b:int
+    in
+        a = 5,
+        b = 10,
+        if a < b then 1 else 0 end
+    end

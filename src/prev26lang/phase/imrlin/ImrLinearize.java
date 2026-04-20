@@ -108,6 +108,19 @@ public class ImrLinearize {
             Vector<IMR.Stmt> result = new Vector<>(rr.stmts);
             result.add(new IMR.MOVE(mv.dst, newCall));
             return result;
+        } else if (s instanceof IMR.MOVE mv &&
+                (mv.dst instanceof IMR.MEM8 || mv.dst instanceof IMR.MEM1)) {
+            // MOVE(MEM8/MEM1, non-CALL src) — canonicalize dst addr and src separately
+            IMR.Expr dstAddr = mv.dst instanceof IMR.MEM8 m8 ? m8.addr : ((IMR.MEM1)mv.dst).addr;
+            IMR.SEXPR dstS = do_expr(dstAddr);
+            IMR.SEXPR srcS = do_expr(mv.src);
+            Vector<IMR.Stmt> result = flattenStmt(dstS.stmt);
+            result.addAll(flattenStmt(srcS.stmt));
+            IMR.Expr newDst = mv.dst instanceof IMR.MEM8
+                    ? new IMR.MEM8(dstS.expr)
+                    : new IMR.MEM1(dstS.expr);
+            result.add(new IMR.MOVE(newDst, srcS.expr));
+            return result;
         } else if (s instanceof IMR.ESTMT es && es.expr instanceof IMR.CALL c) {
             ReorderResult rr = reorder(c.kids());
             IMR.Expr newCall = c.build(rr.exprs);
