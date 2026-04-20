@@ -26,10 +26,10 @@ public class ImrLin {
                 MEM.Label exitLabel = ImrGen.bodyExitLabelAttr.get(defFunDefn);
                 Vector<IMR.Stmt> stmts = ImrLinearize.linearize(body);
                 chunks.add(new LIN.CodeChunk(frame, stmts, entryLabel, exitLabel));
-                System.out.println("=== " + defFunDefn.name + " ===");
+                /*System.out.println("=== " + defFunDefn.name + " ===");
                 for (IMR.Stmt s : stmts) {
                     System.out.println(s);
-                }
+                }*/
                 return null;
             }
             @Override

@@ -265,9 +265,24 @@ public class Compiler {
                         if (c instanceof LIN.DataChunk dc) dataChunks.add(dc);
                         else if (c instanceof LIN.CodeChunk cc) codeChunks.add(cc);
                     }
+                    for (LIN.CodeChunk c : codeChunks) {
+                        BasicBlocks b = new BasicBlocks(c.stmts());
+                        System.out.println("===== "+c.frame.label.name + "'s basic blocks: =====");
+                        System.out.println();
+                        for (int i = 0; i < b.blocks.size(); i++) {
+                            System.out.println("Basic block no. "+ i);
+                            for (IMR.Stmt s : b.blocks.get(i)) {
+                                System.out.println(s);
+                            }
+                            System.out.println();
+                        }
+                        System.out.println();
+                        System.out.println();
+                    }
+                    /*
                     Interpreter interp = new Interpreter(dataChunks, codeChunks);
                     long result = interp.run("_main");
-                    System.out.println("\nResult: " + result);
+                    System.out.println("\nResult: " + result);*/
                     if (cmdLineOpts.get("--target-phase").equals("imrlin"))
                         break;
 
