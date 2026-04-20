@@ -114,8 +114,7 @@ public class ImrGenerator implements AST.FullVisitor<Object, Object> {
                                         IMR.NAME name = new IMR.NAME(label);
                                         ImrGen.genExprIMRAttr.put(atomExpr, name);
                                         break;
-            case AST.AtomExpr.Type.INT :
-                                        ImrGen.genExprIMRAttr.put(atomExpr, new IMR.CONST(Long.parseLong(atomExpr.value)));
+            case AST.AtomExpr.Type.INT: ImrGen.genExprIMRAttr.put(atomExpr, new IMR.CONST(new java.math.BigInteger(atomExpr.value).longValue()));
                                         break;
             case AST.AtomExpr.Type.PTR: // posebej za nil, ki je po typ 19 ptr(void)
                                         ImrGen.genExprIMRAttr.put(atomExpr, new IMR.CONST(0));

@@ -1,38 +1,9 @@
-fun putint(i:int):void
-fun putchar(c:char):void
-fun getint():int
-fun exit():void
-
-fun main():int =
+fun main() : int =
     let
-        var a:[5]int
-        var i:int
-        var j:int
-        var tmp:int
+        var s : ^char
+        var c : char
     in
-        i = 0,
-        while i < 5 do
-            a[i] = getint(),
-            i = i + 1
-        end,
-        i = 0,
-        while i < 5 do
-            j = 0,
-            while j < 4 - i do
-                if a[j] > a[j+1] then
-                    tmp = a[j],
-                    a[j] = a[j+1],
-                    a[j+1] = tmp
-                end,
-                j = j + 1
-            end,
-            i = i + 1
-        end,
-        i = 0,
-        while i < 5 do
-            putint(a[i]),
-            putchar(' '),
-            i = i + 1
-        end,
-        0
+        s = "hello",
+        c = s^,        // first character 'h'
+        300
     end
