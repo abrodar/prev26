@@ -1,5 +1,11 @@
 package prev26lang.phase.memory;
 
+import prev26lang.phase.asmgen.Codegen;
+import prev26lang.phase.asmgen.Instr;
+import prev26lang.phase.imrgen.IMR;
+
+import java.util.Vector;
+
 /**
  * Internal representation of stack frames and variable accesses.
  * 
@@ -54,6 +60,10 @@ public class MEM {
 			this.FP = new Temp();
 			this.RV = new Temp();
 		}
+
+        public Vector<Instr> codegen(IMR.Stmt stm) {
+            return (new Codegen(this)).codegen(stm);
+        }
 
 	}
 
