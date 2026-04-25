@@ -728,7 +728,7 @@ public class IMR {
 	/**
 	 * Label.
 	 * 
-	 * Does nothing.
+	 * Does nothing. (AB: unlike NAME (similar) doesnt return address that the label is mapped to)
 	 */
 	public static class LABEL extends Stmt {
 

@@ -1,0 +1,4 @@
+var a:int
+
+
+fun main():int=a=1, let var b:int in b=1 , a = a + b end, a
