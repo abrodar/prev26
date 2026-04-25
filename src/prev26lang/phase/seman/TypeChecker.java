@@ -3,8 +3,7 @@ package prev26lang.phase.seman;
 import prev26lang.common.report.Report;
 import prev26lang.phase.abstr.*;
 
-import java.util.ArrayList;
-import java.util.List;
+
 
 
 // handles AST.Expr nodes → checks types → stores in ofTypeAttr, isConstAttr, isAddrAttr
@@ -390,7 +389,6 @@ public class TypeChecker implements AST.FullVisitor<Object, Object> {
 
     @Override
     public Object visit(AST.CastExpr castExpr, Object arg) {
-        System.out.println("TC checker castExpr.type identity: " + System.identityHashCode(castExpr.type));
         castExpr.expr.accept(this, arg);
         castExpr.type.accept(this, arg);
         TYP.Type eType =  SemAn.ofTypeAttr.get(castExpr.expr);
@@ -410,7 +408,6 @@ public class TypeChecker implements AST.FullVisitor<Object, Object> {
         if (tActual instanceof TYP.VoidType) {
             throw new Report.Error(castExpr, "Cannot cast expression to void.");
         }
-        System.out.println("tType: " + tType + " tActual: " + tActual);
         SemAn.ofTypeAttr.put(castExpr, tActual);
         SemAn.isAddrAttr.put(castExpr, SemAn.isAddrAttr.get(castExpr.expr));
         SemAn.isConstAttr.put(castExpr, SemAn.isConstAttr.get(castExpr.expr));

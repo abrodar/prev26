@@ -1,7 +1,3 @@
-    fun putchar(c:char):void
-
-    var a:(k1:char)
-
-    fun f(a:int):int=1
-
-    fun main():int=putchar(10 as char), putchar(65 as char), a.k1 = 10 as char,  1
+// test1: basic arithmetic and function call
+// expect Result: 42
+fun main():int = 6 * 7

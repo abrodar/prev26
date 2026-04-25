@@ -1,6 +1,4 @@
     package prev26lang.phase.seman;
-
-    import prev26lang.Compiler;
     import prev26lang.common.report.Report;
     import prev26lang.phase.abstr.*;
 
@@ -366,7 +364,7 @@
             return null;
         }
 
-        // need a manual check because of generic nodes visit AB ?!
+        // need a manual check because of generic nodes visit AB
         @Override
         public Object visit(AST.Exprs exprs, Object arg) {
             for (AST.Expr expr : exprs.exprs) {
@@ -387,10 +385,7 @@
 
         @Override
         public Object visit(AST.CastExpr castExpr, Object arg) {
-            System.out.println("TC constructor castExpr.type identity: " + System.identityHashCode(castExpr.type));
-            System.out.println("TC visiting CastExpr, type node: " + castExpr.type);
             castExpr.type.accept(this, arg);
-            System.out.println("after accept, isTypeAttr: " + SemAn.isTypeAttr.get(castExpr.type));
             castExpr.expr.accept(this, arg);
             return null;
         }

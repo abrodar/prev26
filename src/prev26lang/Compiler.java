@@ -40,7 +40,8 @@ public class Compiler {
             "seman", // --: semantic analysis
             "memory", // --: memory layout
             "imrgen", // --: generation of intermediate representation
-            "imrlin"
+            "imrlin", // --: linearization of intermediate representation
+            "asmgen" //--: instruction selection
     ));
 
     /** Specifies whether the compiler is run in the development mode. */
@@ -293,6 +294,11 @@ public class Compiler {
                     long result = interp.run("_main");
                     System.out.println("\nResult: " + result);
                     if (cmdLineOpts.get("--target-phase").equals("imrlin"))
+                        break;
+
+                    // === INSTRUCTION SELECTION ===
+
+                    if (cmdLineOpts.get("--target-phase").equals("asmgen"))
                         break;
 
                     break;
