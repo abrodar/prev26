@@ -282,7 +282,7 @@ public class Compiler {
                         // trace schedule
                         TraceSchedule ts = new TraceSchedule(b, c.entryLabel);
                         tracedChunks.add(new LIN.CodeChunk(c.frame, ts.stmts, c.entryLabel, c.exitLabel));
-                        System.out.println("Trace schedule:");
+                        System.out.println("Trace scheduled:");
                         for (IMR.Stmt s : ts.stmts) {
                             System.out.println(s);
                         }
@@ -292,7 +292,7 @@ public class Compiler {
 
                     Interpreter interp = new Interpreter(dataChunks, tracedChunks);
                     long result = interp.run("_main");
-                    System.out.println("\nResult: " + result);
+                    System.out.println("\nInterpreted result: " + result);
                     if (cmdLineOpts.get("--target-phase").equals("imrlin"))
                         break;
 

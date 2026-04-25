@@ -9,7 +9,6 @@ import java.util.Vector;
 public class TraceSchedule {
 
     public Vector<IMR.Stmt> stmts = new Vector<>();
-
     public TraceSchedule(BasicBlocks b, MEM.Label entryLabel) {
         // map label -> block for quick lookup
         HashMap<MEM.Label, Vector<IMR.Stmt>> table = new HashMap<>();
@@ -34,6 +33,30 @@ public class TraceSchedule {
 
         // append done label at the end
         stmts.add(new IMR.LABEL(b.done));
+        //remove jumps where the target label is the next command after jump
+        int len = stmts.size();
+        Vector<IMR.Stmt> cleared = new Vector<>();
+        for (int i = 0; i < len; i++) {
+            IMR.Stmt stmt = stmts.get(i);
+            if (stmt instanceof IMR.JUMP jump && i < len - 1) {
+                IMR.Stmt next_stmt = stmts.get(i + 1);
+                if (next_stmt instanceof IMR.LABEL label) {
+                    MEM.Label mem_label = label.label;
+                    MEM.Label mem_jump = ((IMR.NAME)jump.addr).label;
+                    if (mem_jump.equals(mem_label)) {
+                        cleared.add(next_stmt);
+                        i++;
+                    } else {
+                        cleared.add(stmt);
+                        cleared.add(next_stmt);
+                    }
+                }
+            } else {
+                cleared.add(stmt);
+            }
+        }
+        stmts.clear();
+        stmts.addAll(cleared);
     }
 
     private void trace(Vector<IMR.Stmt> block, HashMap<MEM.Label, Vector<IMR.Stmt>> table, MEM.Label done) {
