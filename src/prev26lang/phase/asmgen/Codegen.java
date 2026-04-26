@@ -27,6 +27,67 @@ public class Codegen {
     }
 
     MEM.Temp munchExp(IMR.Expr e) {
+        if (e instanceof IMR.MEM8 m8) {
+            if (m8.addr instanceof IMR.BINOP bin && bin.oper == IMR.BINOP.Oper.ADD) {
+                if (bin.fstExpr instanceof IMR.CONST c) {
+                    MEM.Temp r = new MEM.Temp();
+                    emit(new OPER("ld `d0, "+c.value+"(`s0)", toVector(munchExp(bin.sndExpr)), toVector(r)));
+                    return r;
+                } else if (bin.sndExpr instanceof IMR.CONST c) {
+                    MEM.Temp r = new MEM.Temp();
+                    emit(new OPER("ld `d0, "+c.value+"(`s0)", toVector(munchExp(bin.fstExpr)), toVector(r)));
+                    return r;
+                } else {
+                    MEM.Temp r = new MEM.Temp();
+                    emit(new OPER("ld `d0, 0(`s0)", toVector(munchExp(m8.addr)), toVector(r)));
+                    return r;
+                }
+            }  else if (m8.addr instanceof IMR.CONST c) {
+                MEM.Temp r = new MEM.Temp();
+                emit(new OPER("li `d0, "+c.value+"", null, toVector(r)));
+                emit(new OPER("ld `d0, 0(`s0)", toVector(r), toVector(r)));
+                return r;
+            } else if(m8.addr instanceof IMR.NAME n) {
+                MEM.Temp r = new MEM.Temp();
+                emit(new OPER("la `d0, "+n.label.name, null, toVector(r)));
+                emit(new OPER("ld `d0, 0(`s0)", toVector(r), toVector(r)));
+                return r;
+            } else {
+                MEM.Temp r = new MEM.Temp();
+                emit(new OPER("ld `d0, 0(`s0)", toVector(munchExp(m8.addr)), toVector(r)));
+                return r;
+            }
+        } else if (e instanceof IMR.MEM1 m1) {
+            if (m1.addr instanceof IMR.BINOP bin && bin.oper == IMR.BINOP.Oper.ADD) {
+                if (bin.fstExpr instanceof IMR.CONST c) {
+                    MEM.Temp r = new MEM.Temp();
+                    emit(new OPER("lb `d0, "+c.value+"(`s0)", toVector(munchExp(bin.sndExpr)), toVector(r)));
+                    return r;
+                } else if (bin.sndExpr instanceof IMR.CONST c) {
+                    MEM.Temp r = new MEM.Temp();
+                    emit(new OPER("lb `d0, "+c.value+"(`s0)", toVector(munchExp(bin.fstExpr)), toVector(r)));
+                    return r;
+                } else {
+                    MEM.Temp r = new MEM.Temp();
+                    emit(new OPER("lb `d0, 0(`s0)", toVector(munchExp(m1.addr)), toVector(r)));
+                    return r;
+                }
+            }  else if (m1.addr instanceof IMR.CONST c) {
+                MEM.Temp r = new MEM.Temp();
+                emit(new OPER("li `d0, "+c.value+"", null, toVector(r)));
+                emit(new OPER("lb `d0, 0(`s0)", toVector(r), toVector(r)));
+                return r;
+            } else if(m1.addr instanceof IMR.NAME n) {
+                MEM.Temp r = new MEM.Temp();
+                emit(new OPER("la `d0, "+n.label.name, null, toVector(r)));
+                emit(new OPER("lb `d0, 0(`s0)", toVector(r), toVector(r)));
+                return r;
+            } else {
+                MEM.Temp r = new MEM.Temp();
+                emit(new OPER("lb `d0, 0(`s0)", toVector(munchExp(m1.addr)), toVector(r)));
+                return r;
+            }
+        }
         return null;
     }
 
