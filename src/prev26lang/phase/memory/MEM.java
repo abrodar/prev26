@@ -64,7 +64,15 @@ public class MEM {
         public Vector<Instr> codegen(IMR.Stmt stm) {
             return (new Codegen(this)).codegen(stm);
         }
-
+        // a mapping from special temps (fp...) to their name and non-special temps to null
+        public String tempMap(MEM.Temp temp) {
+            if ((temp.toString()).equals(FP.toString())) {
+                return "FP";
+            } else if ((temp.toString()).equals(RV.toString())) {
+                return "RV";
+            }
+            return null;
+        }
 	}
 
 	/**

@@ -1,7 +1,6 @@
 package prev26lang.phase.imrgen;
 
-import prev26lang.Compiler;
-import prev26lang.common.report.Report;
+
 import prev26lang.phase.abstr.AST;
 import prev26lang.phase.memory.Layouter;
 import prev26lang.phase.memory.MEM;
@@ -10,7 +9,7 @@ import prev26lang.phase.seman.SemAn;
 import prev26lang.phase.seman.TYP;
 import prev26lang.phase.seman.TypeConstructor;
 
-import java.io.DataOutput;
+
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Map;
@@ -339,7 +338,6 @@ public class ImrGenerator implements AST.FullVisitor<Object, Object> {
         IMR.Expr E = ImrGen.genExprIMRAttr.get(castExpr.expr);
         E = deref(E, castExpr.expr);
 
-        // type ne sme biti bool ali char
         TYP.Type castType = SemAn.isTypeAttr.get(castExpr.type);
         if (TYP.equiv(castType, TYP.BoolType.type)) {
             E = new IMR.BINOP(IMR.BINOP.Oper.MOD, E, new IMR.CONST(2));

@@ -8,7 +8,7 @@ public class MOVE extends Instr{
     public MEM.Temp dst;
     public MEM.Temp src;
 
-    public MOVE(String a, MEM.Temp dst, MEM.Temp src){
+    public MOVE(String a, MEM.Temp src, MEM.Temp dst){
         assem = a;
         this.dst = dst;
         this.src = src;
