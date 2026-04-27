@@ -150,7 +150,17 @@ public class Codegen {
                 return r;
             } else if (bin.oper == IMR.BINOP.Oper.LEQ) {
                 MEM.Temp r = new MEM.Temp();
-                emit(new OPER("", toVector(r), toVector(r)));
+                MEM.Temp s0 = new MEM.Temp();
+                MEM.Temp s1 = new MEM.Temp();
+                emit(new OPER("neg `d0, `s0", toVector(munchExp(bin.fstExpr)), toVector(s0)));
+                emit(new OPER("neg `d0, `s1", toVector(munchExp(bin.sndExpr)), toVector(s1)));
+                emit(new OPER("slt `d0, `s0, `s1", toVector(s0, s1), toVector(r)));
+                emit(new OPER("seqz `d0, `s1", toVector(r), toVector(r)));
+                return r;
+            } else if (bin.oper == IMR.BINOP.Oper.GEQ) {
+                MEM.Temp r = new MEM.Temp();
+                emit(new OPER("slt `d0, `s0, `s1", toVector(munchExp(bin.fstExpr), munchExp(bin.sndExpr)), toVector(r)));
+                emit(new OPER("seqz `d0, `s1", toVector(r), toVector(r)));
                 return r;
             }
         } else if (e instanceof IMR.CONST c) {
