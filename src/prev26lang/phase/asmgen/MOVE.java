@@ -5,24 +5,24 @@ import prev26lang.phase.memory.MEM;
 import java.util.Vector;
 
 public class MOVE extends Instr{
-    public MEM.Temp dst;
-    public MEM.Temp src;
+    public MEM.Temp def;
+    public MEM.Temp use;
 
-    public MOVE(String a, MEM.Temp src, MEM.Temp dst){
+    public MOVE(String a, MEM.Temp use, MEM.Temp def){
         assem = a;
-        this.dst = dst;
-        this.src = src;
+        this.use = use;
+        this.def = def;
     }
 
     public Vector<MEM.Temp> use() {
         Vector<MEM.Temp> v = new Vector<>();
-        v.add(src);
+        v.add(use);
         return v;
     }
 
     public Vector<MEM.Temp> def() {
         Vector<MEM.Temp> v = new Vector<>();
-        v.add(dst);
+        v.add(def);
         return v;
     }
 
@@ -30,7 +30,4 @@ public class MOVE extends Instr{
         return null;
     }
 
-    public String format() {
-        return "";
-    }
 }

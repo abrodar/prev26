@@ -1,6 +1,5 @@
 package prev26lang.phase.imrgen;
 
-
 import prev26lang.phase.abstr.AST;
 import prev26lang.phase.memory.Layouter;
 import prev26lang.phase.memory.MEM;

@@ -103,10 +103,9 @@ public class ImrLinearize {
         } else if (s instanceof IMR.MOVE mv &&
                 (mv.dst instanceof IMR.MEM8 || mv.dst instanceof IMR.MEM1) &&
                 mv.src instanceof IMR.CALL c) {
-            ReorderResult rr = reorder(c.kids());
-            IMR.Expr newCall = c.build(rr.exprs);
-            Vector<IMR.Stmt> result = new Vector<>(rr.stmts);
-            result.add(new IMR.MOVE(mv.dst, newCall));
+            IMR.TEMP t = new IMR.TEMP(new MEM.Temp());
+            Vector<IMR.Stmt> result = new Vector<>(do_stmt(new IMR.MOVE(t, c)));
+            result.add(new IMR.MOVE(mv.dst, t));
             return result;
         } else if (s instanceof IMR.MOVE mv &&
                 (mv.dst instanceof IMR.MEM8 || mv.dst instanceof IMR.MEM1)) {

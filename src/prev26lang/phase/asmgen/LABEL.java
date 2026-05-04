@@ -23,10 +23,5 @@ public class LABEL extends Instr {
     public  Targets jumps() {
         return null;
     }
-    // TODO
-    public String format() {
-        return "";
-    }
-
 
 }

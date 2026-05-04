@@ -1,12 +1,18 @@
 package prev26lang;
 
+import java.awt.event.WindowStateListener;
 import java.io.*;
 import java.nio.file.*;
 import java.nio.file.attribute.*;
 import java.util.*;
 
 import prev26lang.common.report.*;
+import prev26lang.phase.asmgen.Instr;
+import prev26lang.phase.asmgen.LABEL;
 import prev26lang.phase.lexan.*;
+import prev26lang.phase.livean.AssemFlowGraph;
+import prev26lang.phase.livean.Liveness;
+import prev26lang.phase.livean.Node;
 import prev26lang.phase.synan.*;
 import prev26lang.phase.abstr.*;
 import prev26lang.phase.seman.*;
@@ -41,9 +47,21 @@ public class Compiler {
             "memory", // --: memory layout
             "imrgen", // --: generation of intermediate representation
             "imrlin", // --: linearization of intermediate representation
-            "asmgen" //--: instruction selection
+            "asmgen", //--: instruction selection
+            "livean" //--:liveness analysis
     ));
-
+    // za lepsi print def in use
+    private static String formatTemps(HashSet<MEM.Temp> temps, MEM.Frame frame) {
+        if (temps == null) return "null";
+        StringBuilder sb = new StringBuilder("[");
+        for (MEM.Temp t : temps) {
+            String mapped = frame.tempMap(t);
+            sb.append(mapped != null ? mapped : t.toString()).append(", ");
+        }
+        if (!temps.isEmpty()) sb.setLength(sb.length() - 2);
+        sb.append("]");
+        return sb.toString();
+    }
     /** Specifies whether the compiler is run in the development mode. */
     private static boolean devMode = false;
 
@@ -269,6 +287,7 @@ public class Compiler {
                     Vector<LIN.CodeChunk> tracedChunks = new Vector<>();
                     for (LIN.CodeChunk c : codeChunks) {
                         BasicBlocks b = new BasicBlocks(c.stmts());
+
                         System.out.println("===== "+c.frame.label.name + "'s basic blocks and trace schedule: =====");
                         System.out.println();
                         for (int i = 0; i < b.blocks.size(); i++) {
@@ -283,6 +302,7 @@ public class Compiler {
                         TraceSchedule ts = new TraceSchedule(b, c.entryLabel);
                         tracedChunks.add(new LIN.CodeChunk(c.frame, ts.stmts, c.entryLabel, c.exitLabel));
                         System.out.println("Trace scheduled:");
+
                         for (IMR.Stmt s : ts.stmts) {
                             System.out.println(s);
                         }
@@ -297,8 +317,45 @@ public class Compiler {
                         break;
 
                     // === INSTRUCTION SELECTION ===
+                    HashMap<LIN.CodeChunk, Vector<Instr>> map = new HashMap<>();
+                    for (LIN.CodeChunk c : tracedChunks) {
+                        Vector<Instr> instrs = c.frame.codegen(new IMR.STMTS(c.stmts()));
+                        map.put(c, instrs);
+                        System.out.println("===== " + c.frame.label.name + " =====");
+                        for (Instr instr : instrs) {
+                            if(instr instanceof LABEL) {
+                                System.out.println(instr.format(c.frame) + "        # def: {" + instr.def() + "} use: {" + instr.use() + "} jumps: {" + instr.jumps()+"}");
+                            } else {
+                                System.out.println("    " + instr.format(c.frame) + "       # def: {" + instr.def() + "} use: {" + instr.use() + "} jumps: {" + instr.jumps()+"}");
+                            }
+                        }
+                        System.out.println();
+                    }
 
                     if (cmdLineOpts.get("--target-phase").equals("asmgen"))
+                        break;
+                    // === LIVENESS ANALYSIS ===
+                    for (LIN.CodeChunk c : tracedChunks) {
+                        System.out.println("===== " + c.frame.label.name + " =====");
+                        AssemFlowGraph cfg =  new AssemFlowGraph(map.get(c));
+                        Liveness liveness = new Liveness(cfg);
+                        for (Instr instr : map.get(c)) {
+                            Node n = cfg.instrMap.get(instr);
+                            System.out.println("{ " + formatTemps(liveness.in.get(n), c.frame) + " }");
+                            if (instr instanceof LABEL) {
+                                System.out.println(instr.format(c.frame) + "            # def: {" + formatTemps(instr.def() != null ? new HashSet<>(instr.def()) : null, c.frame) + "}    use: {" + formatTemps(instr.use() != null ? new HashSet<>(instr.use()) : null, c.frame) + "}      jumps: {" + instr.jumps()+"}");
+                            } else {
+                                System.out.println("    " + instr.format(c.frame) + "               # def: {" + formatTemps(instr.def() != null ? new HashSet<>(instr.def()) : null, c.frame) + "}    use: {" + formatTemps(instr.use() != null ? new HashSet<>(instr.use()) : null, c.frame) + "}      jumps: {" + instr.jumps()+"}");
+                            }
+                        }
+                        Node last = cfg.instrMap.get(map.get(c).lastElement());
+                        System.out.println("{ "+liveness.in.get(last)+ " }");
+                        System.out.println();
+                        System.out.println("Interference graph: ");
+                        liveness.show();
+                        System.out.println();
+                    }
+                    if (cmdLineOpts.get("--target-phase").equals("livean"))
                         break;
 
                     break;

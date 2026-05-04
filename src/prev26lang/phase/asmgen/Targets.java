@@ -9,4 +9,13 @@ public class Targets {
     public Targets(Vector<MEM.Label> l) {
         labels = l;
     }
+
+    @Override
+    public String toString() {
+        String str = "";
+        for (MEM.Label l : labels) {
+            str += l.name + " ";
+        }
+        return str;
+    }
 }
