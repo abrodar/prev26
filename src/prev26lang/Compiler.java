@@ -287,7 +287,7 @@ public class Compiler {
                     Vector<LIN.CodeChunk> tracedChunks = new Vector<>();
                     for (LIN.CodeChunk c : codeChunks) {
                         BasicBlocks b = new BasicBlocks(c.stmts());
-
+                        /*
                         System.out.println("===== "+c.frame.label.name + "'s basic blocks and trace schedule: =====");
                         System.out.println();
                         for (int i = 0; i < b.blocks.size(); i++) {
@@ -297,22 +297,22 @@ public class Compiler {
                             }
                             System.out.println();
                         }
-                        System.out.println();
+                        System.out.println();*/
                         // trace schedule
                         TraceSchedule ts = new TraceSchedule(b, c.entryLabel);
                         tracedChunks.add(new LIN.CodeChunk(c.frame, ts.stmts, c.entryLabel, c.exitLabel));
-                        System.out.println("Trace scheduled:");
+                        /*System.out.println("Trace scheduled:");
 
                         for (IMR.Stmt s : ts.stmts) {
                             System.out.println(s);
                         }
                         System.out.println();
-                        System.out.println();
+                        System.out.println();*/
                     }
 
-                    Interpreter interp = new Interpreter(dataChunks, tracedChunks);
-                    long result = interp.run("_main");
-                    System.out.println("\nInterpreted result: " + result);
+                    //Interpreter interp = new Interpreter(dataChunks, tracedChunks);
+                    //long result = interp.run("_main");
+                    //System.out.println("\nInterpreted result: " + result);
                     if (cmdLineOpts.get("--target-phase").equals("imrlin"))
                         break;
 
@@ -320,7 +320,7 @@ public class Compiler {
                     HashMap<LIN.CodeChunk, Vector<Instr>> map = new HashMap<>();
                     for (LIN.CodeChunk c : tracedChunks) {
                         Vector<Instr> instrs = c.frame.codegen(new IMR.STMTS(c.stmts()));
-                        map.put(c, instrs);
+                        map.put(c, instrs); /*
                         System.out.println("===== " + c.frame.label.name + " =====");
                         for (Instr instr : instrs) {
                             if(instr instanceof LABEL) {
@@ -329,7 +329,7 @@ public class Compiler {
                                 System.out.println("    " + instr.format(c.frame) + "       # def: {" + instr.def() + "} use: {" + instr.use() + "} jumps: {" + instr.jumps()+"}");
                             }
                         }
-                        System.out.println();
+                        System.out.println();*/
                     }
 
                     if (cmdLineOpts.get("--target-phase").equals("asmgen"))

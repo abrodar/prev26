@@ -14,30 +14,7 @@ public class Codegen {
         ZERO = new MEM.Temp(), // x0
         RA = new MEM.Temp(), // x1 - return address
         SP = new MEM.Temp(), // x2 - stack pointer
-        FP = new MEM.Temp(), // x0 / so - frame pointer
-        GP = new MEM.Temp(), // GP - global pointer
-        TP = new MEM.Temp(), // TP - thread pointer
-        // argument/return registers - caller saved
-        A0 = new MEM.Temp(), A1 = new MEM.Temp(),
-        A2 = new MEM.Temp(), A3 = new MEM.Temp(),
-        A4 = new MEM.Temp(), A5 = new MEM.Temp(),
-        A6 = new MEM.Temp(), A7 = new MEM.Temp(),
-        // caller saved temporaries
-        T0 = new MEM.Temp(), T1 = new MEM.Temp(),
-        T2 = new MEM.Temp(), T3 = new MEM.Temp(),
-        T4 = new MEM.Temp(), T5 = new MEM.Temp(),
-        T6 = new MEM.Temp(),
-        // calle saved
-        S1  = new MEM.Temp(), S2  = new MEM.Temp(),
-        S3  = new MEM.Temp(), S4  = new MEM.Temp(),
-        S5  = new MEM.Temp(), S6  = new MEM.Temp(),
-        S7  = new MEM.Temp(), S8  = new MEM.Temp(),
-        S9  = new MEM.Temp(), S10 = new MEM.Temp(),
-        S11 = new MEM.Temp();
-    private static Vector<MEM.Temp> callerSaves = toVector(RA, T0, T1, T2, T3, T4, T5, T6, A0, A1, A2, A3, A4, A5, A6); // 15 total
-    private static Vector<MEM.Temp> calleeSaves = toVector(SP, FP, S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11); // 13 total
-    private static Vector<MEM.Temp> argRegs = toVector(A0, A1, A2, A3, A4, A5, A6, A7);
-    private static Vector<MEM.Temp> specialRegs = toVector(SP, FP, RA, GP, TP);
+        FP = new MEM.Temp(); // x0 / so - frame pointer
 
     public Codegen(MEM.Frame frame) {
         this.frame = frame;
@@ -120,7 +97,7 @@ public class Codegen {
                 }
             }  else if (m1.addr instanceof IMR.CONST c) {
                 MEM.Temp r = new MEM.Temp();
-                emit(new OPER("li `d0, "+c.value+"", null, toVector(r)));
+                emit(new OPER("li `d0, "+c.value, null, toVector(r)));
                 emit(new OPER("lb `d0, 0(`s0)", toVector(r), toVector(r)));
                 return r;
             } else if(m1.addr instanceof IMR.NAME n) {
@@ -263,9 +240,9 @@ public class Codegen {
                         Long offset = call.offs.get(i);
                         emit(new OPER("sd `s0, "+offset+"(`s1)", toVector(l.get(i), SP),null));
                     }
-                    emit(new OPER("jalr ra, 0(`s0)", toVector(addr), toVector(temp.temp)));
-                    // return value is in a0 by convention?
-                    emit(new MOVE("mv `d0, `s0", A0, frame.RV));
+                    emit(new OPER("jalr ra, 0(`s0)", toVector(addr), toVector(RA)));
+                    // return value
+                    //emit(new MOVE("mv `d0, `s0", frame.RV, temp.temp));  //no mv needed - dst is always frame.RV, callee already wrote result there; ImrGenerator.java
                 } else  if (move.src instanceof IMR.TEMP temp_src) {
                     emit(new MOVE("mv `d0, `s0", temp_src.temp, temp.temp));
                 } else {

@@ -71,67 +71,11 @@ public class MEM {
             }  else if ((temp.toString()).equals(Codegen.ZERO.toString())) {
                 return "zero";
             } else if ((temp.toString()).equals(RV.toString())) {
-                return "a0"; // return value
+                return "RV"; // return value
             } else if ((temp.toString()).equals(Codegen.RA.toString())) {
                 return "ra"; // return address — NOT a0!
             }else if ((temp.toString()).equals(Codegen.SP.toString())) {
                 return "sp";
-            } else if ((temp.toString()).equals(Codegen.GP.toString())) {
-                return "gp";
-            } else if ((temp.toString()).equals(Codegen.TP.toString())) {
-                return "tp";
-            } else if ((temp.toString()).equals(Codegen.A0.toString())) {
-                return "a0";
-            } else if ((temp.toString()).equals(Codegen.A1.toString())) {
-                return "a1";
-            } else if ((temp.toString()).equals(Codegen.A2.toString())) {
-                return "a2";
-            } else if ((temp.toString()).equals(Codegen.A3.toString())) {
-                return "a3";
-            } else if ((temp.toString()).equals(Codegen.A4.toString())) {
-                return "a4";
-            } else if ((temp.toString()).equals(Codegen.A5.toString())) {
-                return "a5";
-            } else if ((temp.toString()).equals(Codegen.A6.toString())) {
-                return "a6";
-            }  else if ((temp.toString()).equals(Codegen.A7.toString())) {
-                return "a7";
-            } else if ((temp.toString()).equals(Codegen.T0.toString())) {
-                return "t0";
-            } else if ((temp.toString()).equals(Codegen.T1.toString())) {
-                return "t1";
-            } else if ((temp.toString()).equals(Codegen.T2.toString())) {
-                return "t2";
-            } else if ((temp.toString()).equals(Codegen.T3.toString())) {
-                return "t3";
-            } else if ((temp.toString()).equals(Codegen.T4.toString())) {
-                return "t4";
-            } else if ((temp.toString()).equals(Codegen.T5.toString())) {
-                return "t5";
-            } else if ((temp.toString()).equals(Codegen.T6.toString())) {
-                return "t6";
-            } else if ((temp.toString()).equals(Codegen.S1.toString())) {
-                return "s1";
-            } else if ((temp.toString()).equals(Codegen.S2.toString())) {
-                return "s2";
-            } else if ((temp.toString()).equals(Codegen.S3.toString())) {
-                return "s3";
-            } else if ((temp.toString()).equals(Codegen.S4.toString())) {
-                return "s4";
-            } else if ((temp.toString()).equals(Codegen.S5.toString())) {
-                return "s5";
-            } else if ((temp.toString()).equals(Codegen.S6.toString())) {
-                return "s6";
-            } else if ((temp.toString()).equals(Codegen.S7.toString())) {
-                return "s7";
-            } else if ((temp.toString()).equals(Codegen.S8.toString())) {
-                return "s8";
-            } else if ((temp.toString()).equals(Codegen.S9.toString())) {
-                return "s9";
-            } else if ((temp.toString()).equals(Codegen.S10.toString())) {
-                return "s10";
-            } else if ((temp.toString()).equals(Codegen.S11.toString())) {
-                return "s11";
             }
             return null;
         }
