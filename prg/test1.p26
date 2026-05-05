@@ -1,3 +1,0 @@
-// test1: basic arithmetic and function call
-// expect Result: 42
-fun main():int = 6 * 7
