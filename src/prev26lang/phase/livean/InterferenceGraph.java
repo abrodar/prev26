@@ -2,8 +2,6 @@ package prev26lang.phase.livean;
 
 import prev26lang.phase.memory.MEM;
 
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Vector;
 
 abstract public class InterferenceGraph extends Graph {

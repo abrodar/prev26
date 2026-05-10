@@ -1,9 +1,11 @@
 package prev26lang.phase.livean;
 
+import prev26lang.Compiler;
 import prev26lang.phase.memory.MEM;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 import java.util.Vector;
 
 
@@ -19,7 +21,7 @@ public class Liveness extends InterferenceGraph{
     // computes liveness
     // rule 1: in[n] = use[n] U (out[n] - def[n])
     // rule 2: out[n] = U_{s el succ[n]} in[s]
-    public Liveness(FlowGraph flow) {
+    public Liveness(FlowGraph flow, MEM.Frame frame) {
         for (Node n : flow.nodes()) {
             in.put(n, new HashSet<MEM.Temp>());
             out.put(n, new HashSet<MEM.Temp>());
@@ -60,8 +62,12 @@ public class Liveness extends InterferenceGraph{
 
         for (Node n : flow.nodes()) {
             for (MEM.Temp d : flow.def(n)) {
+                //if (frame.tempMap(d) == null)
+                    tnode(d);
+                //else
+                    //continue;
                 for (MEM.Temp t : out.get(n)) {
-                    if (!d.equals(t)) { // no self-edges
+                    if (!d.equals(t)) {//&& frame.tempMap(t) == null) { // no self-edges
                         // undirected — add both directions
                         addEdge(tnode(d), tnode(t));
                         addEdge(tnode(t), tnode(d));
@@ -90,5 +96,15 @@ public class Liveness extends InterferenceGraph{
     @Override
     public Vector<Node> moves() {
         return null;
+    }
+
+    public void showWithTemp(MEM.Frame frame) {
+        for (Node n : nodes()) {
+            System.out.print(n.toString() + "-("+ Compiler.formatTemps(new HashSet<>(Set.of(nodeToTemp.get(n))), frame)+"):     ");
+            for (Node s : n.succ()) {
+                System.out.print(s.toString() + "-("+nodeToTemp.get(s)+")       ");
+            }
+            System.out.println();
+        }
     }
 }

@@ -64,18 +64,75 @@ public class MEM {
         public Vector<Instr> codegen(IMR.Stmt stm) {
             return (new Codegen(this)).codegen(stm);
         }
+
         // a mapping from special temps (fp...) to their name and non-special temps to null
         public String tempMap(MEM.Temp temp) {
             if ((temp.toString()).equals(FP.toString()) || (temp.toString()).equals(Codegen.FP.toString())) {
                 return "fp";
-            }  else if ((temp.toString()).equals(Codegen.ZERO.toString())) {
-                return "zero";
             } else if ((temp.toString()).equals(RV.toString())) {
                 return "RV"; // return value
             } else if ((temp.toString()).equals(Codegen.RA.toString())) {
                 return "ra"; // return address — NOT a0!
             }else if ((temp.toString()).equals(Codegen.SP.toString())) {
                 return "sp";
+            } else if ((temp.toString()).equals(Codegen.ZERO.toString())) {
+                return "zero";
+            } else if ((temp.toString()).equals(Codegen.GP.toString())) {
+                return "gp";
+            } else if ((temp.toString()).equals(Codegen.TP.toString())) {
+                return "tp";
+            } else if ((temp.toString()).equals(Codegen.X5.toString())) {
+                return "x5";
+            } else if ((temp.toString()).equals(Codegen.X6.toString())) {
+                return "x6";
+            } else if ((temp.toString()).equals(Codegen.X7.toString())) {
+                return "x7";
+            } else if ((temp.toString()).equals(Codegen.X9.toString())) {
+                return "x9";
+            } else if ((temp.toString()).equals(Codegen.X10.toString())) {
+                return "x10";
+            } else if ((temp.toString()).equals(Codegen.X11.toString())) {
+                return "x11";
+            } else if ((temp.toString()).equals(Codegen.X12.toString())) {
+                return "x12";
+            } else if ((temp.toString()).equals(Codegen.X13.toString())) {
+                return "x13";
+            } else if ((temp.toString()).equals(Codegen.X14.toString())) {
+                return "x14";
+            } else if ((temp.toString()).equals(Codegen.X15.toString())) {
+                return "x15";
+            } else if ((temp.toString()).equals(Codegen.X16.toString())) {
+                return "x16";
+            } else if ((temp.toString()).equals(Codegen.X17.toString())) {
+                return "x17";
+            } else if ((temp.toString()).equals(Codegen.X18.toString())) {
+                return "x18";
+            } else if ((temp.toString()).equals(Codegen.X19.toString())) {
+                return "x19";
+            } else if ((temp.toString()).equals(Codegen.X20.toString())) {
+                return "x20";
+            } else if ((temp.toString()).equals(Codegen.X21.toString())) {
+                return "x21";
+            } else if ((temp.toString()).equals(Codegen.X22.toString())) {
+                return "x22";
+            } else if ((temp.toString()).equals(Codegen.X23.toString())) {
+                return "x23";
+            } else if ((temp.toString()).equals(Codegen.X24.toString())) {
+                return "x24";
+            } else if ((temp.toString()).equals(Codegen.X25.toString())) {
+                return "x25";
+            } else if ((temp.toString()).equals(Codegen.X26.toString())) {
+                return "x26";
+            } else if ((temp.toString()).equals(Codegen.X27.toString())) {
+                return "x27";
+            } else if ((temp.toString()).equals(Codegen.X28.toString())) {
+                return "x28";
+            } else if ((temp.toString()).equals(Codegen.X29.toString())) {
+                return "x29";
+            } else if ((temp.toString()).equals(Codegen.X30.toString())) {
+                return "x30";
+            } else if ((temp.toString()).equals(Codegen.X31.toString())) {
+                return "x31";
             }
             return null;
         }

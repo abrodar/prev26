@@ -20,7 +20,7 @@ public class Node {
         return preds;
     }
 
-    HashSet<Node>  cat(HashSet<Node>  a, HashSet<Node>  b) {
+    HashSet<Node> cat(HashSet<Node>  a, HashSet<Node>  b) {
         HashSet<Node> combined = new HashSet<>(a);
         combined.addAll(b);
         return combined;
@@ -60,5 +60,9 @@ public class Node {
 
     public String toString() {
         return String.valueOf(mykey);
+    }
+
+    public int name() {
+        return mykey;
     }
 }

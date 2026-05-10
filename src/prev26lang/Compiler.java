@@ -1,6 +1,5 @@
 package prev26lang;
 
-import java.awt.event.WindowStateListener;
 import java.io.*;
 import java.nio.file.*;
 import java.nio.file.attribute.*;
@@ -13,6 +12,7 @@ import prev26lang.phase.lexan.*;
 import prev26lang.phase.livean.AssemFlowGraph;
 import prev26lang.phase.livean.Liveness;
 import prev26lang.phase.livean.Node;
+import prev26lang.phase.regall.Regall;
 import prev26lang.phase.synan.*;
 import prev26lang.phase.abstr.*;
 import prev26lang.phase.seman.*;
@@ -22,10 +22,10 @@ import prev26lang.phase.imrlin.*;
 /**
  * The Prev26 compiler.
  *
- * @author bostjan.slivnik@fri.uni-lj.si
+ *
  */
 public class Compiler {
-
+    public static int numRegs = 32;
     /** (Default) values of command line options. */
     private static final HashMap<String, String> cmdLineOpts = new HashMap<String, String>(Map.ofEntries( //
             Map.entry("--src-file-name", ""), // ---: the name of the source file
@@ -34,7 +34,8 @@ public class Compiler {
             Map.entry("--logged-phase", "all"), // -: the name of the logged phase (or none or all)
             Map.entry("--xml", ""), // -------------: the name of xml files (without phase name and extension)
             Map.entry("--xsl", "../lib/xsl/"), // --: the directory with the xsl templates for the logs
-            Map.entry("--dev-mode", "on") // -------: development mode (on or off)
+            Map.entry("--dev-mode", "on"), // -------: development mode (on or off)
+            Map.entry("--num-regs", "") // ---: number of physical regs to be allocated
     ));
 
     /** All valid phases name of the compiler. */
@@ -48,10 +49,11 @@ public class Compiler {
             "imrgen", // --: generation of intermediate representation
             "imrlin", // --: linearization of intermediate representation
             "asmgen", //--: instruction selection
-            "livean" //--:liveness analysis
+            "livean", //--: liveness analysis
+            "regall" //--: register allocation
     ));
     // za lepsi print def in use
-    private static String formatTemps(HashSet<MEM.Temp> temps, MEM.Frame frame) {
+    public static String formatTemps(HashSet<MEM.Temp> temps, MEM.Frame frame) {
         if (temps == null) return "null";
         StringBuilder sb = new StringBuilder("[");
         for (MEM.Temp t : temps) {
@@ -129,6 +131,20 @@ public class Compiler {
                             if (cmdLineOptName.equals("--dev-mode") && (!cmdLineOptValue.matches("on|off"))) {
                                 Report.warning("Illegal value in '" + cmdLineArgs[argc] + "' ignored.");
                                 continue;
+                            }
+                            if (cmdLineOpts.equals("--num-regs")) {
+                                try  {
+                                    int num = Integer.parseInt(cmdLineOptValue);
+                                    if (num > 26) {
+                                        throw new Report.Error("Cannot have more than 26 (general-purpose) registers. You entered: "+num+".");
+                                    } else if (num <= 0) {
+                                        throw new Report.Error("Cannot have 0 or less register. You entered: " + num + ".");
+                                    }
+                                    // set the number of physical register
+                                    Regall.K = num;
+                                } catch (NumberFormatException e) {
+                                    Report.warning("Illegal value: '"+cmdLineOptValue+"'in '" + cmdLineArgs[argc] + "' ignored.");
+                                }
                             }
 
                             cmdLineOpts.put(cmdLineOptName, cmdLineOptValue);
@@ -279,12 +295,14 @@ public class Compiler {
                     // === LINEARIZATION OF INTERMEDIATE REPRESENTATION ===
                     ImrLin.linearize(Abstr.tree);
                     Vector<LIN.DataChunk> dataChunks = new Vector<>();
-                    Vector<LIN.CodeChunk> codeChunks = new Vector<>();
+                    Vector<LIN.CodeChunk> codeChunks = new Vector<>(); // kot jedro funkcije (pred trace schedule)
                     for (LIN.Chunk c : ImrLin.chunks) {
-                        if (c instanceof LIN.DataChunk dc) dataChunks.add(dc);
-                        else if (c instanceof LIN.CodeChunk cc) codeChunks.add(cc);
+                        if (c instanceof LIN.DataChunk dc)
+                            dataChunks.add(dc);
+                        else if (c instanceof LIN.CodeChunk cc)
+                            codeChunks.add(cc);
                     }
-                    Vector<LIN.CodeChunk> tracedChunks = new Vector<>();
+                    Vector<LIN.CodeChunk> tracedChunks = new Vector<>(); //jedro funkcije oz. sled
                     for (LIN.CodeChunk c : codeChunks) {
                         BasicBlocks b = new BasicBlocks(c.stmts());
                         /*
@@ -317,7 +335,7 @@ public class Compiler {
                         break;
 
                     // === INSTRUCTION SELECTION ===
-                    HashMap<LIN.CodeChunk, Vector<Instr>> map = new HashMap<>();
+                    HashMap<LIN.CodeChunk, Vector<Instr>> map = new HashMap<>(); //za vsako jedro funkcije slika v seznam ukazov
                     for (LIN.CodeChunk c : tracedChunks) {
                         Vector<Instr> instrs = c.frame.codegen(new IMR.STMTS(c.stmts()));
                         map.put(c, instrs); /*
@@ -329,23 +347,24 @@ public class Compiler {
                                 System.out.println("    " + instr.format(c.frame) + "       # def: {" + instr.def() + "} use: {" + instr.use() + "} jumps: {" + instr.jumps()+"}");
                             }
                         }
-                        System.out.println();*/
+                        System.out.println();
+                        */
                     }
 
                     if (cmdLineOpts.get("--target-phase").equals("asmgen"))
                         break;
                     // === LIVENESS ANALYSIS ===
                     for (LIN.CodeChunk c : tracedChunks) {
-                        System.out.println("===== " + c.frame.label.name + " =====");
+                        //System.out.println("===== " + c.frame.label.name + " =====");
                         AssemFlowGraph cfg =  new AssemFlowGraph(map.get(c));
-                        Liveness liveness = new Liveness(cfg);
-                        for (Instr instr : map.get(c)) {
+                        Liveness liveness = new Liveness(cfg, c.frame);
+                        /*for (Instr instr : map.get(c)) {
                             Node n = cfg.instrMap.get(instr);
-                            System.out.println("{ " + formatTemps(liveness.in.get(n), c.frame) + " }");
+                            //System.out.println("{ " + formatTemps(liveness.in.get(n), c.frame) + " }");
                             if (instr instanceof LABEL) {
-                                System.out.println(instr.format(c.frame) + "            # def: {" + formatTemps(instr.def() != null ? new HashSet<>(instr.def()) : null, c.frame) + "}    use: {" + formatTemps(instr.use() != null ? new HashSet<>(instr.use()) : null, c.frame) + "}      jumps: {" + instr.jumps()+"}");
+                                System.out.println(instr.format(c.frame)); //+ "            # def: {" + formatTemps(instr.def() != null ? new HashSet<>(instr.def()) : null, c.frame) + "}    use: {" + formatTemps(instr.use() != null ? new HashSet<>(instr.use()) : null, c.frame) + "}      jumps: {" + instr.jumps()+"}");
                             } else {
-                                System.out.println("    " + instr.format(c.frame) + "               # def: {" + formatTemps(instr.def() != null ? new HashSet<>(instr.def()) : null, c.frame) + "}    use: {" + formatTemps(instr.use() != null ? new HashSet<>(instr.use()) : null, c.frame) + "}      jumps: {" + instr.jumps()+"}");
+                                System.out.println("    " + instr.format(c.frame));// + "               # def: {" + formatTemps(instr.def() != null ? new HashSet<>(instr.def()) : null, c.frame) + "}    use: {" + formatTemps(instr.use() != null ? new HashSet<>(instr.use()) : null, c.frame) + "}      jumps: {" + instr.jumps()+"}");
                             }
                         }
                         Node last = cfg.instrMap.get(map.get(c).lastElement());
@@ -353,9 +372,19 @@ public class Compiler {
                         System.out.println();
                         System.out.println("Interference graph: ");
                         liveness.show();
-                        System.out.println();
+                        System.out.println();*/
                     }
                     if (cmdLineOpts.get("--target-phase").equals("livean"))
+                        break;
+                    // === REGISTER ALLOCATION ===
+                    // we register allocate for each function body separately
+                    for (LIN.CodeChunk c : tracedChunks) {
+                        Regall regAlloc = new Regall();
+                        System.out.println("===== " + c.frame.label.name + " =====");
+                        AssemFlowGraph cfg =  new AssemFlowGraph(map.get(c));
+                        regAlloc.main(map.get(c), c.frame);
+                    }
+                    if (cmdLineOpts.get("--target-phase").equals("regall"))
                         break;
 
                     break;
