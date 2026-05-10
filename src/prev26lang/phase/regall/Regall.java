@@ -1,5 +1,6 @@
 package prev26lang.phase.regall;
 
+import prev26lang.phase.asmgen.Codegen;
 import prev26lang.phase.asmgen.Instr;
 import prev26lang.phase.asmgen.LABEL;
 import prev26lang.phase.asmgen.MOVE;
@@ -17,7 +18,7 @@ public class Regall {
     public static int K = 26; // number of phy. regs for coloring; can be overwritten by the following flag: --num-regs=K'
     // Node work-lists, sets and stacks. The following lists and sets are always disjoint and every node is always in
     // exactly one of the sets or lists.
-    HashSet<MEM.Temp> precolored = new HashSet<>(); // machine registers, preassigned a color
+    HashSet<Node> precolored = new HashSet<>(); // machine registers, preassigned a color
     //static HashSet<Node> initial; // temporary registers, not precolored and not yet processed
     HashSet<Node> simplifyWorklist = new HashSet<>(); // list of low-degree non-move related nodes
     HashSet<Node> freezeWorklist = new HashSet<>(); // low-degree move-related nodes
@@ -40,6 +41,7 @@ public class Regall {
     int degree[]; // an array containing the current degree of each node
     HashMap<Node, HashSet<MOVE>> moveList = new HashMap<>(); // a mapping from a node to the list of moves it is associated with.
     //alias
+    HashMap<Node, Node> alias; // when a move (u, v) has been coalesced, and v put in coalescedNodes, then alias(v) = u.
     //color
 
     private HashSet<MOVE> nodeMoves(Node node) {
@@ -108,7 +110,38 @@ public class Regall {
             decrementDegree(m);
         }
     }
+    public Node getAlias(Node n) {
+        if (coalescedNodes.contains(n)) {
+            getAlias(alias.get(n));
+        }
+        return n;
+    }
+    /*public void addWorkList(Node u) {
+        if (Codegen.specialRegs.contains()) {
 
+        }
+    }*/
+    public void coalesce(Liveness ig) {
+        MOVE m = worklistMoves.iterator().next(); // grab any element from the set
+        Node x = getAlias(ig.tempToNode.get(m.def));
+        Node y = getAlias(ig.tempToNode.get(m.use));
+        Node u, v;
+        // so either you have u, v both precolored, both not precolored, or only the first ie u is precolored.
+        // maters for the 2nd and 3rd clause especially later on
+        if (Codegen.specialRegs.contains(ig.nodeToTemp.get(y))) {
+            u = y;
+            v = x;
+        } else {
+            u = x;
+            v = y;
+        }
+        worklistMoves.remove(m);
+        if (u.name() == v.name()) {
+            coalescedMoves.add(m);
+            //addWorkList(u);
+            //addWorkList(v);
+        }
+    }
 
     public void main(Vector<Instr> instrs, MEM.Frame frame) {
         // 1. liveness analysis
@@ -124,11 +157,15 @@ public class Regall {
             }
         }
         ig.showWithTemp(frame); // debug print, TBDeleted
-        // initialize degree array, moveList
+        // initialize degree array, moveList, precolored
         degree = new int[ig.nodes().size()];
         for (Node n : ig.nodes()) {
             degree[n.name()] = n.degree() / 2;
             moveList.put(n, new HashSet<>());
+            if (Codegen.specialRegs.contains(ig.nodeToTemp.get(n))) {
+                precolored.add(n);
+                System.out.println("I precolored: " + n.name() + "-"+ig.nodeToTemp.get(n));
+            }
         }
         // 2. Build
         for (Instr instr : instrs) {
@@ -137,12 +174,12 @@ public class Regall {
                 worklistMoves.add(mv);
                 //initialize moveList
                 for (MEM.Temp t : mv.def()) {
-                    HashSet<MOVE> ml = new HashSet<>();
+                    HashSet<MOVE> ml;
                     if ((ml = moveList.get(ig.tempToNode.get(t))) != null) // could be RV (or precolored) and then it's null!
                         ml.add(mv);
                 }
                 for (MEM.Temp t : mv.use()) {
-                    HashSet<MOVE> ml = new HashSet<>();
+                    HashSet<MOVE> ml;
                     if ((ml = moveList.get(ig.tempToNode.get(t))) != null) // could be RV (or precolored) and then it's null!
                         ml.add(mv);
                 }
@@ -155,7 +192,7 @@ public class Regall {
             if (!simplifyWorklist.isEmpty()) {
                 simplify();
             } else if (!worklistMoves.isEmpty()) {
-                //coalesce();
+                coalesce(ig);
             } else if (!freezeWorklist.isEmpty()) {
                 //freeze();
             } else if (!spillWorklist.isEmpty()) {

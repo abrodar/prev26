@@ -69,8 +69,8 @@ public class MEM {
         public String tempMap(MEM.Temp temp) {
             if ((temp.toString()).equals(FP.toString()) || (temp.toString()).equals(Codegen.FP.toString())) {
                 return "fp";
-            } else if ((temp.toString()).equals(RV.toString())) {
-                return "RV"; // return value
+            } else if ((temp.toString()).equals(RV.toString()) || (temp.toString()).equals(Codegen.A0.toString())) {
+                return "a0"; // return value
             } else if ((temp.toString()).equals(Codegen.RA.toString())) {
                 return "ra"; // return address — NOT a0!
             }else if ((temp.toString()).equals(Codegen.SP.toString())) {
@@ -89,8 +89,6 @@ public class MEM {
                 return "x7";
             } else if ((temp.toString()).equals(Codegen.X9.toString())) {
                 return "x9";
-            } else if ((temp.toString()).equals(Codegen.X10.toString())) {
-                return "x10";
             } else if ((temp.toString()).equals(Codegen.X11.toString())) {
                 return "x11";
             } else if ((temp.toString()).equals(Codegen.X12.toString())) {

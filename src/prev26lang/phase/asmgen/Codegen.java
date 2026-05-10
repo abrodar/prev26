@@ -16,6 +16,7 @@ public class Codegen {
         ZERO = new MEM.Temp(), // x0 - hardwired to zero
         RA = new MEM.Temp(), // x1 - return address
         SP = new MEM.Temp(), // x2 - stack pointer
+        A0 = new MEM.Temp(), // return value
         FP = new MEM.Temp(), // s0 / fp - frame pointer
         GP = new MEM.Temp(), // gp / x3 - glopal pointer
         TP = new MEM.Temp(), // tp / x4 - thread pointer
@@ -23,7 +24,6 @@ public class Codegen {
         X6 = new MEM.Temp(), // color
         X7 = new MEM.Temp(), // color
         X9 = new MEM.Temp(), // color
-        X10 = new MEM.Temp(), // color
         X11 = new MEM.Temp(), // color
         X12 = new MEM.Temp(), // color
         X13 = new MEM.Temp(), // color
@@ -46,8 +46,8 @@ public class Codegen {
         X30 = new MEM.Temp(), // color
         X31 = new MEM.Temp(); // color
 
-    public static HashSet<MEM.Temp> specialRegs = new HashSet<>(Set.of(RA, SP, FP, GP, TP));
-    public static HashSet<MEM.Temp> registers = new HashSet<>(Set.of(X5, X6, X7, X9, X10, X11,
+    public static HashSet<MEM.Temp> specialRegs = new HashSet<>(Set.of(RA, SP, FP, GP, TP, A0));
+    public static HashSet<MEM.Temp> registers = new HashSet<>(Set.of(X5, X6, X7, X9, X11,
             X12, X13, X14, X15, X16, X17, X18, X19, X20, X21, X22, X23, X24, X25, X26, X27, X28, X29, X30, X31)); // colors
 
     public Codegen(MEM.Frame frame) {
@@ -276,7 +276,8 @@ public class Codegen {
                     }
                     emit(new OPER("jalr ra, 0(`s0)", toVector(addr), toVector(RA)));
                     // return value
-                    emit(new MOVE("mv `d0, `s0", frame.RV, temp.temp));  //d.c. - ??no mv needed - dst is always frame.RV, callee already wrote result there; ImrGenerator.java
+                    //emit(new MOVE("mv `d0, `s0", frame.RV, temp.temp));  //d.c. - ??no mv needed - dst is always frame.RV, callee already wrote result there; ImrGenerator.java
+                    emit(new MOVE("mv `d0, `s0", A0, temp.temp));  //d.c. - ??no mv needed - dst is always frame.RV, callee already wrote result there; ImrGenerator.java
                 } else  if (move.src instanceof IMR.TEMP temp_src) {
                     emit(new MOVE("mv `d0, `s0", temp_src.temp, temp.temp));
                 } else {
