@@ -4,7 +4,6 @@ import prev26lang.phase.asmgen.Codegen;
 import prev26lang.phase.asmgen.Instr;
 import prev26lang.phase.asmgen.LABEL;
 import prev26lang.phase.asmgen.MOVE;
-import prev26lang.phase.imrlin.LIN;
 import prev26lang.phase.livean.AssemFlowGraph;
 import prev26lang.phase.livean.Liveness;
 import prev26lang.phase.livean.Node;
@@ -116,11 +115,24 @@ public class Regall {
         }
         return n;
     }
-    /*public void addWorkList(Node u) {
-        if (Codegen.specialRegs.contains()) {
-
+    public void addWorkList(Node u) {
+        if (!precolored.contains(u) && !moveRelated(u) && degree[u.name()] < K) {
+            freezeWorklist.remove(u);
+            simplifyWorklist.add(u);
         }
-    }*/
+    }
+    public boolean georgeCheck(Node u, Node v) {
+        for (Node t : adjacent(v)) {
+            if (degree[t.name()] >= K) {
+                return false;
+            }
+            if (precolored.contains(t)) { // ta pride iz dejstva da sta t in v oba precolored in sta ze povezana (po george)
+                return false;
+            }
+            if ()
+        }
+        return true;
+    }
     public void coalesce(Liveness ig) {
         MOVE m = worklistMoves.iterator().next(); // grab any element from the set
         Node x = getAlias(ig.tempToNode.get(m.def));
@@ -128,7 +140,7 @@ public class Regall {
         Node u, v;
         // so either you have u, v both precolored, both not precolored, or only the first ie u is precolored.
         // maters for the 2nd and 3rd clause especially later on
-        if (Codegen.specialRegs.contains(ig.nodeToTemp.get(y))) {
+        if (precolored.contains(y)) {
             u = y;
             v = x;
         } else {
@@ -138,8 +150,11 @@ public class Regall {
         worklistMoves.remove(m);
         if (u.name() == v.name()) {
             coalescedMoves.add(m);
-            //addWorkList(u);
-            //addWorkList(v);
+            addWorkList(u);
+        } else if (precolored.contains(v) || georgeCheck(u, v)) { // scenarij ko oba u in v precolored (zagotovo ce ta clause true po delu u el. precolored !)
+            constrainedMoves.add(m);
+            addWorkList(u);
+            addWorkList(v);
         }
     }
 
@@ -162,9 +177,10 @@ public class Regall {
         for (Node n : ig.nodes()) {
             degree[n.name()] = n.degree() / 2;
             moveList.put(n, new HashSet<>());
-            if (Codegen.specialRegs.contains(ig.nodeToTemp.get(n))) {
+            MEM.Temp temp_n = ig.nodeToTemp.get(n);
+            if (Codegen.specialRegs.contains(temp_n) || temp_n == frame.FP || temp_n == frame.RV) {
                 precolored.add(n);
-                System.out.println("I precolored: " + n.name() + "-"+ig.nodeToTemp.get(n));
+                //System.out.println("I precolored: " + n.name() + "-"+ig.nodeToTemp.get(n));
             }
         }
         // 2. Build
