@@ -34,7 +34,8 @@ public class MEM {
 
 		/** The size of the block of (call, i.e., outgoing) arguments within a frame. */
 		public final long argsSize;
-
+        /** The size of the block of temporaries within a frame (by AB) */
+        public long tempsSize;
 		/** The register to hold the frame pointer. */
 		public final Temp FP;
 
@@ -59,6 +60,8 @@ public class MEM {
 			this.size = size;
 			this.FP = new Temp();
 			this.RV = new Temp();
+            // initially zero, then regall can increase temps size
+            this.tempsSize = 0;
 		}
 
         public Vector<Instr> codegen(IMR.Stmt stm) {

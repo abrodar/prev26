@@ -1,9 +1,6 @@
 package prev26lang.phase.regall;
 
-import prev26lang.phase.asmgen.Codegen;
-import prev26lang.phase.asmgen.Instr;
-import prev26lang.phase.asmgen.LABEL;
-import prev26lang.phase.asmgen.MOVE;
+import prev26lang.phase.asmgen.*;
 import prev26lang.phase.livean.AssemFlowGraph;
 import prev26lang.phase.livean.Liveness;
 import prev26lang.phase.livean.Node;
@@ -18,7 +15,7 @@ public class Regall {
     // Node work-lists, sets and stacks. The following lists and sets are always disjoint and every node is always in
     // exactly one of the sets or lists.
     HashSet<Node> precolored = new HashSet<>(); // machine registers, preassigned a color
-    //static HashSet<Node> initial; // temporary registers, not precolored and not yet processed
+    HashSet<Node> initial; // temporary registers, not precolored and not yet processed
     HashSet<Node> simplifyWorklist = new HashSet<>(); // list of low-degree non-move related nodes
     HashSet<Node> freezeWorklist = new HashSet<>(); // low-degree move-related nodes
     HashSet<Node> spillWorklist = new HashSet<>(); // high-degree nodes
@@ -33,16 +30,27 @@ public class Regall {
     HashSet<MOVE> frozenMoves = new HashSet<>(); // moves that will no longer be considered for coalescing
     HashSet<MOVE> worklistMoves = new HashSet<>(); // moves enabled for possible coalescing
     HashSet<MOVE> activeMoves = new HashSet<>(); // moves not yet ready for coalescing; na zacetku prazen, ker so vsi v worklistMoves, vendar se polni ko v coalesce() ugotovis da ga se ni mozno zdruzit
-
     // Other data-structures
     //adjSet
     //adjList
     int degree[]; // an array containing the current degree of each node
     HashMap<Node, HashSet<MOVE>> moveList = new HashMap<>(); // a mapping from a node to the list of moves it is associated with.
-    //alias
     HashMap<Node, Node> alias; // when a move (u, v) has been coalesced, and v put in coalescedNodes, then alias(v) = u.
     HashMap<Node, String> color; // the color chosen by the algorithm for a node; for a precolored nodes this is initialized to the given color
+    HashMap<MEM.Temp, Long> spilledTemps = new HashMap<>(); //offset on the stack
 
+
+    private static Vector<MEM.Temp> toVector(MEM.Temp head, Vector<MEM.Temp> tail) {
+        Vector<MEM.Temp> v = new Vector<>();
+        v.add(head);
+        v.addAll(tail);
+        return v;
+    }
+    private static  <T> Vector<T> toVector(T... args) {
+        Vector<T> v = new Vector<>();
+        for (T t : args) v.add(t);
+        return v;
+    }
     private HashSet<MOVE> nodeMoves(Node node) {
         HashSet<MOVE> intersection = new HashSet<>(moveList.get(node));
         HashSet<MOVE> union = new HashSet<>(activeMoves);
@@ -253,6 +261,54 @@ public class Regall {
             color.put(n, color.get(getAlias(n)));
         }
     }
+    public long newSpillOffset(MEM.Frame frame) {
+        frame.tempsSize += 8;
+        return -(frame.tempsSize+ frame.locsSize);
+    }
+    public void rewriteProgram(Liveness ig, Vector<Instr> instrs, MEM.Frame frame) {
+        HashSet<Node> newTemps = new HashSet<>();
+        // 1. allocate memory locations for each spilled node
+        for (Node v : spilledNodes) {
+            frame.tempsSize += 8;
+            spilledTemps.put(ig.nodeToTemp.get(v), newSpillOffset(frame));
+        }
+        Vector<Instr> newInstrs = new Vector<>();
+        for (Instr instr : instrs) {
+            //2. a fetch before each use
+            Vector<MEM.Temp> use = instr.use();
+            for (int i = 0; i < use.size(); i++) {
+                Node use_node = ig.tempToNode.get(use.get(i));
+                if (spilledNodes.contains(use_node)) {
+                    MEM.Temp newTemp = new MEM.Temp();
+                    newTemps.add(ig.tnode(newTemp));
+                    Instr loadInstr = new OPER("ld `d0, "+spilledTemps.get(use.get(i))+"(`s0)", toVector(Codegen.FP), toVector(newTemp));
+                    instr.use().set(i, newTemp);
+                    newInstrs.add(loadInstr);
+                }
+            }
+            newInstrs.add(instr);
+            // 3. a store after each definition
+            Vector<MEM.Temp> def = instr.def();
+            for (int i = 0; i < def.size(); i++) {
+                Node def_node = ig.tempToNode.get(def.get(i));
+                if (spilledNodes.contains(def_node)) {
+                    MEM.Temp newTemp = new MEM.Temp();
+                    newTemps.add(ig.tnode(newTemp));
+                    Instr storInstr = new OPER("sd `s0, "+spilledTemps.get(def.get(i))+"(`s1)", toVector(newTemp, Codegen.FP), null);
+                    instr.def().set(i, newTemp);
+                    newInstrs.add(storInstr);
+                }
+            }
+        }
+        // 4. put all the new temps into their own set newTemps
+        spilledNodes.clear();
+        HashSet<Node> union = new  HashSet<>(coloredNodes);
+        union.addAll(coalescedNodes);
+        union.addAll(newTemps);
+        initial = union;
+        coloredNodes.clear();
+        coloredNodes.clear();
+    }
     public void main(Vector<Instr> instrs, MEM.Frame frame) {
         // 1. liveness analysis
         AssemFlowGraph cfg = new AssemFlowGraph(instrs);
@@ -312,5 +368,9 @@ public class Regall {
         }
         // 5. assigned colors
         assignColors();
+        if (!spilledNodes.isEmpty()) {
+            rewriteProgram(ig, instrs, frame);
+            main(instrs, frame);
+        }
     }
 }
