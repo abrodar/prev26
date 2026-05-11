@@ -32,7 +32,7 @@ public class Regall {
     HashSet<MOVE> constrainedMoves = new HashSet<>(); // moves whose source and target interfere
     HashSet<MOVE> frozenMoves = new HashSet<>(); // moves that will no longer be considered for coalescing
     HashSet<MOVE> worklistMoves = new HashSet<>(); // moves enabled for possible coalescing
-    HashSet<MOVE> activeMoves = new HashSet<>(); // moves not yet ready for coalescing
+    HashSet<MOVE> activeMoves = new HashSet<>(); // moves not yet ready for coalescing; na zacetku prazen, ker so vsi v worklistMoves, vendar se polni ko v coalesce() ugotovis da ga se ni mozno zdruzit
 
     // Other data-structures
     //adjSet
@@ -41,7 +41,7 @@ public class Regall {
     HashMap<Node, HashSet<MOVE>> moveList = new HashMap<>(); // a mapping from a node to the list of moves it is associated with.
     //alias
     HashMap<Node, Node> alias; // when a move (u, v) has been coalesced, and v put in coalescedNodes, then alias(v) = u.
-    //color
+    HashMap<Node, String> color; // the color chosen by the algorithm for a node; for a precolored nodes this is initialized to the given color
 
     private HashSet<MOVE> nodeMoves(Node node) {
         HashSet<MOVE> intersection = new HashSet<>(moveList.get(node));
@@ -129,9 +129,42 @@ public class Regall {
             if (precolored.contains(t)) { // ta pride iz dejstva da sta t in v oba precolored in sta ze povezana (po george)
                 return false;
             }
-            if ()
+            if (t.adj(u)) {
+                return false;
+            }
         }
         return true;
+    }
+    public boolean conservative(HashSet<Node> nodes) {
+        int k = 0;
+        for (Node n : nodes) {
+            if (degree[n.name()] >= K) {
+                k++;
+            }
+        }
+        return k < K;
+    }
+    public void combine(Liveness ig, Node u, Node v) {
+        if (freezeWorklist.contains(v)) { // ker v postane irelevanten ko ga "zdruzis" v u (kjer na koncu ostane le u)
+            freezeWorklist.remove(v);
+        } else {
+            spillWorklist.remove(v);
+        }
+        coalescedNodes.add(v);
+        alias.put(v, u);
+        HashSet<MOVE> uv_ml = moveList.get(u);
+        HashSet<MOVE> v_ml = moveList.get(v);
+        uv_ml.addAll(v_ml);
+        moveList.put(u, uv_ml); // vse move-e od v dodaj movelist od u (oz. uv tj. novi node!)
+        enableMoves(new HashSet<>(Set.of(v))); // vse activeMoves od "v" dodaj v worklist, ker so potencialno coalesceble
+        for (Node t : adjacent(v)) {
+            ig.addEdge(t, u);
+            //decrementDegree-probably not needed in my case
+        }
+        if (degree[u.name()] >= K && freezeWorklist.contains(u)) {
+            freezeWorklist.remove(u);
+            spillWorklist.add(u);
+        }
     }
     public void coalesce(Liveness ig) {
         MOVE m = worklistMoves.iterator().next(); // grab any element from the set
@@ -148,16 +181,78 @@ public class Regall {
             v = y;
         }
         worklistMoves.remove(m);
+        //get neighbours of a joined node; for a param in conservative()
+        HashSet<Node> joinedAdj = new HashSet<>(adjacent(u));
+        joinedAdj.addAll(adjacent(v));
         if (u.name() == v.name()) {
             coalescedMoves.add(m);
             addWorkList(u);
-        } else if (precolored.contains(v) || georgeCheck(u, v)) { // scenarij ko oba u in v precolored (zagotovo ce ta clause true po delu u el. precolored !)
+        } else if (precolored.contains(v) || u.adj(v)) { // scenarij ko oba u in v precolored (zagotovo ce ta clause true po delu u el. precolored !)
             constrainedMoves.add(m);
             addWorkList(u);
             addWorkList(v);
+        } else if (precolored.contains(u) && georgeCheck(u, v) || !precolored.contains(u) && conservative(joinedAdj)) {
+            coalescedMoves.add(m);
+            combine(ig, u, v);
+            addWorkList(u);
+        } else {
+            activeMoves.add(m);
+        }
+    }
+    public void freezeMoves(Liveness ig, Node u) {
+        for (MOVE m : nodeMoves(u)) {
+            Node v;
+            if (getAlias(ig.tempToNode.get(m.def)) == getAlias(u)) {
+                v = getAlias(ig.tempToNode.get(m.use));
+            } else {
+                v = getAlias(ig.tempToNode.get(m.def));
+            }
+            activeMoves.remove(m);  // m is guaranted to be in activeMoves, bec its a intersection of u's moves with (activeMoves and worklistMoves={})
+            frozenMoves.add(m);
+            // check if the other node in mv is also to be simplified
+            if (!precolored.contains(v) && nodeMoves(v).isEmpty() && degree[v.name()] < K) {
+                freezeWorklist.remove(v);
+                simplifyWorklist.add(v);
+            }
         }
     }
 
+    public void freeze(Liveness ig) {
+        Node u = freezeWorklist.iterator().next();
+        freezeWorklist.remove(u);
+        simplifyWorklist.add(u);
+        freezeMoves(ig, u);
+    }
+    public void selectSpill(Liveness ig) {
+        Node m = spillWorklist.iterator().next();
+        spillWorklist.remove(m);
+        simplifyWorklist.add(m);
+        freezeMoves(ig, m);
+    }
+    public void assignColors() {
+        while (!selectStack.isEmpty()) {
+            Node n = selectStack.pop();
+            HashSet<String> okColors = new HashSet<>(Set.of("ra", "sp", "fp", "gp", "tp", "a0", "x5", "x6", "x7", "x9", "x11",
+                    "x12", "x13", "x14", "x15", "x16", "x17", "x18", "x19", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28", "x29", "x30", "x31"));
+            for (Node w : n.adj()) {
+                HashSet<Node> union = new HashSet<>(coloredNodes);
+                union.addAll(precolored);
+                if (union.contains(getAlias(w))) {
+                    okColors.remove(color.get(getAlias(w)));
+                }
+                if (okColors.isEmpty()) {
+                    spilledNodes.add(n);
+                } else {
+                    coloredNodes.add(n);
+                    String c = okColors.iterator().next();
+                    color.put(n, c);
+                }
+            }
+        }
+        for (Node n : coalescedNodes) {
+            color.put(n, color.get(getAlias(n)));
+        }
+    }
     public void main(Vector<Instr> instrs, MEM.Frame frame) {
         // 1. liveness analysis
         AssemFlowGraph cfg = new AssemFlowGraph(instrs);
@@ -210,11 +305,12 @@ public class Regall {
             } else if (!worklistMoves.isEmpty()) {
                 coalesce(ig);
             } else if (!freezeWorklist.isEmpty()) {
-                //freeze();
+                freeze(ig);
             } else if (!spillWorklist.isEmpty()) {
-                //selectSpill();
+                selectSpill(ig);
             }
         }
-        // 5. assigne colors
+        // 5. assigned colors
+        assignColors();
     }
 }
