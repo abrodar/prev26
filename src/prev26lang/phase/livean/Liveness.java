@@ -100,7 +100,7 @@ public class Liveness extends InterferenceGraph{
 
     public void showWithTemp(MEM.Frame frame) {
         for (Node n : nodes()) {
-            System.out.print(n.toString() + "-("+ Compiler.formatTemps(new HashSet<>(Set.of(nodeToTemp.get(n))), frame)+"):     ");
+            System.out.print(n.toString() + "-("+ Compiler.formatTemps(new HashSet<>(Set.of(nodeToTemp.get(n))), frame)+" - "+nodeToTemp.get(n)+"):     ");
             for (Node s : n.succ()) {
                 System.out.print(s.toString() + "-("+nodeToTemp.get(s)+")       ");
             }
