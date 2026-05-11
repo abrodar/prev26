@@ -8,7 +8,6 @@ import prev26lang.phase.seman.SemAn;
 import prev26lang.phase.seman.TYP;
 import prev26lang.phase.seman.TypeConstructor;
 
-
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Map;

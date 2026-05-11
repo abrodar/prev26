@@ -12,7 +12,7 @@ import java.util.*;
 import static prev26lang.Compiler.formatTemps;
 
 public class Regall {
-    public static int K = 26; // number of phy. regs for coloring; can be overwritten by the following flag: --num-regs=K'
+    public static int K = 25; // number of phy. regs for coloring; can be overwritten by the following flag: --num-regs=K'
     MEM.Frame frame;
     // Node work-lists, sets and stacks. The following lists and sets are always disjoint and every node is always in
     // exactly one of the sets or lists.
@@ -93,14 +93,16 @@ public class Regall {
     }
 
     public void makeWorklist(Liveness ig) {
-        for (Node node : ig.nodes()) {
-            int deg = degree[node.name()];
-            if (deg >= K) {
-                spillWorklist.add(node);
-            } else if (moveRelated(node)) {
-                freezeWorklist.add(node);
-            } else {
-                simplifyWorklist.add(node);
+        for (Node node : ig.nodes()) {// initial - temp regs not precolored and not yet processed
+            if (!precolored.contains(node)) {
+                int deg = degree[node.name()];
+                if (deg >= K) {
+                    spillWorklist.add(node);
+                } else if (moveRelated(node)) {
+                    freezeWorklist.add(node);
+                } else {
+                    simplifyWorklist.add(node);
+                }
             }
         }
         System.out.println("Initial 3 worklist setup: ");
@@ -271,7 +273,7 @@ public class Regall {
     public void assignColors() {
         while (!selectStack.isEmpty()) {
             Node n = selectStack.pop();
-            HashSet<String> okColors = new HashSet<>(Set.of("zero", "ra", "sp", "fp", "gp", "tp", "a0", "x5", "x6", "x7", "x9", "x11",
+            HashSet<String> okColors = new HashSet<>(Set.of("x5", "x6", "x7", "x9", "x11",
                     "x12", "x13", "x14", "x15", "x16", "x17", "x18", "x19", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28", "x29", "x30", "x31"));
             for (Node w : n.adj()) {
                 HashSet<Node> union = new HashSet<>(coloredNodes);
