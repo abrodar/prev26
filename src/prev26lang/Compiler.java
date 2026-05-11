@@ -383,17 +383,7 @@ public class Compiler {
                         System.out.println("===== " + c.frame.label.name + " =====");
                         Vector<Instr> instrs = map.get(c);
                         AssemFlowGraph cfg =  new AssemFlowGraph(instrs);
-                        regAlloc.main(map.get(c), c.frame);
-                        /*
-                        System.out.println("Apparently colored? ");
-                        for (Instr instr : map.get(c)) {
-                            Node n = cfg.instrMap.get(instr);;
-                            if (instr instanceof LABEL) {
-                                System.out.println(instr.format(c.frame)); //+ "            # def: {" + formatTemps(instr.def() != null ? new HashSet<>(instr.def()) : null, c.frame) + "}    use: {" + formatTemps(instr.use() != null ? new HashSet<>(instr.use()) : null, c.frame) + "}      jumps: {" + instr.jumps()+"}");
-                            } else {
-                                System.out.println("    " + instr.format(c.frame));// + "               # def: {" + formatTemps(instr.def() != null ? new HashSet<>(instr.def()) : null, c.frame) + "}    use: {" + formatTemps(instr.use() != null ? new HashSet<>(instr.use()) : null, c.frame) + "}      jumps: {" + instr.jumps()+"}");
-                            }
-                        }*/
+                        regAlloc.main(instrs, c.frame);
                     }
                     if (cmdLineOpts.get("--target-phase").equals("regall"))
                         break;

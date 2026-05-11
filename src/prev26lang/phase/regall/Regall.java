@@ -13,7 +13,7 @@ import static prev26lang.Compiler.formatTemps;
 
 public class Regall {
     public static int K = 26; // number of phy. regs for coloring; can be overwritten by the following flag: --num-regs=K'
-    MEM.Frame tframe;
+    MEM.Frame frame;
     // Node work-lists, sets and stacks. The following lists and sets are always disjoint and every node is always in
     // exactly one of the sets or lists.
     HashSet<Node> precolored = new HashSet<>(); // machine registers, preassigned a color
@@ -41,14 +41,14 @@ public class Regall {
     HashMap<Node, String> color = new HashMap<>(); // the color chosen by the algorithm for a node; for a precolored nodes this is initialized to the given color
     HashMap<MEM.Temp, Long> spilledTemps = new HashMap<>(); //offset on the stack
 
-    private static void moveSetPrint(HashSet<MOVE> mvs, MEM.Frame frame) {
+    private void moveSetPrint(HashSet<MOVE> mvs) {
         for (MOVE mv : mvs) {
             System.out.print(mv.format(frame)+" ");
         }
         System.out.println();
     }
 
-    public void status(MEM.Frame frame) {
+    public void status() {
         System.out.println("DEBUG PRINT: ");
         System.out.println("Current stack: " + selectStack);
         System.out.println("Degree: ");
@@ -61,13 +61,13 @@ public class Regall {
         System.out.println("simplifyWorklist: "+simplifyWorklist);
 
         System.out.print("coalescedMoves: ");
-        moveSetPrint(coalescedMoves, frame);
+        moveSetPrint(coalescedMoves);
         System.out.print("constrainedMoves: ");
-        moveSetPrint(constrainedMoves, frame);
+        moveSetPrint(constrainedMoves);
         System.out.print("activeMoves: ");
-        moveSetPrint(activeMoves, frame);
+        moveSetPrint(activeMoves);
         System.out.println("worklistMoves: ");
-        moveSetPrint(worklistMoves, frame);
+        moveSetPrint(worklistMoves);
     }
     private static Vector<MEM.Temp> toVector(MEM.Temp head, Vector<MEM.Temp> tail) {
         Vector<MEM.Temp> v = new Vector<>();
@@ -292,16 +292,16 @@ public class Regall {
             color.put(n, color.get(getAlias(n)));
         }
     }
-    public long newSpillOffset(MEM.Frame frame) {
+    public long newSpillOffset() {
         frame.tempsSize += 8;
         return -(frame.tempsSize+ frame.locsSize + 8); // + 8 za return address, ki se v klicnem zapisu nahaja med locs in temps vmes!
     }
-    public void rewriteProgram(Liveness ig, Vector<Instr> instrs, MEM.Frame frame) {
+    public void rewriteProgram(Liveness ig, Vector<Instr> instrs) {
         HashSet<Node> newTemps = new HashSet<>();
         // 1. allocate memory locations for each spilled node
         for (Node v : spilledNodes) {
             frame.tempsSize += 8;
-            spilledTemps.put(ig.nodeToTemp.get(v), newSpillOffset(frame));
+            spilledTemps.put(ig.nodeToTemp.get(v), newSpillOffset());
         }
         Vector<Instr> newInstrs = new Vector<>();
         for (Instr instr : instrs) {
@@ -343,7 +343,7 @@ public class Regall {
     }
     public void main(Vector<Instr> instrs, MEM.Frame frame) {
         // to be handled in constructor
-        this.tframe = frame;
+        this.frame = frame;
         // 1. liveness analysis
         //build the cfg
         AssemFlowGraph cfg = new AssemFlowGraph(instrs);
@@ -397,8 +397,8 @@ public class Regall {
                 }
             }
         }
-        System.out.println("test wlmvs");
-        moveSetPrint(worklistMoves, frame);
+        System.out.println("worklistMoves: ");
+        moveSetPrint(worklistMoves);
         System.out.println();
         System.out.println("MoveList current state: ");
         for (Node key : moveList.keySet()) {
@@ -415,26 +415,27 @@ public class Regall {
         while (!simplifyWorklist.isEmpty() || !worklistMoves.isEmpty() || !freezeWorklist.isEmpty() || !spillWorklist.isEmpty()) {
             if (!simplifyWorklist.isEmpty()) {
                 simplify();
-                status(frame);
-            }
-            if (!worklistMoves.isEmpty()) {
-                System.out.println("wait a minute");
+                //status();
+            } else if (!worklistMoves.isEmpty()) {
                 coalesce(ig);
-                status(frame);
-            }
-            break;
-            /* else if (!freezeWorklist.isEmpty()) {
-
+                //status();
+            } else if (!freezeWorklist.isEmpty()) {
                 freeze(ig);
             } else if (!spillWorklist.isEmpty()) {
                 selectSpill(ig);
-            }*/
+            }
         }
         // 5. assigned colors
-        /*assignColors();
+        assignColors();
         if (!spilledNodes.isEmpty()) {
-            rewriteProgram(ig, instrs, frame);
+            rewriteProgram(ig, instrs);
             main(instrs, frame);
-        }*/
+        }
+
+        //final print
+        System.out.println("Apparently colored? ");
+        for (var key : color.keySet()) {
+            System.out.println(key.name()+ " -> " +color.get(key));
+        }
     }
 }
