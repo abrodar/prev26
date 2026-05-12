@@ -326,7 +326,7 @@ public class Regall {
                     if (spilledNodes.contains(use_node)) {
                         MEM.Temp newTemp = new MEM.Temp();
                         newTemps.add(ig.tnode(newTemp));
-                        Instr loadInstr = new OPER("ld `d0, "+spilledTemps.get(use.get(i))+"(`s0) # added newly!!!!!!", toVector(Codegen.FP), toVector(newTemp));
+                        Instr loadInstr = new OPER("ld `d0, "+spilledTemps.get(use.get(i))+"(`s0)", toVector(Codegen.FP), toVector(newTemp));
                         use.set(i, newTemp);
                         newInstrs.add(loadInstr);
                     }
@@ -449,7 +449,7 @@ public class Regall {
         // 4. the loop
 
         while (!simplifyWorklist.isEmpty() || !worklistMoves.isEmpty() || !freezeWorklist.isEmpty() || !spillWorklist.isEmpty()) {
-            status();
+            //status();
             if (!simplifyWorklist.isEmpty()) {
                 simplify();
             } else if (!worklistMoves.isEmpty()) {
@@ -460,7 +460,7 @@ public class Regall {
                 selectSpill(ig);
             }
         }
-        status();
+        //status();
         // 5. assigned colors
         assignColors();
         if (!spilledNodes.isEmpty()) {
