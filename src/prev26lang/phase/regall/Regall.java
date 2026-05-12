@@ -6,7 +6,6 @@ import prev26lang.phase.livean.Liveness;
 import prev26lang.phase.livean.Node;
 import prev26lang.phase.memory.MEM;
 
-import javax.swing.*;
 import java.util.*;
 
 import static prev26lang.Compiler.formatTemps;
@@ -17,7 +16,7 @@ public class Regall {
     // Node work-lists, sets and stacks. The following lists and sets are always disjoint and every node is always in
     // exactly one of the sets or lists.
     HashSet<Node> precolored = new HashSet<>(); // machine registers, preassigned a color
-    HashSet<Node> initial = new HashSet<>(); // temporary registers, not precolored and not yet processed
+    //HashSet<Node> initial = new HashSet<>(); // temporary registers, not precolored and not yet processed
     HashSet<Node> simplifyWorklist = new HashSet<>(); // list of low-degree non-move related nodes
     HashSet<Node> freezeWorklist = new HashSet<>(); // low-degree move-related nodes
     HashSet<Node> spillWorklist = new HashSet<>(); // high-degree nodes
@@ -140,11 +139,13 @@ public class Regall {
             HashSet<Node> par = new HashSet<>(Set.of(m));
             par.addAll(adjacent(m));
             enableMoves(par); // therefore they are added to worklist
-            spillWorklist.remove(m);
-            if (moveRelated(m)) {
-                freezeWorklist.add(m);
-            } else {
-                simplifyWorklist.add(m);
+            if (!precolored.contains(m)) {
+                spillWorklist.remove(m);
+                if (moveRelated(m)) {
+                    freezeWorklist.add(m);
+                } else {
+                    simplifyWorklist.add(m);
+                }
             }
         }
     }
@@ -170,13 +171,7 @@ public class Regall {
     }
     public boolean georgeCheck(Node u, Node v) {
         for (Node t : adjacent(v)) {
-            if (degree[t.name()] >= K) {
-                return false;
-            }
-            if (precolored.contains(t)) { // ta pride iz dejstva da sta t in v oba precolored in sta ze povezana (po george)
-                return false;
-            }
-            if (t.adj(u)) {
+            if (degree[t.name()] >= K && !precolored.contains(t) && !t.adj(u)) {
                 return false;
             }
         }
@@ -205,8 +200,16 @@ public class Regall {
         moveList.put(u, uv_ml); // vse move-e od v dodaj movelist od u (oz. uv tj. novi node!)
         enableMoves(new HashSet<>(Set.of(v))); // vse activeMoves od "v" dodaj v worklist, ker so potencialno coalesceble
         for (Node t : adjacent(v)) {
+            boolean isNew = !t.adj(u);
             ig.addEdge(t, u);
-            //decrementDegree-probably not needed in my case
+            ig.addEdge(u, t);   // interference graph is undirected
+            if (isNew) {
+                if (!precolored.contains(t))  // bec precolored nodes have inf. degree and it would mess up decrementDeg etc otherwise
+                    degree[t.name()]++; // gains a new neighbour u
+                if (!precolored.contains(u))
+                    degree[u.name()]++; // gains a new neighbour t
+            }
+            decrementDegree(t); // t loses v as a neighbor
         }
         if (degree[u.name()] >= K && freezeWorklist.contains(u)) {
             freezeWorklist.remove(u);
@@ -287,13 +290,13 @@ public class Regall {
                 if (union.contains(getAlias(w))) {
                     okColors.remove(color.get(getAlias(w)));
                 }
-                if (okColors.isEmpty()) {
-                    spilledNodes.add(n);
-                } else {
-                    coloredNodes.add(n);
-                    String c = okColors.iterator().next();
-                    color.put(n, c);
-                }
+            }
+            if (okColors.isEmpty()) {
+                spilledNodes.add(n);
+            } else {
+                coloredNodes.add(n);
+                String c = okColors.iterator().next();
+                color.put(n, c);
             }
         }
         for (Node n : coalescedNodes) {
@@ -304,54 +307,76 @@ public class Regall {
         frame.tempsSize += 8;
         return -(frame.tempsSize+ frame.locsSize + 8); // + 8 za return address, ki se v klicnem zapisu nahaja med locs in temps vmes!
     }
-    public void rewriteProgram(Liveness ig, Vector<Instr> instrs) {
+    public Vector<Instr> rewriteProgram(Liveness ig, Vector<Instr> instrs) {
         HashSet<Node> newTemps = new HashSet<>();
         // 1. allocate memory locations for each spilled node
         for (Node v : spilledNodes) {
-            frame.tempsSize += 8;
             spilledTemps.put(ig.nodeToTemp.get(v), newSpillOffset());
         }
         Vector<Instr> newInstrs = new Vector<>();
         for (Instr instr : instrs) {
             //2. a fetch before each use
             Vector<MEM.Temp> use = instr.use();
-            for (int i = 0; i < use.size(); i++) {
-                Node use_node = ig.tempToNode.get(use.get(i));
-                if (spilledNodes.contains(use_node)) {
-                    MEM.Temp newTemp = new MEM.Temp();
-                    newTemps.add(ig.tnode(newTemp));
-                    Instr loadInstr = new OPER("ld `d0, "+spilledTemps.get(use.get(i))+"(`s0)", toVector(Codegen.FP), toVector(newTemp));
-                    instr.use().set(i, newTemp);
-                    newInstrs.add(loadInstr);
+            if (use != null) {
+                for (int i = 0; i < use.size(); i++) {
+                    Node use_node = ig.tempToNode.get(use.get(i));
+                    if (spilledNodes.contains(use_node)) {
+                        MEM.Temp newTemp = new MEM.Temp();
+                        newTemps.add(ig.tnode(newTemp));
+                        Instr loadInstr = new OPER("ld `d0, "+spilledTemps.get(use.get(i))+"(`s0) # added newly!!!!!!", toVector(Codegen.FP), toVector(newTemp));
+                        use.set(i, newTemp);
+                        newInstrs.add(loadInstr);
+                    }
                 }
             }
             newInstrs.add(instr);
             // 3. a store after each definition
             Vector<MEM.Temp> def = instr.def();
-            for (int i = 0; i < def.size(); i++) {
-                Node def_node = ig.tempToNode.get(def.get(i));
-                if (spilledNodes.contains(def_node)) {
-                    MEM.Temp newTemp = new MEM.Temp();
-                    newTemps.add(ig.tnode(newTemp));
-                    Instr storInstr = new OPER("sd `s0, "+spilledTemps.get(def.get(i))+"(`s1)", toVector(newTemp, Codegen.FP), null);
-                    instr.def().set(i, newTemp);
-                    newInstrs.add(storInstr);
+            if (def != null) {
+                for (int i = 0; i < def.size(); i++) {
+                    Node def_node = ig.tempToNode.get(def.get(i));
+                    if (spilledNodes.contains(def_node)) {
+                        MEM.Temp newTemp = new MEM.Temp();
+                        newTemps.add(ig.tnode(newTemp));
+                        Instr storInstr = new OPER("sd `s0, "+spilledTemps.get(def.get(i))+"(`s1) # added newly!!!!!!", toVector(newTemp, Codegen.FP), null);
+                        def.set(i, newTemp);
+                        newInstrs.add(storInstr);
+                    }
                 }
             }
         }
         // 4. put all the new temps into their own set newTemps
         spilledNodes.clear();
         HashSet<Node> union = new  HashSet<>(coloredNodes);
-        union.addAll(coalescedNodes);
-        union.addAll(newTemps);
-        initial = union;
+        //union.addAll(coalescedNodes);
+        //union.addAll(newTemps);
+        //initial = union;
         coloredNodes.clear();
-        coloredNodes.clear();
-        instrs = newInstrs;
+        coalescedNodes.clear();
+        return newInstrs;
     }
     public void main(Vector<Instr> instrs, MEM.Frame frame) {
         // to be handled in constructor
         this.frame = frame;
+        // Reset all state for this round
+        precolored.clear();
+        //initial.clear();
+        simplifyWorklist.clear();
+        freezeWorklist.clear();
+        spillWorklist.clear();
+        spilledNodes.clear();
+        coalescedNodes.clear();
+        coloredNodes.clear();
+        selectStack.clear();
+        coalescedMoves.clear();
+        constrainedMoves.clear();
+        frozenMoves.clear();
+        worklistMoves.clear();
+        activeMoves.clear();
+        moveList.clear();
+        alias.clear();
+        color.clear();
+        // spilledTemps intentionally NOT cleared — offsets accumulate across rounds
         // 1. liveness analysis
         //build the cfg
         AssemFlowGraph cfg = new AssemFlowGraph(instrs);
@@ -436,14 +461,18 @@ public class Regall {
         // 5. assigned colors
         assignColors();
         if (!spilledNodes.isEmpty()) {
-            rewriteProgram(ig, instrs);
+            instrs = rewriteProgram(ig, instrs);
             main(instrs, frame);
+            return;
         }
 
         //final print
         System.out.println("Apparently colored? ");
         for (var key : color.keySet()) {
             System.out.println(key.name()+ " -> " +color.get(key));
+        }
+        for (Instr instr : instrs) {
+            System.out.println(instr.formatWithColor(frame, color, ig));
         }
     }
 }

@@ -63,15 +63,15 @@ public abstract class Instr {
                     case 's':   {
                         int n = Character.digit(assem.charAt(++i), 10);
                         MEM.Temp t = src.get(n);
-                        String actual = frame.tempMap(t);
-                        sb.append(color.get(ig.tempToNode.get(actual)));
+                        //String actual = frame.tempMap(t);
+                        sb.append(color.get(ig.tempToNode.get(t)));
                     }
                     break;
                     case 'd':   {
                         int n = Character.digit(assem.charAt(++i), 10);
                         MEM.Temp t = dst.get(n);
-                        String actual = frame.tempMap(t);
-                        sb.append(color.get(ig.tempToNode.get(actual)));
+                        //String actual = frame.tempMap(t);
+                        sb.append(color.get(ig.tempToNode.get(t)));
                     };
                     break;
                     case 'j':   {
