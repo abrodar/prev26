@@ -11,6 +11,10 @@ import java.util.*;
 import static prev26lang.Compiler.formatTemps;
 
 public class Regall {
+
+    public static LinkedHashSet<String> allRegs = new LinkedHashSet<>(List.of("x5", "x6", "x7", "x9", "x11",
+            "x12", "x13", "x14", "x15", "x16", "x17", "x18", "x19", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28", "x29", "x30", "x31")); // that can be colors
+    public static LinkedHashSet<String> okColors = new LinkedHashSet<>(); // initially empty bec it gets set depending on K, which can vary due to user flag num-regs
     public static int K = 25; // number of phy. regs for coloring; can be overwritten by the following flag: --num-regs=K'
     MEM.Frame frame;
     // Node work-lists, sets and stacks. The following lists and sets are always disjoint and every node is always in
@@ -110,11 +114,11 @@ public class Regall {
                     simplifyWorklist.add(node);
                 }
             }
-        }
+        }/*
         System.out.println("Initial 3 worklist setup: ");
         System.out.println("spillWorklist: " + spillWorklist);
         System.out.println("freezeWorklist: " + freezeWorklist);
-        System.out.println("simplifyWorklist: " + simplifyWorklist);
+        System.out.println("simplifyWorklist: " + simplifyWorklist);*/
     }
     public void enableMoves(HashSet<Node> nodes) {
         for (Node n : nodes) {
@@ -282,20 +286,19 @@ public class Regall {
     public void assignColors() {
         while (!selectStack.isEmpty()) {
             Node n = selectStack.pop();
-            HashSet<String> okColors = new HashSet<>(Set.of("x5", "x6", "x7", "x9", "x11",
-                    "x12", "x13", "x14", "x15", "x16", "x17", "x18", "x19", "x20", "x21", "x22", "x23", "x24", "x25", "x26", "x27", "x28", "x29", "x30", "x31"));
+            HashSet<String> candidateColors = new HashSet<>(okColors);
             for (Node w : n.adj()) {
                 HashSet<Node> union = new HashSet<>(coloredNodes);
                 union.addAll(precolored);
                 if (union.contains(getAlias(w))) {
-                    okColors.remove(color.get(getAlias(w)));
+                    candidateColors.remove(color.get(getAlias(w)));
                 }
             }
-            if (okColors.isEmpty()) {
+            if (candidateColors.isEmpty()) {
                 spilledNodes.add(n);
             } else {
                 coloredNodes.add(n);
-                String c = okColors.iterator().next();
+                String c = candidateColors.iterator().next();
                 color.put(n, c);
             }
         }
@@ -382,6 +385,7 @@ public class Regall {
         AssemFlowGraph cfg = new AssemFlowGraph(instrs);
         // build the ig
         Liveness ig = new Liveness(cfg, frame);
+        /*
         for (Instr instr : instrs) {
             Node n = cfg.instrMap.get(instr);
             System.out.println("{ " + formatTemps(ig.in.get(n), frame) + " }");
@@ -390,8 +394,8 @@ public class Regall {
             } else {
                 System.out.println("    " + instr.format(frame) + "               # def: {" + formatTemps(instr.def() != null ? new HashSet<>(instr.def()) : null, frame) + "}    use: {" + formatTemps(instr.use() != null ? new HashSet<>(instr.use()) : null, frame) + "}      jumps: {" + instr.jumps()+"}");
             }
-        }
-        ig.showWithTemp(frame); // debug print, TBDeleted
+        }*/
+        //ig.showWithTemp(frame); // debug print, TBDeleted
         // initialize degree array, moveList(with empty hs), precolored
         degree = new int[ig.nodes().size()];
         for (Node n : ig.nodes()) {
@@ -404,18 +408,17 @@ public class Regall {
                 if (precolor != null) {
                     color.put(n,  precolor);
                 }
-                System.out.println("I precolored: " + n.name() + "-"+ig.nodeToTemp.get(n) + " with "+color.get(n));
+                //System.out.println("I precolored: " + n.name() + "-"+ig.nodeToTemp.get(n) + " with "+color.get(n));
             }
         }
-        System.out.println("Degree array current state: ");
+        /*System.out.println("Degree array current state: ");
         for (int i = 0; i < degree.length; i++) {
             System.out.print(degree[i] + " ");
         }
-        System.out.println();
+        System.out.println();*/
         // 2. Build, since ig is already created, we just add move related nodes to worklistmoves and movelist map
         for (Instr instr : instrs) {
             if (instr instanceof MOVE mv) {
-                System.out.println(instr.format(frame));
                 worklistMoves.add(mv);
                 //initialize moveList
                 for (MEM.Temp t : mv.def()) {
@@ -429,7 +432,7 @@ public class Regall {
                         ml.add(mv);
                 }
             }
-        }
+        }/*
         System.out.println("worklistMoves: ");
         moveSetPrint(worklistMoves);
         System.out.println();
@@ -440,7 +443,7 @@ public class Regall {
                 System.out.print(m.format(frame) + ",   ");
             }
             System.out.println();
-        }
+        }*/
         // 3. MakeWorklist
         makeWorklist(ig);
         // 4. the loop
@@ -467,10 +470,11 @@ public class Regall {
         }
 
         //final print
+        /*
         System.out.println("Apparently colored? ");
         for (var key : color.keySet()) {
             System.out.println(key.name()+ " -> " +color.get(key));
-        }
+        }*/
         for (Instr instr : instrs) {
             System.out.println(instr.formatWithColor(frame, color, ig));
         }

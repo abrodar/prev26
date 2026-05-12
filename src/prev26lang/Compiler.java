@@ -19,13 +19,16 @@ import prev26lang.phase.seman.*;
 import prev26lang.phase.memory.*;
 import prev26lang.phase.imrgen.*;
 import prev26lang.phase.imrlin.*;
+
+import static prev26lang.phase.regall.Regall.allRegs;
+import static prev26lang.phase.regall.Regall.okColors;
+
 /**
  * The Prev26 compiler.
  *
  *
  */
 public class Compiler {
-    public static int numRegs = 32;
     /** (Default) values of command line options. */
     private static final HashMap<String, String> cmdLineOpts = new HashMap<String, String>(Map.ofEntries( //
             Map.entry("--src-file-name", ""), // ---: the name of the source file
@@ -132,13 +135,13 @@ public class Compiler {
                                 Report.warning("Illegal value in '" + cmdLineArgs[argc] + "' ignored.");
                                 continue;
                             }
-                            if (cmdLineOpts.equals("--num-regs")) {
+                            if (cmdLineOptName.equals("--num-regs")) {
                                 try  {
                                     int num = Integer.parseInt(cmdLineOptValue);
-                                    if (num > 26) {
-                                        throw new Report.Error("Cannot have more than 26 (general-purpose) registers. You entered: "+num+".");
+                                    if (num > 25) {
+                                        throw new Report.Error("Cannot have more than 25 (general-purpose) registers. You entered: "+num+".");
                                     } else if (num <= 0) {
-                                        throw new Report.Error("Cannot have 0 or less register. You entered: " + num + ".");
+                                        throw new Report.Error("Cannot have 0 or less registers. You entered: " + num + ".");
                                     }
                                     // set the number of physical register
                                     Regall.K = num;
@@ -378,6 +381,16 @@ public class Compiler {
                         break;
                     // === REGISTER ALLOCATION ===
                     // we register allocate for each function body separately
+                    // setup the number of allowed colors based on --num-regs or use default value 25
+                    int count = 0;
+                    okColors.clear();
+                    for (String r : allRegs) {
+                        if (count == Regall.K) {
+                            break;
+                        }
+                        okColors.add(r);
+                        count++;
+                    }
                     for (LIN.CodeChunk c : tracedChunks) {
                         Regall regAlloc = new Regall();
                         System.out.println("===== " + c.frame.label.name + " =====");
