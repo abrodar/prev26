@@ -341,7 +341,7 @@ public class Regall {
                     if (spilledNodes.contains(def_node)) {
                         MEM.Temp newTemp = new MEM.Temp();
                         newTemps.add(ig.tnode(newTemp));
-                        Instr storInstr = new OPER("sd `s0, "+spilledTemps.get(def.get(i))+"(`s1) # added newly!!!!!!", toVector(newTemp, Codegen.FP), null);
+                        Instr storInstr = new OPER("sd `s0, "+spilledTemps.get(def.get(i))+"(`s1)", toVector(newTemp, Codegen.FP), null);
                         def.set(i, newTemp);
                         newInstrs.add(storInstr);
                     }

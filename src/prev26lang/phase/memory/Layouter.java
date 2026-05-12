@@ -5,7 +5,6 @@ import prev26lang.phase.abstr.AST;
 import prev26lang.phase.seman.SemAn;
 import prev26lang.phase.seman.TYP;
 
-
 import java.util.ArrayDeque;
 import java.util.Deque;
 
@@ -94,7 +93,7 @@ public class Layouter implements AST.FullVisitor<Object, Object>{
         FrameCtx frameCtx = new FrameCtx(label, currentdepth);
         stack.push(frameCtx);
         currentdepth++;
-        // obisci parametre - poz. offset of fp
+        // obisci parametre - poz. offset od fp
         defFunDefn.pars.accept(this, arg);
         // obisci telo funkcije - vars, gnezdene fun./klici
         defFunDefn.expr.accept(this, arg);

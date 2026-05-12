@@ -21,26 +21,26 @@ public class MEM {
 	static public class Frame {
 
 		/** The function's entry label. */
-		public final Label label;
+		public Label label;
 
 		/** The function's static depth (global functions are at depth 0). */
-		public final long depth;
+		public long depth;
 
 		/** The size of the frame. */
-		public final long size;
+		public long size;
 
 		/** The size of the block of local variables within a frame. */
-		public final long locsSize;
+		public long locsSize;
 
 		/** The size of the block of (call, i.e., outgoing) arguments within a frame. */
-		public final long argsSize;
+		public long argsSize;
         /** The size of the block of temporaries within a frame (by AB) */
         public long tempsSize;
 		/** The register to hold the frame pointer. */
-		public final Temp FP;
+		public Temp FP;
 
 		/** The register to hold the return value. */
-		public final Temp RV;
+		public Temp RV;
 
 		/**
 		 * Constructs a new frame with no temporary variables and no saved registers.

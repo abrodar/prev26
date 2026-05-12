@@ -397,6 +397,8 @@ public class Compiler {
                         Vector<Instr> instrs = map.get(c);
                         AssemFlowGraph cfg =  new AssemFlowGraph(instrs);
                         regAlloc.main(instrs, c.frame);
+                        // update frame size for all the new temps added during spilling
+                        c.frame.size += c.frame.tempsSize;
                     }
                     if (cmdLineOpts.get("--target-phase").equals("regall"))
                         break;
