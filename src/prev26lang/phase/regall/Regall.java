@@ -49,7 +49,8 @@ public class Regall {
     }
 
     public void status() {
-        System.out.println("DEBUG PRINT: ");
+        System.out.println("");
+        System.out.println("===================== DEBUG PRINT: =====================");
         System.out.println("Current stack: " + selectStack);
         System.out.println("Degree: ");
         for (int i = 0; i < degree.length; i++) {
@@ -59,6 +60,8 @@ public class Regall {
         System.out.println("spillWorklist: "+spillWorklist);
         System.out.println("freezeWorklist: "+freezeWorklist);
         System.out.println("simplifyWorklist: "+simplifyWorklist);
+        System.out.println("spilledNodes: "+spilledNodes);
+        System.out.println("coalescedNodes: "+coalescedNodes);
 
         System.out.print("coalescedMoves: ");
         moveSetPrint(coalescedMoves);
@@ -68,6 +71,10 @@ public class Regall {
         moveSetPrint(activeMoves);
         System.out.println("worklistMoves: ");
         moveSetPrint(worklistMoves);
+        System.out.println("alias: ");
+        for (Node key : alias.keySet()) {
+            System.out.println(key+ " = "+getAlias(key));
+        }
     }
     private static Vector<MEM.Temp> toVector(MEM.Temp head, Vector<MEM.Temp> tail) {
         Vector<MEM.Temp> v = new Vector<>();
@@ -148,11 +155,10 @@ public class Regall {
         for (Node m: adjacent(n)) {
             decrementDegree(m);
         }
-        System.out.println();
     }
     public Node getAlias(Node n) {
         if (coalescedNodes.contains(n)) {
-            getAlias(alias.get(n));
+            return getAlias(alias.get(n));
         }
         return n;
     }
@@ -415,18 +421,18 @@ public class Regall {
         // 4. the loop
 
         while (!simplifyWorklist.isEmpty() || !worklistMoves.isEmpty() || !freezeWorklist.isEmpty() || !spillWorklist.isEmpty()) {
+            status();
             if (!simplifyWorklist.isEmpty()) {
                 simplify();
-                //status();
             } else if (!worklistMoves.isEmpty()) {
                 coalesce(ig);
-                //status();
             } else if (!freezeWorklist.isEmpty()) {
                 freeze(ig);
             } else if (!spillWorklist.isEmpty()) {
                 selectSpill(ig);
             }
         }
+        status();
         // 5. assigned colors
         assignColors();
         if (!spilledNodes.isEmpty()) {
