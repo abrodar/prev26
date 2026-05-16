@@ -101,7 +101,7 @@ public class Layouter implements AST.FullVisitor<Object, Object>{
         stack.pop();
         long locsSize = -frameCtx.locsOffset;
         long argsSize = frameCtx.argsOffset;
-        long frameSize = locsSize + 8 + 8 + argsSize;  // 8 + 8 za ret addr in old FP
+        long frameSize = locsSize + 8 + 8 + argsSize;  // 8 + 8 za ret addr in old FP; kasneje se tempsize in savedregs
         Memory.frameAttr.put(defFunDefn, new MEM.Frame(label, frameCtx.depth, locsSize, argsSize, frameSize));
         return null;
     }

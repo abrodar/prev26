@@ -50,7 +50,15 @@ public class Regall {
         }
         System.out.println();
     }
-
+    public HashSet<String> usedPhysRegs() {
+        HashSet<String> used = new HashSet<>();
+        for (String c : color.values()) {
+            if (allRegs.contains(c)) {
+                used.add(c);
+            }
+        }
+        return used;
+    }
     public void status() {
         System.out.println("");
         System.out.println("===================== DEBUG PRINT: =====================");
@@ -308,7 +316,7 @@ public class Regall {
     }
     public long newSpillOffset() {
         frame.tempsSize += 8;
-        return -(frame.tempsSize+ frame.locsSize + 8); // + 8 za return address, ki se v klicnem zapisu nahaja med locs in temps vmes!
+        return -(frame.tempsSize+ frame.locsSize + 8 + 8); // + 8 +8 za return address in star fp, ki se v klicnem zapisu nahaja med locs in temps vmes!
     }
     public Vector<Instr> rewriteProgram(Liveness ig, Vector<Instr> instrs) {
         HashSet<Node> newTemps = new HashSet<>();
@@ -358,7 +366,7 @@ public class Regall {
         coalescedNodes.clear();
         return newInstrs;
     }
-    public void main(Vector<Instr> instrs, MEM.Frame frame) {
+    public Vector<String> main(Vector<Instr> instrs, MEM.Frame frame) {
         // to be handled in constructor
         this.frame = frame;
         // Reset all state for this round
@@ -466,7 +474,6 @@ public class Regall {
         if (!spilledNodes.isEmpty()) {
             instrs = rewriteProgram(ig, instrs);
             main(instrs, frame);
-            return;
         }
 
         //final print
@@ -475,8 +482,11 @@ public class Regall {
         for (var key : color.keySet()) {
             System.out.println(key.name()+ " -> " +color.get(key));
         }*/
+        Vector<String> result = new Vector<>();
         for (Instr instr : instrs) {
-            System.out.println(instr.formatWithColor(frame, color, ig));
+            //System.out.println(instr.formatWithColor(frame, color, ig));
+            result.add(instr.formatWithColor(frame, color, ig));
         }
+        return result;
     }
 }

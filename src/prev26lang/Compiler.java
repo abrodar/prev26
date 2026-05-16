@@ -20,6 +20,8 @@ import prev26lang.phase.memory.*;
 import prev26lang.phase.imrgen.*;
 import prev26lang.phase.imrlin.*;
 
+import javax.print.DocFlavor;
+
 import static prev26lang.phase.regall.Regall.allRegs;
 import static prev26lang.phase.regall.Regall.okColors;
 
@@ -338,9 +340,21 @@ public class Compiler {
                         break;
 
                     // === INSTRUCTION SELECTION ===
-                    HashMap<LIN.CodeChunk, Vector<Instr>> map = new HashMap<>(); //za vsako jedro funkcije slika v seznam ukazov
+                    HashMap<LIN.CodeChunk, Vector<Instr>> map = new HashMap<>(); //vsako jedro funkcije slika v seznam ukazov
                     for (LIN.CodeChunk c : tracedChunks) {
                         Vector<Instr> instrs = c.frame.codegen(new IMR.STMTS(c.stmts()));
+                        // clear double labels
+                        Vector<Instr> newInstrs = new Vector<>();
+                        for (int i = 0; i < instrs.size(); i++) {
+                            Instr instr1 = instrs.get(i);
+                            if (i < instrs.size() - 1) {
+                                Instr instr2 = instrs.get(i + 1);
+                                if (instr1 instanceof LABEL l1 && instr2 instanceof LABEL l2 && l1.label.name.equals(l2.label.name)) {
+                                    continue;
+                                }
+                            }
+                            newInstrs.add(instr1);
+                        }
                         map.put(c, instrs); /*
                         System.out.println("===== " + c.frame.label.name + " =====");
                         for (Instr instr : instrs) {
@@ -391,15 +405,44 @@ public class Compiler {
                         okColors.add(r);
                         count++;
                     }
+                    PrintWriter out = new PrintWriter(new FileWriter(cmdLineOpts.get("--dst-file-name")));
+                    // data segment - dodamo globalne/statične spremenljivke
+                    out.println(".data");
+                    for (LIN.DataChunk dc : dataChunks) {
+                        out.println(dc.label.name + ":");
+                        if (dc.init != null) {
+                            // string bytes
+                            out.println("   .string "+dc.init);
+                        } else {
+                            out.println("   .space "+dc.size);
+                        }
+                    }
+                    out.println(".text");
+                    //startup routine
+                    //emitStartup(out);
+                    //stdlib routine
+                    //emitStdlib(out);
+
                     for (LIN.CodeChunk c : tracedChunks) {
                         Regall regAlloc = new Regall();
-                        System.out.println("===== " + c.frame.label.name + " =====");
+                        //System.out.println("===== " + c.frame.label.name + " =====");
                         Vector<Instr> instrs = map.get(c);
-                        AssemFlowGraph cfg =  new AssemFlowGraph(instrs);
-                        regAlloc.main(instrs, c.frame);
+                        Vector<String> coloredLines = regAlloc.main(instrs, c.frame);
+                        // which regs were used
+                        HashSet<String> savedRegs = regAlloc.usedPhysRegs();
+                        // order them deterministically
+                        ArrayList<String> savedRegsList = new ArrayList<>();
+                        for (String r : allRegs) {
+                            if (savedRegs.contains(r)) {
+                                savedRegsList.add(r);
+                            }
+                        }
+                        int savedRegsSize = savedRegsList.size() * 8;
                         // update frame size for all the new temps added during spilling
-                        c.frame.size += c.frame.tempsSize;
+                        c.frame.size += c.frame.tempsSize + savedRegsSize;
+                        emitFunction(out, c, coloredLines, savedRegsList);
                     }
+                    out.close();
                     if (cmdLineOpts.get("--target-phase").equals("regall"))
                         break;
 
@@ -415,6 +458,49 @@ public class Compiler {
         } catch (final Report.Error error) {
             System.err.println(error.getMessage());
             System.exit(1);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    // prolog/epilog:
+    private static void emitFunction(PrintWriter out, LIN.CodeChunk c, Vector<String> coloredLines, ArrayList<String> savedRegsList) {
+        long size = c.frame.size;
+        long argsSize = c.frame.argsSize;
+        long locsSize = c.frame.locsSize;
+        long tempsSize = c.frame.tempsSize;
+        int savedRegsSize = savedRegsList.size();
+        // saved regs = sp + args + i*8
+        // ra slot = fp - locsize + 8
+        // old fp = fp - locsize  + 16
+        for (int i = 0; i < coloredLines.size(); i++) {
+            String line = coloredLines.get(i);
+            if (line.equals(c.frame.label.name + ":")) {
+                // entry label - emit, then prolog
+                out.println(line);
+                out.println("   addi sp, sp, -" + size); // premaknemo SP
+                out.println("   sd fp, "+argsSize+savedRegsSize+tempsSize+"(sp)"); // shranimo star fp
+                out.println("   sd ra, "+8+argsSize+savedRegsSize+tempsSize+"(sp)"); // shranimo star fp
+                out.println("   addi fp, sp, " + size); // premaknemo FP
+                // shranimo uporabljene registre v savedregisters
+                for (int j = 0; j < savedRegsList.size(); j++) {
+                    out.println("   sd "+savedRegsList.get(j)+", "+j*8 + argsSize+"(sp)");
+                }
+            } else if (line.equals(c.exitLabel.name + ":")) {
+                // emit exit label, then epilog follows
+                out.println(line);
+                // restore registers
+                for (int j = 0; j < savedRegsList.size(); j++) {
+                    out.println("   ld "+savedRegsList.get(j)+", "+i+j*8 + argsSize+"(sp)");
+                }
+                // restore fp, sp, ra; a0 has return value
+                out.println("   ld fp, "+argsSize+savedRegsSize+tempsSize+"(sp)");
+                out.println("   ld ra, "+8+argsSize+savedRegsSize+tempsSize+"(sp)");
+                out.println("   addi sp, sp, " + size);
+                // return to the caller
+                out.println("   ret");
+            } else {
+                out.println(line);
+            }
         }
     }
 }
