@@ -355,7 +355,7 @@ public class Compiler {
                             }
                             newInstrs.add(instr1);
                         }
-                        map.put(c, instrs); /*
+                        map.put(c, newInstrs); /*
                         System.out.println("===== " + c.frame.label.name + " =====");
                         for (Instr instr : instrs) {
                             if(instr instanceof LABEL) {
@@ -425,7 +425,7 @@ public class Compiler {
 
                     for (LIN.CodeChunk c : tracedChunks) {
                         Regall regAlloc = new Regall();
-                        //System.out.println("===== " + c.frame.label.name + " =====");
+                        out.println("#### " + c.frame.label.name + " ####");
                         Vector<Instr> instrs = map.get(c);
                         Vector<String> coloredLines = regAlloc.main(instrs, c.frame);
                         // which regs were used
@@ -468,38 +468,40 @@ public class Compiler {
         long argsSize = c.frame.argsSize;
         long locsSize = c.frame.locsSize;
         long tempsSize = c.frame.tempsSize;
-        int savedRegsSize = savedRegsList.size();
+        int savedRegsSize = savedRegsList.size() * 8;
         // saved regs = sp + args + i*8
         // ra slot = fp - locsize + 8
         // old fp = fp - locsize  + 16
         for (int i = 0; i < coloredLines.size(); i++) {
             String line = coloredLines.get(i);
-            if (line.equals(c.frame.label.name + ":")) {
-                // entry label - emit, then prolog
-                out.println(line);
+            if (line.equals(c.entryLabel.name + ":")) {
+                // prolog, then emit entry label at the end of it
                 out.println("   addi sp, sp, -" + size); // premaknemo SP
-                out.println("   sd fp, "+argsSize+savedRegsSize+tempsSize+"(sp)"); // shranimo star fp
-                out.println("   sd ra, "+8+argsSize+savedRegsSize+tempsSize+"(sp)"); // shranimo star fp
+                out.println("   sd fp, "+(argsSize+savedRegsSize+tempsSize)+"(sp)"); // shranimo star fp
+                out.println("   sd ra, "+(8+argsSize+savedRegsSize+tempsSize)+"(sp)"); // shranimo star fp
                 out.println("   addi fp, sp, " + size); // premaknemo FP
                 // shranimo uporabljene registre v savedregisters
                 for (int j = 0; j < savedRegsList.size(); j++) {
-                    out.println("   sd "+savedRegsList.get(j)+", "+j*8 + argsSize+"(sp)");
+                    out.println("   sd "+savedRegsList.get(j)+", "+(j*8 + argsSize)+"(sp)");
                 }
+                out.println(line);
             } else if (line.equals(c.exitLabel.name + ":")) {
                 // emit exit label, then epilog follows
                 out.println(line);
                 // restore registers
                 for (int j = 0; j < savedRegsList.size(); j++) {
-                    out.println("   ld "+savedRegsList.get(j)+", "+i+j*8 + argsSize+"(sp)");
+                    out.println("   ld "+savedRegsList.get(j)+", "+(j*8 + argsSize)+"(sp)");
                 }
                 // restore fp, sp, ra; a0 has return value
-                out.println("   ld fp, "+argsSize+savedRegsSize+tempsSize+"(sp)");
-                out.println("   ld ra, "+8+argsSize+savedRegsSize+tempsSize+"(sp)");
+                out.println("   ld fp, "+(argsSize+savedRegsSize+tempsSize)+"(sp)");
+                out.println("   ld ra, "+(8+argsSize+savedRegsSize+tempsSize)+"(sp)");
                 out.println("   addi sp, sp, " + size);
                 // return to the caller
                 out.println("   ret");
-            } else {
+            } else if (line.endsWith(":")){
                 out.println(line);
+            } else {
+                out.println("   "+line);
             }
         }
     }
