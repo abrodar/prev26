@@ -68,10 +68,10 @@ public class MEM {
             return (new Codegen(this)).codegen(stm);
         }
 
-        // a mapping from special temps (fp...) to their name and non-special temps to null
+        // a mapping from special temps (s0...) to their name and non-special temps to null
         public String tempMap(MEM.Temp temp) {
             if ((temp.toString()).equals(FP.toString()) || (temp.toString()).equals(Codegen.FP.toString())) {
-                return "fp";
+                return "s0";
             } else if ((temp.toString()).equals(RV.toString()) || (temp.toString()).equals(Codegen.A0.toString())) {
                 return "a0"; // return value
             } else if ((temp.toString()).equals(Codegen.RA.toString())) {

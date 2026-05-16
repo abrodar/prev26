@@ -18,12 +18,12 @@ import static prev26lang.phase.memory.Layouter.sizeOf;
 public class ImrGenerator implements AST.FullVisitor<Object, Object> {
     //AB's helper
     IMR.Expr getNestedFP(FrameCtx currentFrame, long depth) {
-        IMR.Expr fp = currentFrame.FP;
+        IMR.Expr s0 = currentFrame.FP;
         long diff = currentFrame.depth-depth;
         for (int i = 0; i < diff; i++) {
-            fp = new IMR.MEM8(fp);
+            s0 = new IMR.MEM8(s0);
         }
-        return fp;
+        return s0;
     }
     // little helper map
     private static final Map<AST.BinExpr.Oper, IMR.BINOP.Oper> operMap = Map.ofEntries(
@@ -92,7 +92,8 @@ public class ImrGenerator implements AST.FullVisitor<Object, Object> {
         Vector<IMR.Stmt> stmts = new Vector<>();
         stmts.add(new IMR.LABEL(entryLabel));
         stmts.add(new IMR.MOVE(new IMR.TEMP(frame.RV), bodyExpr));
-        stmts.add(new IMR.LABEL(exitLabel));
+        stmts.add(new IMR.JUMP(new IMR.NAME(exitLabel))); // must add this so we can cut a basic block out of it in next phase
+        //stmts.add(new IMR.LABEL(exitLabel));
         ImrGen.genStmtIMRAttr.put(defFunDefn, new IMR.STMTS(stmts));
 
         // stack bookeeping
@@ -163,8 +164,8 @@ public class ImrGenerator implements AST.FullVisitor<Object, Object> {
         if (SemAn.isAddrAttr.get(nameExpr)) {
             FrameCtx currentFrame = stack.peek();
             if (accessType instanceof MEM.RelAccess ra) {
-                IMR.Expr fp = getNestedFP(currentFrame, ra.depth);
-                IMR.Expr e = new IMR.BINOP(IMR.BINOP.Oper.ADD, fp, new IMR.CONST(ra.offset));
+                IMR.Expr s0 = getNestedFP(currentFrame, ra.depth);
+                IMR.Expr e = new IMR.BINOP(IMR.BINOP.Oper.ADD, s0, new IMR.CONST(ra.offset));
                 ImrGen.genExprIMRAttr.put(nameExpr, e);
             } else  if (accessType instanceof MEM.AbsAccess aa) {
                 IMR.NAME name = new IMR.NAME(aa.label);

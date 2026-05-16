@@ -17,7 +17,7 @@ public class Codegen {
         RA = new MEM.Temp(), // x1 - return address
         SP = new MEM.Temp(), // x2 - stack pointer
         A0 = new MEM.Temp(), // return value
-        FP = new MEM.Temp(), // s0 / fp - frame pointer
+        FP = new MEM.Temp(), // fp / s0 - frame pointer
         GP = new MEM.Temp(), // gp / x3 - glopal pointer
         TP = new MEM.Temp(), // tp / x4 - thread pointer
         X5 = new MEM.Temp(), // color
@@ -274,7 +274,7 @@ public class Codegen {
                         Long offset = call.offs.get(i);
                         emit(new OPER("sd `s0, "+offset+"(`s1)", toVector(l.get(i), SP),null));
                     }
-                    emit(new OPER("jalr ra, 0(`s0)", toVector(addr), toVector(RA)));
+                    emit(new OPER("jalr ra, `s0, 0", toVector(addr), toVector(RA)));
                     // return value
                     //emit(new MOVE("mv `d0, `s0", frame.RV, temp.temp));  //d.c. - ??no mv needed - dst is always frame.RV, callee already wrote result there; ImrGenerator.java
                     emit(new MOVE("mv `d0, `s0", frame.RV, temp.temp));  //d.c. - ??no mv needed - dst is always frame.RV, callee already wrote result there; ImrGenerator.java
@@ -327,7 +327,7 @@ public class Codegen {
                 Long offset = call.offs.get(i);
                 emit(new OPER("sd `s0, "+offset+"(`s1)", toVector(l.get(i), SP),null));
             }
-            emit(new OPER("jalr ra, 0(`s0)", toVector(addr), toVector(RA)));
+            emit(new OPER("jalr ra, `s0, 0", toVector(addr), toVector(RA)));
         }
     }
 }

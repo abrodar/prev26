@@ -49,6 +49,7 @@ public class TraceSchedule {
                     } else {
                         cleared.add(stmt);
                         cleared.add(next_stmt);
+                        i++;
                     }
                 }
             } else {

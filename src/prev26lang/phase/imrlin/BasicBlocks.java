@@ -10,8 +10,8 @@ public class BasicBlocks {
     public Vector<Vector<IMR.Stmt>> blocks = new Vector<>();
     public MEM.Label done;
 
-    public BasicBlocks(Vector<IMR.Stmt> stmts) {
-        done = new MEM.Label();
+    public BasicBlocks(Vector<IMR.Stmt> stmts, MEM.Label exitLabel) {
+        done = exitLabel; // exit / done label goes at the start of epilogue, so that last block ends with jump(name done)
         Vector<IMR.Stmt> current = null;
 
         for (IMR.Stmt s : stmts) {
@@ -38,9 +38,10 @@ public class BasicBlocks {
             blocks.add(current);
         }
 
-        // add done label as empty final block
+        // add done label as empty final block; NOT NEEDED, WE ALREADY ADD IT IN TRACESCHEDULE.JAVA
+        /*
         Vector<IMR.Stmt> doneBlock = new Vector<>();
         doneBlock.add(new IMR.LABEL(done));
-        blocks.add(doneBlock);
+        blocks.add(doneBlock);*/
     }
 }

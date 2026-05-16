@@ -93,7 +93,7 @@ public class Layouter implements AST.FullVisitor<Object, Object>{
         FrameCtx frameCtx = new FrameCtx(label, currentdepth);
         stack.push(frameCtx);
         currentdepth++;
-        // obisci parametre - poz. offset od fp
+        // obisci parametre - poz. offset od s0
         defFunDefn.pars.accept(this, arg);
         // obisci telo funkcije - vars, gnezdene fun./klici
         defFunDefn.expr.accept(this, arg);

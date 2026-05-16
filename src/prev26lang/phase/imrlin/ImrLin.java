@@ -26,6 +26,11 @@ public class ImrLin {
                     MEM.Label exitLabel = ImrGen.bodyExitLabelAttr.get(defFunDefn);
                     Vector<IMR.Stmt> stmts = ImrLinearize.linearize(body);
                     chunks.add(new LIN.CodeChunk(frame, stmts, entryLabel, exitLabel));
+                    /*for (IMR.Stmt stmt : stmts) {
+                        System.out.println(stmt);
+                    }
+                    System.out.println();
+                    System.out.println();*/
                 }
                 // recurse into children so nested functions get processed
                 defFunDefn.pars.accept(this, arg);

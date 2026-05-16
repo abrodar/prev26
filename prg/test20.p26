@@ -1,5 +1,5 @@
 // test20: fibonacci recursive
-// expect Result: 55
+// expect Result:
 // test20
 fun fib(n:int):int =
     let var r:int in

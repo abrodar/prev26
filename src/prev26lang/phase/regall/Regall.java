@@ -316,7 +316,7 @@ public class Regall {
     }
     public long newSpillOffset() {
         frame.tempsSize += 8;
-        return -(frame.tempsSize+ frame.locsSize + 8 + 8); // + 8 +8 za return address in star fp, ki se v klicnem zapisu nahaja med locs in temps vmes!
+        return -(frame.tempsSize+ frame.locsSize + 8 + 8); // + 8 +8 za return address in star s0, ki se v klicnem zapisu nahaja med locs in temps vmes!
     }
     public Vector<Instr> rewriteProgram(Liveness ig, Vector<Instr> instrs) {
         HashSet<Node> newTemps = new HashSet<>();
