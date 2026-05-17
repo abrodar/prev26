@@ -407,6 +407,10 @@ public class Compiler {
                     PrintWriter out = new PrintWriter(new FileWriter(cmdLineOpts.get("--dst-file-name")));
                     // data segment - dodamo globalne/statične spremenljivke
                     out.println(".data");
+                    out.println("_heap:");
+                    out.println("   .space 65536");
+                    out.println("_heap_ptr:");
+                    out.println("   .space 8");
                     for (LIN.DataChunk dc : dataChunks) {
                         out.println(dc.label.name + ":");
                         if (dc.init != null) {
@@ -532,12 +536,37 @@ public class Compiler {
         out.println("_exit:");
         out.println("    li a7, 10");
         out.println("    ecall");
+        // malloc
+        out.println("_new:");
+        out.println("   addi sp, sp, -32");
+        out.println("   sd s0, 0(sp)");
+        out.println("   sd ra, 8(sp)");
+        out.println("   sd a7, 16(sp)");
+        out.println("   sd a6, 24(sp)");
+        out.println("   addi s0, sp, 32");
+        out.println("   la a6, _heap_ptr"); // get hp's address
+        out.println("   ld a0, 0(a6)"); // load hp in to a7
+        out.println("   ld a7, 8(s0)"); // get the size in a0
+        out.println("   add a7, a0, a7"); // hp += size
+        out.println("   sd a7, 0(a6)"); // update in mem
+        out.println("   ld s0, 0(sp)");
+        out.println("   ld ra, 8(sp)");
+        out.println("   ld a7, 16(sp)");
+        out.println("   ld a6, 24(sp)");
+        out.println("   addi sp, sp, 32");
+        out.println("   ret");
+        // free
+        out.println("_del:");
+        out.println("   ret");
     }
 
     // startup routine, executes, before main()
     private static void emitStartup(PrintWriter out) {
         out.println("_start:");
         out.println("    li sp, 0x7FFFFF00");
+        out.println("    la t0, _heap");      // ← init heap ptr
+        out.println("    la t1, _heap_ptr"); // point it to heap
+        out.println("    sd t0, 0(t1)");
         out.println("    jal ra, _main");
         out.println("    li a7, 10");   // exit syscall number in Ripes
         out.println("    ecall");

@@ -1,24 +1,26 @@
 fun putint(i:int):void
-fun getint():int
 fun putchar(c:char):void
-fun getchar():char
-fun exit():void
+fun new(size:int):^int
+fun del(ptr:^int):void
 
 fun main():int =
     let
-        var i:int
-        var c:char
+        var p:^int
+        var q:^int
     in
-        putint(42),
+        p = new(8),
+        putint(p as int),
         putchar('\x0A'),
-        putchar('A'),
+        p^ = 42,
+        putint(p^),
         putchar('\x0A'),
-        i = getint(),
-        putint(i),
+        q = new(8),
+        putint(q as int),
+        putchar(10 as char),
+        q^ = 99,
+        putint(q^),
         putchar('\x0A'),
-        c = getchar(),
-        putchar(c),
-        putchar('\x0A'),
-        exit(),
+        del(p),
+        del(q),
         0
     end

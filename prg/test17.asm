@@ -1,7 +1,14 @@
 .data
+_heap:
+   .space 65536
+_heap_ptr:
+   .space 8
 .text
 _start:
     li sp, 0x7FFFFF00
+    la t0, _heap
+    la t1, _heap_ptr
+    sd t0, 0(t1)
     jal ra, _main
     li a7, 10
     ecall
@@ -62,6 +69,26 @@ _getchar:
 _exit:
     li a7, 10
     ecall
+_new:
+   addi sp, sp, -32
+   sd s0, 0(sp)
+   sd ra, 8(sp)
+   sd a7, 16(sp)
+   sd a6, 24(sp)
+   addi s0, sp, 32
+   la a6, _heap_ptr
+   ld a0, 0(a6)
+   ld a7, 8(s0)
+   add a7, a0, a7
+   sd a7, 0(a6)
+   ld s0, 0(sp)
+   ld ra, 8(sp)
+   ld a7, 16(sp)
+   ld a6, 24(sp)
+   addi sp, sp, 32
+   ret
+_del:
+   ret
 _double:
    addi sp, sp, -32
    sd s0, 16(sp)

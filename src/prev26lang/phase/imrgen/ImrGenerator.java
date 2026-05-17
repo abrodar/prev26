@@ -335,8 +335,12 @@ public class ImrGenerator implements AST.FullVisitor<Object, Object> {
         castExpr.type.accept(this, arg);
         castExpr.expr.accept(this, arg);
         IMR.Expr E = ImrGen.genExprIMRAttr.get(castExpr.expr);
-        E = deref(E, castExpr.expr);
-
+        // E = deref(E, castExpr.expr); gives an error when casting ptr to int etc. thereofore commented
+        // only deref if the expression is NOT already a value (e.g. don't deref pointers being cast to int)
+        TYP.Type fromType = SemAn.ofTypeAttr.get(castExpr.expr);
+        if (!(fromType.actualType() instanceof TYP.PtrType)) {
+            E = deref(E, castExpr.expr);
+        }
         TYP.Type castType = SemAn.isTypeAttr.get(castExpr.type);
         if (TYP.equiv(castType, TYP.BoolType.type)) {
             E = new IMR.BINOP(IMR.BINOP.Oper.MOD, E, new IMR.CONST(2));

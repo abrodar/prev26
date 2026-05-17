@@ -1,7 +1,14 @@
 .data
+_heap:
+   .space 65536
+_heap_ptr:
+   .space 8
 .text
 _start:
     li sp, 0x7FFFFF00
+    la t0, _heap
+    la t1, _heap_ptr
+    sd t0, 0(t1)
     jal ra, _main
     li a7, 10
     ecall
@@ -62,32 +69,65 @@ _getchar:
 _exit:
     li a7, 10
     ecall
+_new:
+   addi sp, sp, -32
+   sd s0, 0(sp)
+   sd ra, 8(sp)
+   sd a7, 16(sp)
+   sd a6, 24(sp)
+   addi s0, sp, 32
+   la a6, _heap_ptr
+   ld a0, 0(a6)
+   ld a7, 8(s0)
+   add a7, a0, a7
+   sd a7, 0(a6)
+   ld s0, 0(sp)
+   ld ra, 8(sp)
+   ld a7, 16(sp)
+   ld a6, 24(sp)
+   addi sp, sp, 32
+   ret
+_del:
+   ret
 _main:
-   addi sp, sp, -72
-   sd s0, 40(sp)
-   sd ra, 48(sp)
-   addi s0, sp, 72
+   addi sp, sp, -80
+   sd s0, 48(sp)
+   sd ra, 56(sp)
+   addi s0, sp, 80
    sd x9, 16(sp)
-   sd x30, 24(sp)
-   sd x31, 32(sp)
+   sd x12, 24(sp)
+   sd x30, 32(sp)
+   sd x31, 40(sp)
 L0:
-   la x9, _putint
+   la x31, _new
+   li x9, 0
+   li x30, 8
+   sd x9, 0(sp)
+   sd x30, 8(sp)
+   jalr ra, x31, 0
+   mv x9, a0
+   sd x9, -8(s0)
+   la x30, _putint
+   li x31, 0
+   ld x9, -8(s0)
+   sd x31, 0(sp)
+   sd x9, 8(sp)
+   jalr ra, x30, 0
+   la x9, _putchar
    li x30, 0
-   li x31, 42
+   li x31, 10
    sd x30, 0(sp)
    sd x31, 8(sp)
    jalr ra, x9, 0
-   la x31, _putchar
-   li x30, 0
-   li x9, 10
-   sd x30, 0(sp)
+   li x30, 42
+   ld x9, -8(s0)
+   sd x30, 0(x9)
+   la x30, _putint
+   li x31, 0
+   ld x9, -8(s0)
+   ld x9, 0(x9)
+   sd x31, 0(sp)
    sd x9, 8(sp)
-   jalr ra, x31, 0
-   la x30, _putchar
-   li x9, 0
-   li x31, 65
-   sd x9, 0(sp)
-   sd x31, 8(sp)
    jalr ra, x30, 0
    la x31, _putchar
    li x9, 0
@@ -95,15 +135,35 @@ L0:
    sd x9, 0(sp)
    sd x30, 8(sp)
    jalr ra, x31, 0
-   la x9, _getint
+   la x9, _new
    li x30, 0
+   li x31, 8
    sd x30, 0(sp)
+   sd x31, 8(sp)
    jalr ra, x9, 0
-   mv x9, a0
-   sd x9, -8(s0)
+   mv a0, a0
+   sd a0, -16(s0)
+   la x9, _putint
+   li x30, 0
+   ld x31, -16(s0)
+   sd x30, 0(sp)
+   sd x31, 8(sp)
+   jalr ra, x9, 0
+   la x30, _putchar
+   li x9, 0
+   li x31, 10
+   li x12, 256
+   rem x31, x31, x12
+   sd x9, 0(sp)
+   sd x31, 8(sp)
+   jalr ra, x30, 0
+   li x30, 99
+   ld x9, -16(s0)
+   sd x30, 0(x9)
    la x9, _putint
    li x31, 0
-   ld x30, -8(s0)
+   ld x30, -16(s0)
+   ld x30, 0(x30)
    sd x31, 0(sp)
    sd x30, 8(sp)
    jalr ra, x9, 0
@@ -113,35 +173,26 @@ L0:
    sd x9, 0(sp)
    sd x31, 8(sp)
    jalr ra, x30, 0
-   la x30, _getchar
-   li x9, 0
-   sd x9, 0(sp)
+   la x30, _del
+   li x31, 0
+   ld x9, -8(s0)
+   sd x31, 0(sp)
+   sd x9, 8(sp)
    jalr ra, x30, 0
-   mv a0, a0
-   sb a0, -16(s0)
-   la x9, _putchar
-   li x30, 0
-   lb x31, -16(s0)
-   sd x30, 0(sp)
-   sd x31, 8(sp)
-   jalr ra, x9, 0
-   la x30, _putchar
-   li x9, 0
-   li x31, 10
-   sd x9, 0(sp)
-   sd x31, 8(sp)
-   jalr ra, x30, 0
-   la x30, _exit
-   li x9, 0
-   sd x9, 0(sp)
+   la x30, _del
+   li x31, 0
+   ld x9, -16(s0)
+   sd x31, 0(sp)
+   sd x9, 8(sp)
    jalr ra, x30, 0
    li a0, 0
    mv a0, a0
 L1:
    ld x9, 16(sp)
-   ld x30, 24(sp)
-   ld x31, 32(sp)
-   ld s0, 40(sp)
-   ld ra, 48(sp)
-   addi sp, sp, 72
+   ld x12, 24(sp)
+   ld x30, 32(sp)
+   ld x31, 40(sp)
+   ld s0, 48(sp)
+   ld ra, 56(sp)
+   addi sp, sp, 80
    ret
