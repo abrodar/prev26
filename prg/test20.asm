@@ -89,40 +89,59 @@ _new:
    ret
 _del:
    ret
-_double:
-   addi sp, sp, -32
-   sd s0, 16(sp)
-   sd ra, 24(sp)
-   addi s0, sp, 32
-   sd x9, 0(sp)
-   sd x30, 8(sp)
+_fib:
+   addi sp, sp, -80
+   sd s0, 56(sp)
+   sd ra, 64(sp)
+   addi s0, sp, 80
+   sd x9, 16(sp)
+   sd x11, 24(sp)
+   sd x12, 32(sp)
+   sd x30, 40(sp)
+   sd x31, 48(sp)
+L3:
+   ld x9, 8(s0)
+   li x30, 1
+   ble x9, x30, L0
+L1:
+   la x30, _fib
+   li x31, 0
+   ld x9, 8(s0)
+   li x12, 1
+   sub x9, x9, x12
+   sd x31, 0(sp)
+   sd x9, 8(sp)
+   jalr ra, x30, 0
+   mv x9, a0
+   mv x9, x9
+   la x12, _fib
+   li x30, 0
+   ld x31, 8(s0)
+   li x11, 2
+   sub x31, x31, x11
+   sd x30, 0(sp)
+   sd x31, 8(sp)
+   jalr ra, x12, 0
+   mv a0, a0
+   add x9, x9, a0
+   sd x9, -8(s0)
+L2:
+   ld a0, -8(s0)
+   mv a0, a0
+   j L4
 L0:
    ld x9, 8(s0)
-   li x30, 2
-   mul a0, x9, x30
-   mv a0, a0
-L1:
-   ld x9, 0(sp)
-   ld x30, 8(sp)
-   ld s0, 16(sp)
-   ld ra, 24(sp)
-   addi sp, sp, 32
-   ret
-_inc:
-   addi sp, sp, -24
-   sd s0, 8(sp)
-   sd ra, 16(sp)
-   addi s0, sp, 24
-   sd x9, 0(sp)
-L2:
-   ld x9, 8(s0)
-   addi a0, x9, 1
-   mv a0, a0
-L3:
-   ld x9, 0(sp)
-   ld s0, 8(sp)
-   ld ra, 16(sp)
-   addi sp, sp, 24
+   sd x9, -8(s0)
+   j L2
+L4:
+   ld x9, 16(sp)
+   ld x11, 24(sp)
+   ld x12, 32(sp)
+   ld x30, 40(sp)
+   ld x31, 48(sp)
+   ld s0, 56(sp)
+   ld ra, 64(sp)
+   addi sp, sp, 80
    ret
 _main:
    addi sp, sp, -56
@@ -132,27 +151,15 @@ _main:
    sd x9, 16(sp)
    sd x30, 24(sp)
    sd x31, 32(sp)
-L4:
-   la x9, _double
-   li x30, 0
-   li x31, 5
-   sd x30, 0(sp)
-   sd x31, 8(sp)
-   jalr ra, x9, 0
-   mv x9, a0
-   la x30, _inc
-   li x31, 0
-   sd x31, 0(sp)
-   sd x9, 8(sp)
-   jalr ra, x30, 0
-   mv x9, a0
-   la x31, _double
-   li x30, 0
-   sd x30, 0(sp)
-   sd x9, 8(sp)
-   jalr ra, x31, 0
-   mv a0, a0
 L5:
+   la x9, _fib
+   li x31, 0
+   li x30, 10
+   sd x31, 0(sp)
+   sd x30, 8(sp)
+   jalr ra, x9, 0
+   mv a0, a0
+L6:
    ld x9, 16(sp)
    ld x30, 24(sp)
    ld x31, 32(sp)

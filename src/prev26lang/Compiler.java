@@ -373,10 +373,10 @@ public class Compiler {
                         break;
                     // === LIVENESS ANALYSIS ===
                     for (LIN.CodeChunk c : tracedChunks) {
-                        System.out.println("===== " + c.frame.label.name + " =====");
+                        //System.out.println("===== " + c.frame.label.name + " =====");
                         AssemFlowGraph cfg =  new AssemFlowGraph(map.get(c));
                         Liveness liveness = new Liveness(cfg, c.frame);
-                        liveness.showWithTemp(c.frame);
+                        /*liveness.showWithTemp(c.frame);
                         for (Instr instr : map.get(c)) {
                             Node n = cfg.instrMap.get(instr);
                             System.out.println("{ " + formatTemps(liveness.in.get(n), c.frame) + " }");
@@ -391,7 +391,7 @@ public class Compiler {
                         System.out.println();
                         // System.out.println("Interference graph: ");
                         //liveness.show();
-                        System.out.println();
+                        System.out.println();*/
                     }
                     if (cmdLineOpts.get("--target-phase").equals("livean"))
                         break;
@@ -454,8 +454,8 @@ public class Compiler {
                         // update frame size for all the new temps added during spilling
                         c.frame.size += c.frame.tempsSize + savedRegsSize;
                         emitFunction(out, c, coloredLines, savedRegsList);
-                        System.out.println();
-                        System.out.println();
+                        //System.out.println();
+                        //System.out.println();
                     }
                     out.close();
                     if (cmdLineOpts.get("--target-phase").equals("regall"))
