@@ -5,6 +5,63 @@ _start:
     jal ra, _main
     li a7, 10
     ecall
+_putint:
+   addi sp, sp, -24
+   sd s0, 0(sp)
+   sd ra, 8(sp)
+   sd a7, 16(sp)
+   addi s0, sp, 24
+   ld a0, 8(s0)
+   li a7, 1
+   ecall
+   ld s0, 0(sp)
+   ld ra, 8(sp)
+   ld a7, 16(sp)
+   addi sp, sp, 24
+   ret
+_putchar:
+   addi sp, sp, -24
+   sd s0, 0(sp)
+   sd ra, 8(sp)
+   sd a7, 16(sp)
+   addi s0, sp, 24
+   ld a0, 8(s0)
+   li a7, 11
+   ecall
+   ld s0, 0(sp)
+   ld ra, 8(sp)
+   ld a7, 16(sp)
+   addi sp, sp, 24
+   ret
+_getint:
+   addi sp, sp, -24
+   sd s0, 0(sp)
+   sd ra, 8(sp)
+   sd a7, 16(sp)
+   addi s0, sp, 24
+   li a7, 5
+   ecall
+   ld s0, 0(sp)
+   ld ra, 8(sp)
+   ld a7, 16(sp)
+   addi sp, sp, 24
+   ret
+_getchar:
+   addi sp, sp, -24
+   sd s0, 0(sp)
+   sd ra, 8(sp)
+   sd a7, 16(sp)
+   addi s0, sp, 24
+   li a7, 12
+   ecall
+   ld s0, 0(sp)
+   ld ra, 8(sp)
+   ld a7, 16(sp)
+   addi sp, sp, 24
+   ret
+_exit:
+    li a7, 10
+    ecall
 _main:
    addi sp, sp, -120
    sd s0, 56(sp)

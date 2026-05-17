@@ -409,20 +409,29 @@ public class Compiler {
                     PrintWriter out = new PrintWriter(new FileWriter(cmdLineOpts.get("--dst-file-name")));
                     // data segment - dodamo globalne/statične spremenljivke
                     out.println(".data");
+                    out.println("_input_buff: "); // for readchar()
+                    out.println("   .byte 0, 0, 0, 0, 0, 0, 0, 0");
                     for (LIN.DataChunk dc : dataChunks) {
                         out.println(dc.label.name + ":");
                         if (dc.init != null) {
                             // string bytes
                             out.println("   .string "+dc.init);
                         } else {
-                            out.println("   .space "+dc.size);
+                            out.print("   .byte ");
+                            for (int i = 0; i < dc.size; i++) {
+                                if (i < dc.size -1) {
+                                    out.print("0, ");
+                                } else {
+                                    out.println("0");
+                                }
+                            }
                         }
                     }
                     out.println(".text");
                     //startup routine
                     emitStartup(out);
                     //stdlib routine
-                    //emitStdlib(out);
+                    emitStdlib(out);
 
                     for (LIN.CodeChunk c : tracedChunks) {
                         Regall regAlloc = new Regall();
@@ -463,6 +472,70 @@ public class Compiler {
             throw new RuntimeException(e);
         }
     }
+    // print int=1, print char=11, exit=10,. read=63
+    private static void emitStdlib(PrintWriter out) {
+        // putint
+        out.println("_putint:");
+        out.println("   addi sp, sp, -24"); // need to save 3 regs into mini-frame
+        out.println("   sd s0, 0(sp)");
+        out.println("   sd ra, 8(sp)");
+        out.println("   sd a7, 16(sp)");
+        out.println("   addi s0, sp, 24");
+        out.println("   ld a0, 8(s0)");
+        out.println("   li a7, 1");
+        out.println("   ecall");
+        out.println("   ld s0, 0(sp)");
+        out.println("   ld ra, 8(sp)");
+        out.println("   ld a7, 16(sp)");
+        out.println("   addi sp, sp, 24");
+        out.println("   ret");
+        // putchar
+        out.println("_putchar:");
+        out.println("   addi sp, sp, -24");
+        out.println("   sd s0, 0(sp)");
+        out.println("   sd ra, 8(sp)");
+        out.println("   sd a7, 16(sp)");
+        out.println("   addi s0, sp, 24");
+        out.println("   ld a0, 8(s0)");
+        out.println("   li a7, 11");
+        out.println("   ecall");
+        out.println("   ld s0, 0(sp)");
+        out.println("   ld ra, 8(sp)");
+        out.println("   ld a7, 16(sp)");
+        out.println("   addi sp, sp, 24");
+        out.println("   ret");
+        // getint
+        out.println("_getint:");
+        out.println("   ret");
+        // getchar
+        out.println("_getchar:");
+        out.println("   addi sp, sp, -40");
+        out.println("   sd s0, 0(sp)");
+        out.println("   sd ra, 8(sp)");
+        out.println("   sd a1, 16(sp)");
+        out.println("   sd a2, 24(sp)");
+        out.println("   sd a7, 32(sp)");
+        out.println("   addi s0, sp, 40");
+        out.println("   li a7, 63"); // read; a0 = stdin fd, a1 = address of the buffer, a2 = max no of bytes to read
+        out.println("   li a0, 0");
+        out.println("   la a1, _input_buff");
+        out.println("   li a2, 1");
+        out.println("   ecall"); // number of read bytes or -1 if an error occurred in a0
+        out.println("   la a0, _input_buff");
+        out.println("   lb a0, 0(a0)"); // load result byte into a0
+        out.println("   ld s0, 0(sp)");
+        out.println("   ld ra, 8(sp)");
+        out.println("   ld a1, 16(sp)");
+        out.println("   ld a2, 24(sp)");
+        out.println("   ld a7, 32(sp)");
+        out.println("   addi sp, sp, 40");
+        out.println("   ret");
+        // exit
+        out.println("_exit:");
+        out.println("    li a7, 10");
+        out.println("    ecall");
+    }
+
     // startup routine, executes, before main()
     private static void emitStartup(PrintWriter out) {
         out.println("_start:");
