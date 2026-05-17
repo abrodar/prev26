@@ -1,7 +1,24 @@
-fun getchar():char
-fun putchar(c:char):void
-fun getint():int
 fun putint(i:int):void
+fun getint():int
+fun putchar(c:char):void
+fun getchar():char
 fun exit():void
 
-fun main () : int = let var c:char in c = getchar(), putchar(c) end, 1
+fun main():int =
+    let
+        var i:int
+        var c:char
+    in
+        putint(42),
+        putchar('\x0A'),
+        putchar('A'),
+        putchar('\x0A'),
+        i = getint(),
+        putint(i),
+        putchar('\x0A'),
+        c = getchar(),
+        putchar(c),
+        putchar('\x0A'),
+        exit(),
+        0
+    end

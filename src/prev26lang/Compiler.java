@@ -7,11 +7,9 @@ import java.util.*;
 
 import prev26lang.common.report.*;
 import prev26lang.phase.asmgen.Instr;
-import prev26lang.phase.asmgen.LABEL;
 import prev26lang.phase.lexan.*;
 import prev26lang.phase.livean.AssemFlowGraph;
 import prev26lang.phase.livean.Liveness;
-import prev26lang.phase.livean.Node;
 import prev26lang.phase.regall.Regall;
 import prev26lang.phase.synan.*;
 import prev26lang.phase.abstr.*;
@@ -409,8 +407,6 @@ public class Compiler {
                     PrintWriter out = new PrintWriter(new FileWriter(cmdLineOpts.get("--dst-file-name")));
                     // data segment - dodamo globalne/statične spremenljivke
                     out.println(".data");
-                    out.println("_input_buff: "); // for readchar()
-                    out.println("   .byte 0, 0, 0, 0, 0, 0, 0, 0");
                     for (LIN.DataChunk dc : dataChunks) {
                         out.println(dc.label.name + ":");
                         if (dc.init != null) {
@@ -472,7 +468,7 @@ public class Compiler {
             throw new RuntimeException(e);
         }
     }
-    // print int=1, print char=11, exit=10,. read=63
+    // print int=1, read int = 5, print char=11, read char = 12, exit=10,. read=63
     private static void emitStdlib(PrintWriter out) {
         // putint
         out.println("_putint:");
@@ -506,29 +502,31 @@ public class Compiler {
         out.println("   ret");
         // getint
         out.println("_getint:");
+        out.println("   addi sp, sp, -24");
+        out.println("   sd s0, 0(sp)");
+        out.println("   sd ra, 8(sp)");
+        out.println("   sd a7, 16(sp)");
+        out.println("   addi s0, sp, 24");
+        out.println("   li a7, 5");
+        out.println("   ecall"); // result in a0
+        out.println("   ld s0, 0(sp)");
+        out.println("   ld ra, 8(sp)");
+        out.println("   ld a7, 16(sp)");
+        out.println("   addi sp, sp, 24");
         out.println("   ret");
         // getchar
         out.println("_getchar:");
-        out.println("   addi sp, sp, -40");
+        out.println("   addi sp, sp, -24");
         out.println("   sd s0, 0(sp)");
         out.println("   sd ra, 8(sp)");
-        out.println("   sd a1, 16(sp)");
-        out.println("   sd a2, 24(sp)");
-        out.println("   sd a7, 32(sp)");
-        out.println("   addi s0, sp, 40");
-        out.println("   li a7, 63"); // read; a0 = stdin fd, a1 = address of the buffer, a2 = max no of bytes to read
-        out.println("   li a0, 0");
-        out.println("   la a1, _input_buff");
-        out.println("   li a2, 1");
-        out.println("   ecall"); // number of read bytes or -1 if an error occurred in a0
-        out.println("   la a0, _input_buff");
-        out.println("   lb a0, 0(a0)"); // load result byte into a0
+        out.println("   sd a7, 16(sp)");
+        out.println("   addi s0, sp, 24");
+        out.println("   li a7, 12");
+        out.println("   ecall"); // result in a0
         out.println("   ld s0, 0(sp)");
         out.println("   ld ra, 8(sp)");
-        out.println("   ld a1, 16(sp)");
-        out.println("   ld a2, 24(sp)");
-        out.println("   ld a7, 32(sp)");
-        out.println("   addi sp, sp, 40");
+        out.println("   ld a7, 16(sp)");
+        out.println("   addi sp, sp, 24");
         out.println("   ret");
         // exit
         out.println("_exit:");
