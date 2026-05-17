@@ -74,6 +74,10 @@ public class Liveness extends InterferenceGraph{
                     }
                 }
             }
+            // also add nodes for uses so special regs like s0 get precolored
+            for (MEM.Temp u : flow.use(n)) {
+                tnode(u);
+            }
         }
     }
 

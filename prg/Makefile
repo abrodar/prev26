@@ -18,7 +18,7 @@ LOGGEDPHASE	?= $(PHASE)
 .PHONY  : clean
 clean   :
 	$(RM) *~
-	$(RM) *xml *html
+	$(RM) *xml *html *asm
 
 .PHONY: all_tests
 all_tests:

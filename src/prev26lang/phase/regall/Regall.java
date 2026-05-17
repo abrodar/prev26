@@ -410,13 +410,14 @@ public class Regall {
             degree[n.name()] = n.degree() / 2;
             moveList.put(n, new HashSet<>());
             MEM.Temp temp_n = ig.nodeToTemp.get(n);
+            System.out.println("test: node name: " +n.name() + " its temp " + temp_n + " frame temp map: "+frame.tempMap(temp_n));
             if (Codegen.specialRegs.contains(temp_n) || temp_n == frame.FP || temp_n == frame.RV) {
                 precolored.add(n);
                 String precolor = frame.tempMap(temp_n);
                 if (precolor != null) {
                     color.put(n,  precolor);
                 }
-                //System.out.println("I precolored: " + n.name() + "-"+ig.nodeToTemp.get(n) + " with "+color.get(n));
+                System.out.println("I precolored: " + n.name() + "-"+ig.nodeToTemp.get(n) + " with "+color.get(n));
             }
         }
         /*System.out.println("Degree array current state: ");

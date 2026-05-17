@@ -97,9 +97,9 @@ _double:
    sd x9, 0(sp)
    sd x30, 8(sp)
 L0:
-   ld x30, 8(null)
-   li x9, 2
-   mul a0, x30, x9
+   ld x9, 8(s0)
+   li x30, 2
+   mul a0, x9, x30
    mv a0, a0
 L1:
    ld x9, 0(sp)
@@ -115,7 +115,7 @@ _inc:
    addi s0, sp, 24
    sd x9, 0(sp)
 L2:
-   ld x9, 8(null)
+   ld x9, 8(s0)
    addi a0, x9, 1
    mv a0, a0
 L3:
@@ -133,12 +133,12 @@ _main:
    sd x30, 24(sp)
    sd x31, 32(sp)
 L4:
-   la x31, _double
-   li x9, 0
-   li x30, 5
-   sd x9, 0(sp)
-   sd x30, 8(sp)
-   jalr ra, x31, 0
+   la x9, _double
+   li x30, 0
+   li x31, 5
+   sd x30, 0(sp)
+   sd x31, 8(sp)
+   jalr ra, x9, 0
    mv x9, a0
    la x30, _inc
    li x31, 0
@@ -146,11 +146,11 @@ L4:
    sd x9, 8(sp)
    jalr ra, x30, 0
    mv x9, a0
-   la x30, _double
-   li x31, 0
-   sd x31, 0(sp)
+   la x31, _double
+   li x30, 0
+   sd x30, 0(sp)
    sd x9, 8(sp)
-   jalr ra, x30, 0
+   jalr ra, x31, 0
    mv a0, a0
 L5:
    ld x9, 16(sp)

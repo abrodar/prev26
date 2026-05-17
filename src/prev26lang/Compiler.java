@@ -7,9 +7,11 @@ import java.util.*;
 
 import prev26lang.common.report.*;
 import prev26lang.phase.asmgen.Instr;
+import prev26lang.phase.asmgen.LABEL;
 import prev26lang.phase.lexan.*;
 import prev26lang.phase.livean.AssemFlowGraph;
 import prev26lang.phase.livean.Liveness;
+import prev26lang.phase.livean.Node;
 import prev26lang.phase.regall.Regall;
 import prev26lang.phase.synan.*;
 import prev26lang.phase.abstr.*;
@@ -371,12 +373,13 @@ public class Compiler {
                         break;
                     // === LIVENESS ANALYSIS ===
                     for (LIN.CodeChunk c : tracedChunks) {
-                        //System.out.println("===== " + c.frame.label.name + " =====");
+                        System.out.println("===== " + c.frame.label.name + " =====");
                         AssemFlowGraph cfg =  new AssemFlowGraph(map.get(c));
                         Liveness liveness = new Liveness(cfg, c.frame);
-                        /*for (Instr instr : map.get(c)) {
+                        liveness.showWithTemp(c.frame);
+                        for (Instr instr : map.get(c)) {
                             Node n = cfg.instrMap.get(instr);
-                            //System.out.println("{ " + formatTemps(liveness.in.get(n), c.frame) + " }");
+                            System.out.println("{ " + formatTemps(liveness.in.get(n), c.frame) + " }");
                             if (instr instanceof LABEL) {
                                 System.out.println(instr.format(c.frame)); //+ "            # def: {" + formatTemps(instr.def() != null ? new HashSet<>(instr.def()) : null, c.frame) + "}    use: {" + formatTemps(instr.use() != null ? new HashSet<>(instr.use()) : null, c.frame) + "}      jumps: {" + instr.jumps()+"}");
                             } else {
@@ -386,9 +389,9 @@ public class Compiler {
                         Node last = cfg.instrMap.get(map.get(c).lastElement());
                         System.out.println("{ "+liveness.in.get(last)+ " }");
                         System.out.println();
-                        System.out.println("Interference graph: ");
-                        liveness.show();
-                        System.out.println();*/
+                        // System.out.println("Interference graph: ");
+                        //liveness.show();
+                        System.out.println();
                     }
                     if (cmdLineOpts.get("--target-phase").equals("livean"))
                         break;
@@ -451,6 +454,8 @@ public class Compiler {
                         // update frame size for all the new temps added during spilling
                         c.frame.size += c.frame.tempsSize + savedRegsSize;
                         emitFunction(out, c, coloredLines, savedRegsList);
+                        System.out.println();
+                        System.out.println();
                     }
                     out.close();
                     if (cmdLineOpts.get("--target-phase").equals("regall"))
@@ -581,6 +586,7 @@ public class Compiler {
         // saved regs = sp + args + i*8
         // ra slot = s0 - locsize + 8
         // old s0 = s0 - locsize  + 16
+        //System.out.println("argsize: "+argsSize+ " savedRegsSize: "+ savedRegsSize + " tempsSize: "+tempsSize);
         for (int i = 0; i < coloredLines.size(); i++) {
             String line = coloredLines.get(i);
             if (line.equals(c.entryLabel.name + ":")) {
