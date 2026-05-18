@@ -1,0 +1,39 @@
+fun getint():int
+fun putint(i:int):void
+fun putchar(c:char):void
+fun new(size:int):^int
+
+fun main():int = let
+                    var n:int
+                    var sizes:^int
+                    var start:^int
+                    var i:int
+                 in
+                    n = getint(),
+                    i = 0,
+                    sizes = new(8 * n),
+                    start = sizes,
+                    putint(sizes as int),
+                    putchar(10 as char),
+                    while i < n do
+                        putint(i),
+                        putchar(' '),
+                        let
+                            var r:int
+                            var c:int
+                        in
+                            r = getint(),
+                            c = getint(),
+                            if i == 0 then
+                                sizes^ = r,
+                                sizes = ((sizes as int) + 8) as ^int,
+                                sizes^ = c
+                            else
+                                sizes^ = c
+                            end,
+                            sizes = ((sizes as int) + 8) as ^int
+                        end,
+                        i = i + 1
+                    end
+                 end,
+                 1

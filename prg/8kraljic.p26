@@ -44,7 +44,7 @@ fun backtrack(c:int):void = if c == 8 and row[b] == a then
                                         j = 0,
                                         while j < 8 do
                                             if row[j] == i then
-                                                if (i + 1) == a and (row[j]+1) == a then
+                                                if i == a and j == b then
                                                     putchar('Y'),
                                                     putchar(' ')
                                                 else

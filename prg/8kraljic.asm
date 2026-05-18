@@ -103,9 +103,9 @@ _abs:
    sd x9, 0(sp)
    sd x30, 8(sp)
 L2:
-   ld x30, 8(s0)
-   li x9, 0
-   slt x9, x30, x9
+   ld x9, 8(s0)
+   li x30, 0
+   slt x9, x9, x30
    beqz x9, L1
 L0:
    li x9, 1
@@ -141,9 +141,9 @@ L9:
    li x9, 1
    sb x9, -16(s0)
 L6:
-   ld x9, -8(s0)
-   ld x30, 16(s0)
-   blt x9, x30, L7
+   ld x30, -8(s0)
+   ld x9, 16(s0)
+   blt x30, x9, L7
 L8:
    lb a0, -16(s0)
    mv a0, a0
@@ -162,27 +162,27 @@ L7:
    li x31, 8
    mul x9, x9, x31
    add x9, x30, x9
-   ld x9, 0(x9)
-   ld x30, 8(s0)
-   xor x30, x9, x30
-   seqz x30, x30
-   mv x30, x30
-   la x11, _abs
-   li x31, 0
-   ld x12, -8(s0)
-   ld x9, 16(s0)
-   sub x9, x12, x9
-   sd x31, 0(sp)
-   sd x9, 8(sp)
-   jalr ra, x11, 0
-   mv x9, a0
+   ld x30, 0(x9)
+   ld x9, 8(s0)
+   xor x9, x30, x9
+   seqz x9, x9
    mv x9, x9
+   la x12, _abs
+   li x30, 0
+   ld x31, -8(s0)
+   ld x11, 16(s0)
+   sub x31, x31, x11
+   sd x30, 0(sp)
+   sd x31, 8(sp)
+   jalr ra, x12, 0
+   mv x30, a0
+   mv x30, x30
    la x14, _abs
    li x12, 0
    la x11, _row
-   ld x13, -8(s0)
-   li x31, 8
-   mul x31, x13, x31
+   ld x31, -8(s0)
+   li x13, 8
+   mul x31, x31, x13
    add x31, x11, x31
    ld x11, 0(x31)
    ld x31, 8(s0)
@@ -191,9 +191,9 @@ L7:
    sd x31, 8(sp)
    jalr ra, x14, 0
    mv x31, a0
-   xor x9, x9, x31
-   seqz x9, x9
-   or x9, x30, x9
+   xor x30, x30, x31
+   seqz x30, x30
+   or x9, x9, x30
    bnez x9, L4
 L41:
    j L5
@@ -220,22 +220,22 @@ _backtrack:
    sd x30, 48(sp)
    sd x31, 56(sp)
 L37:
-   ld x30, 8(s0)
-   li x9, 8
-   xor x12, x30, x9
-   seqz x12, x12
-   la x31, _row
+   ld x9, 8(s0)
+   li x30, 8
+   xor x31, x9, x30
+   seqz x31, x31
+   la x12, _row
    la x9, _b
    ld x9, 0(x9)
    li x30, 8
    mul x9, x9, x30
-   add x9, x31, x9
+   add x9, x12, x9
    ld x9, 0(x9)
    la x30, _a
    ld x30, 0(x30)
    xor x9, x9, x30
    seqz x9, x9
-   and x9, x12, x9
+   and x9, x31, x9
    bnez x9, L34
 L35:
    li x9, 0
@@ -249,158 +249,193 @@ L36:
    li a0, 0
    mv a0, a0
    j L38
-L29:
-   la x30, _canPlace
-   li x31, 0
-   ld x12, -32(s0)
-   ld x9, 8(s0)
-   sd x31, 0(sp)
-   sd x12, 8(sp)
-   sd x9, 16(sp)
-   jalr ra, x30, 0
-   mv x9, a0
-   beqz x9, L27
-L26:
-   ld x12, -32(s0)
-   la x9, _row
-   ld x30, 8(s0)
-   li x31, 8
-   mul x30, x30, x31
-   add x9, x9, x30
-   sd x12, 0(x9)
-   la x9, _backtrack
-   li x31, 0
-   ld x30, 8(s0)
-   addi x30, x30, 1
-   sd x31, 0(sp)
-   sd x30, 8(sp)
-   jalr ra, x9, 0
-L27:
-L30:
-   ld x9, -32(s0)
-   addi x9, x9, 1
-   sd x9, -32(s0)
-   j L31
-L15:
+L13:
    la x9, _putchar
    li x31, 0
-   li x30, 88
+   li x12, 10
+   li x30, 256
+   rem x30, x12, x30
    sd x31, 0(sp)
    sd x30, 8(sp)
    jalr ra, x9, 0
-   la x30, _putchar
-   li x31, 0
-   li x9, 32
-   sd x31, 0(sp)
-   sd x9, 8(sp)
-   jalr ra, x30, 0
-L16:
-   j L19
-L13:
-   la x30, _putchar
-   li x31, 0
-   li x12, 10
-   li x9, 256
-   rem x9, x12, x9
-   sd x31, 0(sp)
-   sd x9, 8(sp)
-   jalr ra, x30, 0
    li x9, 7
    sd x9, -16(s0)
    li x9, 0
    sd x9, -24(s0)
 L23:
-   ld x9, -16(s0)
-   li x30, 0
-   bge x9, x30, L24
+   ld x30, -16(s0)
+   li x9, 0
+   bge x30, x9, L24
 L25:
    j L36
-L32:
-   ld x30, 8(s0)
-   la x9, _b
-   ld x9, 0(x9)
-   xor x31, x30, x9
-   seqz x31, x31
-   ld x9, -32(s0)
-   la x30, _a
-   ld x30, 0(x30)
-   xor x9, x9, x30
-   snez x9, x9
-   and x9, x31, x9
-   beqz x9, L29
 L28:
    j L30
-L12:
-   la x31, _putchar
+L34:
+   la x31, _putint
+   li x12, 0
+   la x9, _row
    li x30, 0
-   li x9, 32
-   sd x30, 0(sp)
-   sd x9, 8(sp)
-   jalr ra, x31, 0
-   la x12, _putint
-   li x30, 0
-   la x31, _row
-   ld x9, -8(s0)
    li x11, 8
-   mul x9, x9, x11
-   add x9, x31, x9
+   mul x30, x30, x11
+   add x9, x9, x30
    ld x9, 0(x9)
    addi x9, x9, 1
-   sd x30, 0(sp)
+   sd x12, 0(sp)
+   sd x9, 8(sp)
+   jalr ra, x31, 0
+   li x9, 1
+   sd x9, -8(s0)
+L11:
+   ld x9, -8(s0)
+   li x30, 8
+   slt x9, x9, x30
+   beqz x9, L13
+L12:
+   la x9, _putchar
+   li x31, 0
+   li x30, 32
+   sd x31, 0(sp)
+   sd x30, 8(sp)
+   jalr ra, x9, 0
+   la x12, _putint
+   li x11, 0
+   la x9, _row
+   ld x30, -8(s0)
+   li x31, 8
+   mul x30, x30, x31
+   add x9, x9, x30
+   ld x9, 0(x9)
+   addi x9, x9, 1
+   sd x11, 0(sp)
    sd x9, 8(sp)
    jalr ra, x12, 0
    ld x9, -8(s0)
    addi x9, x9, 1
    sd x9, -8(s0)
    j L11
+L26:
+   ld x12, -32(s0)
+   la x30, _row
+   ld x9, 8(s0)
+   li x31, 8
+   mul x9, x9, x31
+   add x9, x30, x9
+   sd x12, 0(x9)
+   la x31, _backtrack
+   li x30, 0
+   ld x9, 8(s0)
+   addi x9, x9, 1
+   sd x30, 0(sp)
+   sd x9, 8(sp)
+   jalr ra, x31, 0
+L27:
+L30:
+   ld x9, -32(s0)
+   addi x9, x9, 1
+   sd x9, -32(s0)
+   j L31
+L14:
+   la x9, _putchar
+   li x31, 0
+   li x30, 89
+   sd x31, 0(sp)
+   sd x30, 8(sp)
+   jalr ra, x9, 0
+   la x9, _putchar
+   li x30, 0
+   li x31, 32
+   sd x30, 0(sp)
+   sd x31, 8(sp)
+   jalr ra, x9, 0
+   j L16
+L29:
+   la x30, _canPlace
+   li x31, 0
+   ld x9, -32(s0)
+   ld x12, 8(s0)
+   sd x31, 0(sp)
+   sd x9, 8(sp)
+   sd x12, 16(sp)
+   jalr ra, x30, 0
+   mv x9, a0
+   bnez x9, L26
+L42:
+   j L27
+L32:
+   ld x30, 8(s0)
+   la x9, _b
+   ld x9, 0(x9)
+   xor x9, x30, x9
+   seqz x9, x9
+   ld x31, -32(s0)
+   la x30, _a
+   ld x30, 0(x30)
+   xor x30, x31, x30
+   snez x30, x30
+   and x9, x9, x30
+   bnez x9, L28
+L43:
+   j L29
 L17:
-   ld x9, -16(s0)
-   addi x30, x9, 1
+   ld x30, -16(s0)
    la x9, _a
    ld x9, 0(x9)
    xor x30, x30, x9
    seqz x30, x30
-   la x12, _row
    ld x31, -24(s0)
-   li x9, 8
-   mul x9, x31, x9
-   add x9, x12, x9
-   ld x9, 0(x9)
-   addi x31, x9, 1
-   la x9, _a
+   la x9, _b
    ld x9, 0(x9)
    xor x9, x31, x9
    seqz x9, x9
    and x9, x30, x9
-   beqz x9, L15
-L14:
+   bnez x9, L14
+L15:
+   la x31, _putchar
+   li x9, 0
+   li x30, 88
+   sd x9, 0(sp)
+   sd x30, 8(sp)
+   jalr ra, x31, 0
    la x31, _putchar
    li x30, 0
-   li x9, 89
+   li x9, 32
    sd x30, 0(sp)
    sd x9, 8(sp)
    jalr ra, x31, 0
-   la x30, _putchar
-   li x31, 0
-   li x9, 32
-   sd x31, 0(sp)
-   sd x9, 8(sp)
-   jalr ra, x30, 0
-   j L16
+L16:
+   j L19
 L22:
-   la x30, _putchar
+   la x9, _putchar
    li x31, 0
-   li x9, 10
-   li x12, 256
-   rem x9, x9, x12
+   li x12, 10
+   li x30, 256
+   rem x30, x12, x30
    sd x31, 0(sp)
-   sd x9, 8(sp)
-   jalr ra, x30, 0
+   sd x30, 8(sp)
+   jalr ra, x9, 0
    ld x30, -16(s0)
    li x9, 1
    sub x9, x30, x9
    sd x9, -16(s0)
    j L23
+L18:
+   la x30, _putchar
+   li x9, 0
+   li x31, 45
+   sd x9, 0(sp)
+   sd x31, 8(sp)
+   jalr ra, x30, 0
+   la x9, _putchar
+   li x31, 0
+   li x30, 32
+   sd x31, 0(sp)
+   sd x30, 8(sp)
+   jalr ra, x9, 0
+L19:
+   ld x9, -24(s0)
+   addi x9, x9, 1
+   sd x9, -24(s0)
+   j L20
 L24:
    li x9, 0
    sd x9, -24(s0)
@@ -410,53 +445,16 @@ L20:
    slt x9, x30, x9
    beqz x9, L22
 L21:
-   la x9, _row
+   la x30, _row
    ld x31, -24(s0)
-   li x30, 8
-   mul x30, x31, x30
-   add x9, x9, x30
-   ld x30, 0(x9)
-   ld x9, -16(s0)
-   beq x30, x9, L17
-L18:
-   la x30, _putchar
-   li x9, 0
-   li x31, 45
-   sd x9, 0(sp)
-   sd x31, 8(sp)
-   jalr ra, x30, 0
-   la x30, _putchar
-   li x31, 0
-   li x9, 32
-   sd x31, 0(sp)
-   sd x9, 8(sp)
-   jalr ra, x30, 0
-L19:
-   ld x9, -24(s0)
-   addi x9, x9, 1
-   sd x9, -24(s0)
-   j L20
-L34:
-   la x30, _putint
-   li x12, 0
-   la x31, _row
-   li x9, 0
-   li x11, 8
-   mul x9, x9, x11
-   add x9, x31, x9
+   li x9, 8
+   mul x9, x31, x9
+   add x9, x30, x9
    ld x9, 0(x9)
-   addi x9, x9, 1
-   sd x12, 0(sp)
-   sd x9, 8(sp)
-   jalr ra, x30, 0
-   li x9, 1
-   sd x9, -8(s0)
-L11:
-   ld x9, -8(s0)
-   li x30, 8
-   blt x9, x30, L12
-L42:
-   j L13
+   ld x30, -16(s0)
+   beq x9, x30, L17
+L44:
+   j L18
 L38:
    ld x9, 24(sp)
    ld x11, 32(sp)
@@ -490,24 +488,24 @@ L39:
    mv a0, a0
    la x9, _b
    sd a0, 0(x9)
-   la x9, _a
-   ld x9, 0(x9)
-   li x30, 1
-   sub x30, x9, x30
+   la x30, _a
+   ld x30, 0(x30)
+   li x9, 1
+   sub x30, x30, x9
    la x9, _a
    sd x30, 0(x9)
    la x30, _b
    ld x30, 0(x30)
    li x9, 1
-   sub x9, x30, x9
-   la x30, _b
-   sd x9, 0(x30)
-   la x30, _backtrack
-   li x9, 0
+   sub x30, x30, x9
+   la x9, _b
+   sd x30, 0(x9)
+   la x9, _backtrack
    li x31, 0
-   sd x9, 0(sp)
-   sd x31, 8(sp)
-   jalr ra, x30, 0
+   li x30, 0
+   sd x31, 0(sp)
+   sd x30, 8(sp)
+   jalr ra, x9, 0
    li a0, 1
    mv a0, a0
 L40:

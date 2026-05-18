@@ -1,0 +1,14 @@
+fun putint(i:int):int
+
+fun main():int = let
+                    var i:int
+                 in
+                    i = 1,
+                    if (i + 9) == 10 then
+                        putint(10)
+                    else
+                        putint(20)
+                    end
+                 end,
+                 1
+
