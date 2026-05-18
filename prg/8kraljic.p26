@@ -28,6 +28,8 @@ fun backtrack(c:int):void = if c == 8 and row[b] == a then
                                 putint(row[0]+1),
                                 let
                                     var r:int
+                                    var i:int
+                                    var j:int
                                 in
                                     r = 1,
                                     while r < 8 do
@@ -35,7 +37,29 @@ fun backtrack(c:int):void = if c == 8 and row[b] == a then
                                         putint(row[r] + 1),
                                         r = r + 1
                                     end,
-                                    putchar(10 as char)
+                                    putchar(10 as char),
+                                    i = 7,
+                                    j = 0,
+                                    while i >= 0 do
+                                        j = 0,
+                                        while j < 8 do
+                                            if row[j] == i then
+                                                if (i + 1) == a and (row[j]+1) == a then
+                                                    putchar('Y'),
+                                                    putchar(' ')
+                                                else
+                                                    putchar('X'),
+                                                    putchar(' ')
+                                                end
+                                            else
+                                                putchar('-'),
+                                                putchar(' ')
+                                            end,
+                                            j = j + 1
+                                        end,
+                                        putchar(10 as char),
+                                        i = i - 1
+                                    end
                                 end
                             else
                                 let

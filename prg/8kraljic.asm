@@ -109,9 +109,9 @@ L2:
    beqz x9, L1
 L0:
    li x9, 1
-   neg x30, x9
-   ld x9, 8(s0)
-   mul x9, x30, x9
+   neg x9, x9
+   ld x30, 8(s0)
+   mul x9, x9, x30
    sd x9, 8(s0)
 L1:
    ld a0, 8(s0)
@@ -141,9 +141,9 @@ L9:
    li x9, 1
    sb x9, -16(s0)
 L6:
-   ld x30, -8(s0)
-   ld x9, 16(s0)
-   blt x30, x9, L7
+   ld x9, -8(s0)
+   ld x30, 16(s0)
+   blt x9, x30, L7
 L8:
    lb a0, -16(s0)
    mv a0, a0
@@ -162,40 +162,40 @@ L7:
    li x31, 8
    mul x9, x9, x31
    add x9, x30, x9
-   ld x30, 0(x9)
-   ld x9, 8(s0)
-   xor x31, x30, x9
-   seqz x31, x31
-   mv x31, x31
+   ld x9, 0(x9)
+   ld x30, 8(s0)
+   xor x30, x9, x30
+   seqz x30, x30
+   mv x30, x30
    la x11, _abs
-   li x30, 0
+   li x31, 0
    ld x12, -8(s0)
    ld x9, 16(s0)
    sub x9, x12, x9
-   sd x30, 0(sp)
+   sd x31, 0(sp)
    sd x9, 8(sp)
    jalr ra, x11, 0
    mv x9, a0
    mv x9, x9
    la x14, _abs
    li x12, 0
-   la x13, _row
-   ld x30, -8(s0)
-   li x11, 8
-   mul x30, x30, x11
-   add x30, x13, x30
-   ld x11, 0(x30)
-   ld x30, 8(s0)
-   sub x30, x11, x30
+   la x11, _row
+   ld x13, -8(s0)
+   li x31, 8
+   mul x31, x13, x31
+   add x31, x11, x31
+   ld x11, 0(x31)
+   ld x31, 8(s0)
+   sub x31, x11, x31
    sd x12, 0(sp)
-   sd x30, 8(sp)
+   sd x31, 8(sp)
    jalr ra, x14, 0
-   mv x30, a0
-   xor x9, x9, x30
+   mv x31, a0
+   xor x9, x9, x31
    seqz x9, x9
-   or x9, x31, x9
+   or x9, x30, x9
    bnez x9, L4
-L29:
+L41:
    j L5
 L10:
    ld x9, 16(sp)
@@ -210,45 +210,126 @@ L10:
    addi sp, sp, 104
    ret
 _backtrack:
-   addi sp, sp, -96
+   addi sp, sp, -112
    sd s0, 64(sp)
    sd ra, 72(sp)
-   addi s0, sp, 96
+   addi s0, sp, 112
    sd x9, 24(sp)
    sd x11, 32(sp)
    sd x12, 40(sp)
    sd x30, 48(sp)
    sd x31, 56(sp)
-L25:
+L37:
    ld x30, 8(s0)
    li x9, 8
-   xor x9, x30, x9
+   xor x12, x30, x9
+   seqz x12, x12
+   la x31, _row
+   la x9, _b
+   ld x9, 0(x9)
+   li x30, 8
+   mul x9, x9, x30
+   add x9, x31, x9
+   ld x9, 0(x9)
+   la x30, _a
+   ld x30, 0(x30)
+   xor x9, x9, x30
    seqz x9, x9
-   la x12, _row
-   la x30, _b
-   ld x30, 0(x30)
-   li x31, 8
-   mul x30, x30, x31
-   add x30, x12, x30
-   ld x30, 0(x30)
-   la x31, _a
-   ld x31, 0(x31)
-   xor x30, x30, x31
-   seqz x30, x30
-   and x9, x9, x30
-   bnez x9, L22
-L23:
+   and x9, x12, x9
+   bnez x9, L34
+L35:
    li x9, 0
-   sd x9, -16(s0)
-L19:
-   ld x30, -16(s0)
-   li x9, 8
-   blt x30, x9, L20
-L21:
-L24:
+   sd x9, -32(s0)
+L31:
+   ld x9, -32(s0)
+   li x30, 8
+   blt x9, x30, L32
+L33:
+L36:
    li a0, 0
    mv a0, a0
-   j L26
+   j L38
+L29:
+   la x30, _canPlace
+   li x31, 0
+   ld x12, -32(s0)
+   ld x9, 8(s0)
+   sd x31, 0(sp)
+   sd x12, 8(sp)
+   sd x9, 16(sp)
+   jalr ra, x30, 0
+   mv x9, a0
+   beqz x9, L27
+L26:
+   ld x12, -32(s0)
+   la x9, _row
+   ld x30, 8(s0)
+   li x31, 8
+   mul x30, x30, x31
+   add x9, x9, x30
+   sd x12, 0(x9)
+   la x9, _backtrack
+   li x31, 0
+   ld x30, 8(s0)
+   addi x30, x30, 1
+   sd x31, 0(sp)
+   sd x30, 8(sp)
+   jalr ra, x9, 0
+L27:
+L30:
+   ld x9, -32(s0)
+   addi x9, x9, 1
+   sd x9, -32(s0)
+   j L31
+L15:
+   la x9, _putchar
+   li x31, 0
+   li x30, 88
+   sd x31, 0(sp)
+   sd x30, 8(sp)
+   jalr ra, x9, 0
+   la x30, _putchar
+   li x31, 0
+   li x9, 32
+   sd x31, 0(sp)
+   sd x9, 8(sp)
+   jalr ra, x30, 0
+L16:
+   j L19
+L13:
+   la x30, _putchar
+   li x31, 0
+   li x12, 10
+   li x9, 256
+   rem x9, x12, x9
+   sd x31, 0(sp)
+   sd x9, 8(sp)
+   jalr ra, x30, 0
+   li x9, 7
+   sd x9, -16(s0)
+   li x9, 0
+   sd x9, -24(s0)
+L23:
+   ld x9, -16(s0)
+   li x30, 0
+   bge x9, x30, L24
+L25:
+   j L36
+L32:
+   ld x30, 8(s0)
+   la x9, _b
+   ld x9, 0(x9)
+   xor x31, x30, x9
+   seqz x31, x31
+   ld x9, -32(s0)
+   la x30, _a
+   ld x30, 0(x30)
+   xor x9, x9, x30
+   snez x9, x9
+   and x9, x31, x9
+   beqz x9, L29
+L28:
+   j L30
 L12:
    la x31, _putchar
    li x30, 0
@@ -256,99 +337,127 @@ L12:
    sd x30, 0(sp)
    sd x9, 8(sp)
    jalr ra, x31, 0
-   la x31, _putint
-   li x11, 0
-   la x30, _row
-   ld x12, -8(s0)
-   li x9, 8
-   mul x9, x12, x9
-   add x9, x30, x9
-   ld x9, 0(x9)
-   addi x9, x9, 1
-   sd x11, 0(sp)
-   sd x9, 8(sp)
-   jalr ra, x31, 0
-   ld x9, -8(s0)
-   addi x9, x9, 1
-   sd x9, -8(s0)
-   j L11
-L20:
-   ld x30, 8(s0)
-   la x9, _b
-   ld x9, 0(x9)
-   xor x31, x30, x9
-   seqz x31, x31
-   ld x9, -16(s0)
-   la x30, _a
-   ld x30, 0(x30)
-   xor x9, x9, x30
-   snez x9, x9
-   and x9, x31, x9
-   bnez x9, L16
-L17:
-   la x30, _canPlace
-   li x9, 0
-   ld x12, -16(s0)
-   ld x31, 8(s0)
-   sd x9, 0(sp)
-   sd x12, 8(sp)
-   sd x31, 16(sp)
-   jalr ra, x30, 0
-   mv x9, a0
-   beqz x9, L15
-L14:
-   ld x9, -16(s0)
-   la x12, _row
-   ld x31, 8(s0)
-   li x30, 8
-   mul x30, x31, x30
-   add x30, x12, x30
-   sd x9, 0(x30)
-   la x31, _backtrack
-   li x30, 0
-   ld x9, 8(s0)
-   addi x9, x9, 1
-   sd x30, 0(sp)
-   sd x9, 8(sp)
-   jalr ra, x31, 0
-L15:
-L18:
-   ld x9, -16(s0)
-   addi x9, x9, 1
-   sd x9, -16(s0)
-   j L19
-L16:
-   j L18
-L22:
    la x12, _putint
    li x30, 0
-   la x11, _row
-   li x31, 0
-   li x9, 8
-   mul x9, x31, x9
-   add x9, x11, x9
+   la x31, _row
+   ld x9, -8(s0)
+   li x11, 8
+   mul x9, x9, x11
+   add x9, x31, x9
    ld x9, 0(x9)
    addi x9, x9, 1
    sd x30, 0(sp)
    sd x9, 8(sp)
    jalr ra, x12, 0
+   ld x9, -8(s0)
+   addi x9, x9, 1
+   sd x9, -8(s0)
+   j L11
+L17:
+   ld x9, -16(s0)
+   addi x30, x9, 1
+   la x9, _a
+   ld x9, 0(x9)
+   xor x30, x30, x9
+   seqz x30, x30
+   la x12, _row
+   ld x31, -24(s0)
+   li x9, 8
+   mul x9, x31, x9
+   add x9, x12, x9
+   ld x9, 0(x9)
+   addi x31, x9, 1
+   la x9, _a
+   ld x9, 0(x9)
+   xor x9, x31, x9
+   seqz x9, x9
+   and x9, x30, x9
+   beqz x9, L15
+L14:
+   la x31, _putchar
+   li x30, 0
+   li x9, 89
+   sd x30, 0(sp)
+   sd x9, 8(sp)
+   jalr ra, x31, 0
+   la x30, _putchar
+   li x31, 0
+   li x9, 32
+   sd x31, 0(sp)
+   sd x9, 8(sp)
+   jalr ra, x30, 0
+   j L16
+L22:
+   la x30, _putchar
+   li x31, 0
+   li x9, 10
+   li x12, 256
+   rem x9, x9, x12
+   sd x31, 0(sp)
+   sd x9, 8(sp)
+   jalr ra, x30, 0
+   ld x30, -16(s0)
+   li x9, 1
+   sub x9, x30, x9
+   sd x9, -16(s0)
+   j L23
+L24:
+   li x9, 0
+   sd x9, -24(s0)
+L20:
+   ld x30, -24(s0)
+   li x9, 8
+   slt x9, x30, x9
+   beqz x9, L22
+L21:
+   la x9, _row
+   ld x31, -24(s0)
+   li x30, 8
+   mul x30, x31, x30
+   add x9, x9, x30
+   ld x30, 0(x9)
+   ld x9, -16(s0)
+   beq x30, x9, L17
+L18:
+   la x30, _putchar
+   li x9, 0
+   li x31, 45
+   sd x9, 0(sp)
+   sd x31, 8(sp)
+   jalr ra, x30, 0
+   la x30, _putchar
+   li x31, 0
+   li x9, 32
+   sd x31, 0(sp)
+   sd x9, 8(sp)
+   jalr ra, x30, 0
+L19:
+   ld x9, -24(s0)
+   addi x9, x9, 1
+   sd x9, -24(s0)
+   j L20
+L34:
+   la x30, _putint
+   li x12, 0
+   la x31, _row
+   li x9, 0
+   li x11, 8
+   mul x9, x9, x11
+   add x9, x31, x9
+   ld x9, 0(x9)
+   addi x9, x9, 1
+   sd x12, 0(sp)
+   sd x9, 8(sp)
+   jalr ra, x30, 0
    li x9, 1
    sd x9, -8(s0)
 L11:
    ld x9, -8(s0)
    li x30, 8
    blt x9, x30, L12
-L13:
-   la x31, _putchar
-   li x9, 0
-   li x30, 10
-   li x12, 256
-   rem x30, x30, x12
-   sd x9, 0(sp)
-   sd x30, 8(sp)
-   jalr ra, x31, 0
-   j L24
-L26:
+L42:
+   j L13
+L38:
    ld x9, 24(sp)
    ld x11, 32(sp)
    ld x12, 40(sp)
@@ -356,7 +465,7 @@ L26:
    ld x31, 56(sp)
    ld s0, 64(sp)
    ld ra, 72(sp)
-   addi sp, sp, 96
+   addi sp, sp, 112
    ret
 _main:
    addi sp, sp, -56
@@ -366,7 +475,7 @@ _main:
    sd x9, 16(sp)
    sd x30, 24(sp)
    sd x31, 32(sp)
-L27:
+L39:
    la x9, _getint
    li x30, 0
    sd x30, 0(sp)
@@ -381,10 +490,10 @@ L27:
    mv a0, a0
    la x9, _b
    sd a0, 0(x9)
-   la x30, _a
-   ld x30, 0(x30)
-   li x9, 1
-   sub x30, x30, x9
+   la x9, _a
+   ld x9, 0(x9)
+   li x30, 1
+   sub x30, x9, x30
    la x9, _a
    sd x30, 0(x9)
    la x30, _b
@@ -393,15 +502,15 @@ L27:
    sub x9, x30, x9
    la x30, _b
    sd x9, 0(x30)
-   la x9, _backtrack
-   li x30, 0
+   la x30, _backtrack
+   li x9, 0
    li x31, 0
-   sd x30, 0(sp)
+   sd x9, 0(sp)
    sd x31, 8(sp)
-   jalr ra, x9, 0
+   jalr ra, x30, 0
    li a0, 1
    mv a0, a0
-L28:
+L40:
    ld x9, 16(sp)
    ld x30, 24(sp)
    ld x31, 32(sp)
