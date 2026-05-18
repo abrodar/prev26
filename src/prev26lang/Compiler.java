@@ -420,14 +420,7 @@ public class Compiler {
                             // string bytes
                             out.println("   .string "+dc.init);
                         } else {
-                            out.print("   .byte ");
-                            for (int i = 0; i < dc.size; i++) {
-                                if (i < dc.size -1) {
-                                    out.print("0, ");
-                                } else {
-                                    out.println("0");
-                                }
-                            }
+                            out.println("   .space "+dc.size);
                         }
                     }
                     out.println(".text");

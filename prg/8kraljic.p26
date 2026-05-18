@@ -1,0 +1,66 @@
+fun putint(i:int):void
+fun putchar(c:char):void
+fun getint():int
+fun getchar():int
+
+var a:int
+var b:int
+var row:[8]int
+
+fun abs(n:int):int = if n < 0 then n = -1 * n end, n
+
+fun canPlace(r:int, c:int):bool = let
+                                        var prev:int
+                                        var retval:bool
+                                  in
+                                        prev = 0,
+                                        retval = true,
+                                        while prev < c do
+                                            if row[prev] == r or abs(prev - c) == abs(row[prev] - r) then
+                                                retval = false
+                                            end,
+                                            prev = prev + 1
+                                        end,
+                                        retval
+                                  end
+
+fun backtrack(c:int):void = if c == 8 and row[b] == a then
+                                putint(row[0]+1),
+                                let
+                                    var r:int
+                                in
+                                    r = 1,
+                                    while r < 8 do
+                                        putchar(' '),
+                                        putint(row[r] + 1),
+                                        r = r + 1
+                                    end,
+                                    putchar(10 as char)
+                                end
+                            else
+                                let
+                                    var r:int
+                                in
+                                    r = 0,
+                                    while r < 8 do
+                                        if c == b and r != a then
+                                            // continue
+                                            -1
+                                        else
+                                            if canPlace(r, c) then
+                                                row[c] = r,
+                                                backtrack(c + 1)
+                                            end
+                                        end,
+                                        r = r + 1
+                                    end
+                                end
+                            end
+
+
+fun main():int = a = getint(),
+                 b = getint(),
+                 a = a - 1, // 0-based indexing
+                 b = b - 1,
+                 backtrack(0),
+                 1
