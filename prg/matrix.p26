@@ -52,6 +52,33 @@ fun st_mnozenj(sizes:^int, i:int, j:int):int =
         res
     end
 
+fun oklepaji(i:int, j:int):void =
+    if i == j then
+        putchar('A'),
+        putint(i)
+    else
+        let
+            var min_ix:int
+        in
+            min_ix = memoix[i][j],
+            if i != min_ix then
+                putchar('(')
+            end,
+            oklepaji(i, min_ix),
+            if i != min_ix then
+                putchar(')')
+            end,
+            putchar('x'),
+            if j != min_ix + 1 then
+                putchar('(')
+            end,
+            oklepaji(min_ix + 1, j),
+            if j != min_ix + 1 then
+                putchar(')')
+            end
+        end
+    end
+
 fun main():int = let
                     var n:int
                     var sizes:^int
@@ -62,11 +89,7 @@ fun main():int = let
                     i = 0,
                     sizes = new(8 * n),
                     start = sizes,
-                    putint(sizes as int),
-                    putchar(10 as char),
                     while i < n do
-                        putint(i),
-                        putchar(10 as char),
                         let
                             var r:int
                             var c:int
@@ -85,7 +108,9 @@ fun main():int = let
                         i = i + 1
                     end,
                     putint(st_mnozenj(start, 1, n)),
-                    putchar(10 as char)
-                    //oklepaji(1, n)
+                    putchar(10 as char),
+                    putchar('('),
+                    oklepaji(1, n),
+                    putchar(')')
                  end,
                  1
