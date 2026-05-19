@@ -99,31 +99,31 @@ _a:
    sd x30, 32(sp)
    sd x31, 40(sp)
 L0:
-   la x31, _new
+   la x30, _new
    li x9, 0
-   li x30, 8
-   sd x9, 0(sp)
-   sd x30, 8(sp)
-   jalr ra, x31, 0
-   mv a0, a0
-   sd a0, -8(s0)
-   li x9, 3
-   ld x30, -8(s0)
-   sd x9, 0(x30)
-   la x30, _putint
-   li x9, 0
-   ld x31, -8(s0)
+   li x31, 8
    sd x9, 0(sp)
    sd x31, 8(sp)
    jalr ra, x30, 0
-   la x30, _putchar
-   li x12, 0
-   li x9, 10
+   mv a0, a0
+   sd a0, -8(s0)
+   li x30, 3
+   ld x9, -8(s0)
+   sd x30, 0(x9)
+   la x9, _putint
+   li x31, 0
+   ld x30, -8(s0)
+   sd x31, 0(sp)
+   sd x30, 8(sp)
+   jalr ra, x9, 0
+   la x9, _putchar
+   li x30, 0
+   li x12, 10
    li x31, 256
-   rem x9, x9, x31
-   sd x12, 0(sp)
-   sd x9, 8(sp)
-   jalr ra, x30, 0
+   rem x31, x12, x31
+   sd x30, 0(sp)
+   sd x31, 8(sp)
+   jalr ra, x9, 0
    ld a0, -8(s0)
    mv a0, a0
 L1:
@@ -144,17 +144,17 @@ _main:
    sd x30, 24(sp)
    sd x31, 32(sp)
 L2:
-   la x30, _a
-   li x9, 0
-   sd x9, 0(sp)
-   jalr ra, x30, 0
+   la x9, _a
+   li x30, 0
+   sd x30, 0(sp)
+   jalr ra, x9, 0
    mv a0, a0
-   la x31, _putint
-   li x9, 0
-   addi x30, a0, 7
-   sd x9, 0(sp)
-   sd x30, 8(sp)
-   jalr ra, x31, 0
+   la x9, _putint
+   li x30, 0
+   addi x31, a0, 7
+   sd x30, 0(sp)
+   sd x31, 8(sp)
+   jalr ra, x9, 0
    li a0, 300
    mv a0, a0
 L3:

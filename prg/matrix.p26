@@ -3,12 +3,60 @@ fun putint(i:int):void
 fun putchar(c:char):void
 fun new(size:int):^int
 
+var memo:[11][11]int
+var memoix:[11][11]int
+
+fun get_sizes(sizes:^int, ix:int):int =
+    while ix > 0 do
+        sizes = ((sizes as int) + 8) as ^int,
+        ix = ix - 1
+    end,
+    sizes^
+
+fun st_mnozenj(sizes:^int, i:int, j:int):int =
+    let
+        var res:int
+    in
+        if i == j then
+            res = 0
+        else
+            let
+                var min:int
+                var minix:int
+                var k:int
+            in
+                min = 9223372036854775807, //INT_MAX, 2^63 - 1
+                minix = i,
+                k = i,
+                while k < j do
+                    let
+                        var l:int
+                        var d:int
+                        var st_m:int
+                    in
+                        l = st_mnozenj(sizes, i, k),
+                        d = st_mnozenj(sizes, k + 1, j),
+                        st_m = l + d + get_sizes(sizes, i - 1) * get_sizes(sizes, k) * get_sizes(sizes, j),
+                        if st_m < min then
+                            min = st_m,
+                            minix = k
+                        end
+                    end,
+                    k = k + 1
+                end,
+                memo[i][j] = min,
+                memoix[i][j] = minix,
+                res = min
+            end
+        end,
+        res
+    end
+
 fun main():int = let
                     var n:int
                     var sizes:^int
                     var start:^int
                     var i:int
-                    var t:int
                  in
                     n = getint(),
                     i = 0,
@@ -35,6 +83,9 @@ fun main():int = let
                             sizes = ((sizes as int) + 8) as ^int
                         end,
                         i = i + 1
-                    end
+                    end,
+                    putint(st_mnozenj(start, 1, n)),
+                    putchar(10 as char)
+                    //oklepaji(1, n)
                  end,
                  1
