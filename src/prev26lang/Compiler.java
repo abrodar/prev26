@@ -543,8 +543,8 @@ public class Compiler {
         out.println("   sd a6, 24(sp)");
         out.println("   addi s0, sp, 32");
         out.println("   la a6, _heap_ptr"); // get hp's address
-        out.println("   ld a0, 0(a6)"); // load hp in to a7
-        out.println("   ld a7, 8(s0)"); // get the size in a0
+        out.println("   ld a0, 0(a6)"); // load hp in to a0
+        out.println("   ld a7, 8(s0)"); // get the size in a7
         out.println("   add a7, a0, a7"); // hp += size
         out.println("   sd a7, 0(a6)"); // update in mem
         out.println("   ld s0, 0(sp)");

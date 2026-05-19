@@ -1,0 +1,14 @@
+fun getint():int
+fun putchar(c:char):void
+
+fun solve(count:int, source:char, destination:char, intermediate:char):void =
+    if count == 1 then
+        putchar(source), putchar('>'), putchar(destination), putchar(10 as char)
+    else
+        solve(count - 1, source, intermediate, destination),
+        solve(1, source, destination, intermediate),
+        solve(count -1, intermediate, destination, source)
+    end
+
+
+fun main():int = let var n: int in n = getint(), solve(n, 'A', 'C', 'B') end, 0

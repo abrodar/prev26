@@ -8,6 +8,7 @@ fun main():int = let
                     var sizes:^int
                     var start:^int
                     var i:int
+                    var t:int
                  in
                     n = getint(),
                     i = 0,
@@ -17,7 +18,7 @@ fun main():int = let
                     putchar(10 as char),
                     while i < n do
                         putint(i),
-                        putchar(' '),
+                        putchar(10 as char),
                         let
                             var r:int
                             var c:int
@@ -25,7 +26,7 @@ fun main():int = let
                             r = getint(),
                             c = getint(),
                             if i == 0 then
-                                sizes^ = r,
+                                sizes^= r,
                                 sizes = ((sizes as int) + 8) as ^int,
                                 sizes^ = c
                             else

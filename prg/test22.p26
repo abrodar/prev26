@@ -1,0 +1,12 @@
+    fun putint(i:int):void
+    fun putchar(c:char):void
+    fun new(size:int):^int
+
+    fun a():int  = let
+                        var ptr:^int
+                   in
+                        ptr = new(8),
+                        ptr^ = 3, putint(ptr as int), putchar(10 as char), (0, ptr as int)
+                   end
+
+    fun main():int = putint(a() + 7), 300

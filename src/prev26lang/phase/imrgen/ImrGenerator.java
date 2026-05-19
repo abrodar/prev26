@@ -43,6 +43,8 @@ public class ImrGenerator implements AST.FullVisitor<Object, Object> {
     );
     // little helper for deref
     private IMR.Expr deref(IMR.Expr e, AST.Expr astExpr) {
+        if (astExpr instanceof AST.CastExpr) return e;  // cast already produces final value
+        if (astExpr instanceof AST.Exprs) return e;
         if (SemAn.isAddrAttr.get(astExpr)) {
             long size = Layouter.sizeOf(SemAn.ofTypeAttr.get(astExpr));
             return size == 1 ? new IMR.MEM1(e) : new IMR.MEM8(e);
@@ -107,36 +109,36 @@ public class ImrGenerator implements AST.FullVisitor<Object, Object> {
     public Object visit(AST.AtomExpr atomExpr, Object arg) {
         switch (atomExpr.type) {
             case AST.AtomExpr.Type.STR :
-                                        MEM.AbsAccess absAccess = Memory.stringAttr.get(atomExpr);
-                                        MEM.Label label = absAccess.label;
-                                        IMR.NAME name = new IMR.NAME(label);
-                                        ImrGen.genExprIMRAttr.put(atomExpr, name);
-                                        break;
+                MEM.AbsAccess absAccess = Memory.stringAttr.get(atomExpr);
+                MEM.Label label = absAccess.label;
+                IMR.NAME name = new IMR.NAME(label);
+                ImrGen.genExprIMRAttr.put(atomExpr, name);
+                break;
             case AST.AtomExpr.Type.INT: ImrGen.genExprIMRAttr.put(atomExpr, new IMR.CONST(new java.math.BigInteger(atomExpr.value).longValue()));
-                                        break;
+                break;
             case AST.AtomExpr.Type.PTR: // posebej za nil, ki je po typ 19 ptr(void)
-                                        ImrGen.genExprIMRAttr.put(atomExpr, new IMR.CONST(0));
-                                        break;
+                ImrGen.genExprIMRAttr.put(atomExpr, new IMR.CONST(0));
+                break;
             case AST.AtomExpr.Type.BOOL :
-                                        if (atomExpr.value.equals("true")) {
-                                            ImrGen.genExprIMRAttr.put(atomExpr, new IMR.CONST(1));
-                                        } else {
-                                            ImrGen.genExprIMRAttr.put(atomExpr, new IMR.CONST(0));
-                                        }
-                                        break;
+                if (atomExpr.value.equals("true")) {
+                    ImrGen.genExprIMRAttr.put(atomExpr, new IMR.CONST(1));
+                } else {
+                    ImrGen.genExprIMRAttr.put(atomExpr, new IMR.CONST(0));
+                }
+                break;
             case AST.AtomExpr.Type.CHAR:
-                                        String raw = atomExpr.value; // e.g. 'a' or '\'' or '\x41'
-                                        char c;
-                                        if (raw.charAt(1) == '\\') {
-                                            if (raw.charAt(2) == '\'') c = '\'';
-                                            else if (raw.charAt(2) == '\\') c = '\\';
-                                            else if (raw.charAt(2) == 'x') c = (char) Integer.parseInt(raw.substring(3, 5), 16);
-                                            else c = raw.charAt(2);
-                                        } else {
-                                            c = raw.charAt(1);
-                                        }
-                                        ImrGen.genExprIMRAttr.put(atomExpr, new IMR.CONST(c));
-                                        break;
+                String raw = atomExpr.value; // e.g. 'a' or '\'' or '\x41'
+                char c;
+                if (raw.charAt(1) == '\\') {
+                    if (raw.charAt(2) == '\'') c = '\'';
+                    else if (raw.charAt(2) == '\\') c = '\\';
+                    else if (raw.charAt(2) == 'x') c = (char) Integer.parseInt(raw.substring(3, 5), 16);
+                    else c = raw.charAt(2);
+                } else {
+                    c = raw.charAt(1);
+                }
+                ImrGen.genExprIMRAttr.put(atomExpr, new IMR.CONST(c));
+                break;
             case AST.AtomExpr.Type.VOID:
                 ImrGen.genExprIMRAttr.put(atomExpr, new IMR.CONST(0));
                 break;
@@ -221,7 +223,7 @@ public class ImrGenerator implements AST.FullVisitor<Object, Object> {
                 }
             }
         }
-        ImrGen.genExprIMRAttr.put(compExpr, new IMR.BINOP(IMR.BINOP.Oper.ADD, E, new IMR.CONST(ra.offset))); 
+        ImrGen.genExprIMRAttr.put(compExpr, new IMR.BINOP(IMR.BINOP.Oper.ADD, E, new IMR.CONST(ra.offset)));
         return null;
     }
 
@@ -338,7 +340,12 @@ public class ImrGenerator implements AST.FullVisitor<Object, Object> {
         // E = deref(E, castExpr.expr); gives an error when casting ptr to int etc. thereofore commented
         // only deref if the expression is NOT already a value (e.g. don't deref pointers being cast to int)
         TYP.Type fromType = SemAn.ofTypeAttr.get(castExpr.expr);
-        if (!(fromType.actualType() instanceof TYP.PtrType)) {
+        if (fromType.actualType() instanceof TYP.PtrType) {
+            if (SemAn.isAddrAttr.get(castExpr.expr)) {
+                E = new IMR.MEM8(E);  // load pointer value from slot
+            }
+            // result is the pointer value — NOT an address, so callers won't deref again
+        } else {
             E = deref(E, castExpr.expr);
         }
         TYP.Type castType = SemAn.isTypeAttr.get(castExpr.type);
@@ -462,6 +469,5 @@ public class ImrGenerator implements AST.FullVisitor<Object, Object> {
         return null;
     }
 }
-
 
 
