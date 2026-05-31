@@ -238,10 +238,14 @@ public class NameResolver implements AST.FullVisitor<Object, Object> {
 
 	}
 
-    // Vstopna točka (top-level)
+    // Vstopna točka (top-level); but it also gets visited on other nodes, which should be handled, but be careful!
     @Override
     public Object visit(AST.Nodes<? extends AST.Node> nodes, Object arg) {
-        symbTable.newScope(); //program ustvari doseg
+        boolean isProgram = symbTable.currDepth == 1;
+        if (isProgram) {
+            symbTable.newScope(); //program ustvari doseg
+        }
+        //System.out.println("nodes<" +(nodes.size() > 0 ? nodes.get(0).getClass().getSimpleName() : "?") +"> depth: " + symbTable.currDepth());
         // 1. prehod
         for (AST.Node node : nodes) {
             if (node instanceof AST.FullDefn defn) {
@@ -252,7 +256,9 @@ public class NameResolver implements AST.FullVisitor<Object, Object> {
         for (AST.Node node : nodes)
             node.accept(this, arg);
         // konec dosega
-        symbTable.oldScope();
+        if (isProgram) {
+            symbTable.oldScope();
+        }
         return null;
     }
     // Definicije
