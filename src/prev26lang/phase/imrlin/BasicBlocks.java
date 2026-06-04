@@ -15,6 +15,14 @@ public class BasicBlocks {
         Vector<IMR.Stmt> current = null;
 
         for (IMR.Stmt s : stmts) {
+            // NEW: a label starts a new block. If we're mid-block (fall-through
+            // into this label), close the current block with an explicit jump to
+            // the label so control flow is preserved, then start fresh.
+            if (s instanceof IMR.LABEL && current != null) {
+                current.add(new IMR.JUMP(new IMR.NAME(((IMR.LABEL) s).label)));
+                blocks.add(current);
+                current = null;
+            }
             if (current == null) {
                 // start new block
                 current = new Vector<>();
